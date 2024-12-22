@@ -35,36 +35,50 @@ VULKAN_VERSION = VULKAN_SDK:match("(%d+%.%d+%.%d+)") -- Example: 1.3.290 (withou
 
 MacOSVersion = "14.5"
 
-if GetOS() == "windows" then
-	print("On Windows")
-else 
-	print("On different OS")
-end
-
 Dependencies =
 {
-	Vulkan =
+	GLFW =
 	{
-		Windows =
-		{
-			LibName = "vulkan-1",
-			IncludeDir = "%{VULKAN_SDK}/Include/",
-			LibDir = "%{VULKAN_SDK}/Lib/"
-		},
-		Linux =
-		{
-			LibName = "vulkan",
-			IncludeDir = "%{VULKAN_SDK}/include/",
-			LibDir = "%{VULKAN_SDK}/lib/"
-		},
-        MacOS = -- Note: Vulkan on MacOS is currently dynamic. (Example: libvulkan1.3.290.dylib)
-		{
-			LibName = "vulkan.%{VULKAN_VERSION}",
-			IncludeDir = "%{VULKAN_SDK}/../macOS/include/",
-			LibDir = "%{VULKAN_SDK}/../macOS/lib/",
-		},
-	}
+		LibName = "GLFW",
+		IncludeDir = "%{wks.location}/vendor/GLFW/GLFW/include"
+	},
+	glm =
+	{
+		IncludeDir = "%{wks.location}/vendor/glm/glm"
+	},
 }
+
+------------------------------------------------------------------------------
+-- Platform specific
+------------------------------------------------------------------------------
+if GetOS() == "windows" then
+	Dependencies.Vulkan =
+    {
+        LibName = "vulkan-1",
+		IncludeDir = "%{VULKAN_SDK}/Include/",
+		LibDir = "%{VULKAN_SDK}/Lib/"
+    }
+	Dependencies.ShaderC = { LibName = "shaderc_shared" }
+
+elseif GetOS() == "linux" then
+	Dependencies.Vulkan =
+    {
+        LibName = "vulkan",
+		IncludeDir = "%{VULKAN_SDK}/include/",
+		LibDir = "%{VULKAN_SDK}/lib/"
+    }
+	Dependencies.ShaderC = { LibName = "shaderc_shared" }
+
+elseif GetOS() == "macosx" then
+	Dependencies.Vulkan = -- Note: Vulkan on MacOS is currently dynamic. (Example: libvulkan1.3.290.dylib)
+	{
+        LibName = "vulkan.%{VULKAN_VERSION}",
+		IncludeDir = "%{VULKAN_SDK}/../macOS/include/",
+		LibDir = "%{VULKAN_SDK}/../macOS/lib/",
+    }
+	Dependencies.ShaderC = { LibName = "shaderc_combined" }
+end
+------------------------------------------------------------------------------
 ------------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------
@@ -87,6 +101,10 @@ workspace "Lunar"
 	{
 		"MultiProcessorCompile"
 	}
+
+group "Dependencies"
+	include "vendor/GLFW"
+group ""
 
 group "Lunar"
 	include "Lunar"

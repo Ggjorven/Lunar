@@ -34,10 +34,18 @@ project "Lunar"
 	{
 		"src",
 		"src/Lunar",
+
+		"%{Dependencies.GLFW.IncludeDir}",
+		"%{Dependencies.glm.IncludeDir}",
+		"%{Dependencies.Vulkan.IncludeDir}",
 	}
 
 	links
 	{
+		"%{Dependencies.GLFW.LibName}",
+
+		"%{Dependencies.Vulkan.LibDir}/%{Dependencies.Vulkan.LibName}",
+		"%{Dependencies.Vulkan.LibDir}/%{Dependencies.ShaderC.LibName}",
 	}
 
 	filter "system:windows"
@@ -71,6 +79,10 @@ project "Lunar"
 		{
 			"src",
 			"src/Lunar",
+
+			"%{Dependencies.GLFW.IncludeDir}",
+			"%{Dependencies.glm.IncludeDir}",
+			"%{Dependencies.Vulkan.IncludeDir}",
 		}
 
 	filter "configurations:Debug"

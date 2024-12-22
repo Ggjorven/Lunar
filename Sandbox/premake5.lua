@@ -31,11 +31,15 @@ project "Sandbox"
 		"src",
 
 		"%{wks.location}/Lunar/src",
+
+		"%{Dependencies.GLFW.IncludeDir}",
+		"%{Dependencies.glm.IncludeDir}",
+		"%{Dependencies.Vulkan.IncludeDir}",
 	}
 
 	links
 	{
-		"Lunar"
+		"Lunar",
 	}
 
 	filter "system:windows"
@@ -66,7 +70,11 @@ project "Sandbox"
 		{
 			"src",
 
-		"%{wks.location}/Lunar/src",
+			"%{wks.location}/Lunar/src",
+
+			"%{Dependencies.GLFW.IncludeDir}",
+			"%{Dependencies.glm.IncludeDir}",
+			"%{Dependencies.Vulkan.IncludeDir}",
 		}
 
 	filter "configurations:Debug"
