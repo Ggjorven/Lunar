@@ -19,18 +19,21 @@ BraceWrapping:
   BeforeElse: true
   IndentBraces: false
 
+BreakConstructorInitializers: AfterColon
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
+
 AllowShortIfStatementsOnASingleLine: false
 AllowShortBlocksOnASingleLine: false
 AllowShortFunctionsOnASingleLine: InlineOnly
 IndentCaseLabels: true
 NamespaceIndentation: All
-AlignConsecutiveDeclarations: true
-AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: false
+AlignConsecutiveAssignments: false
 AlignTrailingComments: true
 ColumnLimit: 120
 SortIncludes: false
 SpacesInParentheses: false
-SpaceAfterCStyleCast: true
+SpaceAfterCStyleCast: false
 SpaceBeforeCpp11BracedList: false
 Cpp11BracedListStyle: false
 SpaceBeforeParens: ControlStatements

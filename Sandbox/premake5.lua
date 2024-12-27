@@ -43,6 +43,7 @@ project "Sandbox"
 	}
 
 	filter "system:windows"
+		defines "LU_PLATFORM_DESKTOP"
 		defines "LU_PLATFORM_WINDOWS"
 		systemversion "latest"
 		staticruntime "on"
@@ -54,11 +55,13 @@ project "Sandbox"
         }
 
 	filter "system:linux"
+		defines "LU_PLATFORM_DESKTOP"
 		defines "LU_PLATFORM_LINUX"
 		systemversion "latest"
 		staticruntime "on"
 
     filter "system:macosx"
+		defines "LU_PLATFORM_DESKTOP"
 		defines "LU_PLATFORM_MACOS"
 		systemversion(MacOSVersion)
 		staticruntime "on"
