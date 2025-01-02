@@ -92,7 +92,20 @@ namespace Lunar
 		inline T& operator * () { return *Raw(); }
 		inline const T& operator * () const { return *Raw(); }
 
+		inline bool operator == (std::nullptr_t n) { return m_Object == nullptr; }
+		inline bool operator != (std::nullptr_t n) { return !(*this == n); }
+
 		// Methods
+		inline void Reset()
+		{ 
+			if (m_Object) 
+			{
+                delete m_Object;
+            }
+
+			m_Object = nullptr;
+		}
+
 		inline T* Raw()
 		{
 			return m_Object;

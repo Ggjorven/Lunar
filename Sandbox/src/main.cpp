@@ -1,43 +1,52 @@
-#include <iostream>
-
-#include "Lunar/Core/Events.hpp"
-#include "Lunar/Core/Window.hpp"
+#include "Lunar/Enum/Name.hpp"
 
 #include "Lunar/IO/Print.hpp"
 
-#include "Lunar/Memory/Rc.hpp"
-#include "Lunar/Memory/Arc.hpp"
-
-#include "Lunar/Memory/Box.hpp"
-#include "Lunar/Memory/AutoRelease.hpp"
-
-#include "Lunar/Maths/Structs.hpp"
-
-#include "Lunar/Utils/Profiler.hpp"
-
-using namespace Lunar;
-
-int main(int argc, char* argv[])
+enum class Colour
 {
-    Arc<Window> w = Window::Create({ 
-        .Title = "Custom Window",
-        .Width = 1280,
-        .Height = 720,
+    Green,
+    Red,
+    Blue
+};
 
-        .EventCallback = [](Event e) {},
+////////////////////////////////////////////////////////////////////
+// Impl
+////////////////////////////////////////////////////////////////////
+constexpr bool IsPretty(char ch)
+{
+    return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z');
+}
 
-        .VSync = false,
-        .Buffers = WindowSpecification::BufferMode::Triple
-    });
+constexpr std::string_view PrettyName(std::string_view sv)
+{
+    for (size_t n = sv.size() - 1; n > 0; --n) 
+    {
+        if (!IsPretty(sv[n])) 
+        {
+            sv.remove_prefix(n + 1);
+            break;
+        }
+    }
 
-    LU_LOG_TRACE("HI {0}", 1);
-    LU_LOG_INFO("HI {0}", 1);
-    LU_LOG_WARN("HI {0}", 1);
-    LU_LOG_ERROR("HI {0}", 1);
-    LU_LOG_FATAL("HI {0}", 1);
+    return sv;
+}
 
-    LU_VERIFY(false, "Message");
-    LU_ASSERT(false, "Message");
+template<typename TEnum, TEnum EValue>
+constexpr std::string_view n()
+{
+    #if defined(__GNUC__) || defined(__clang__)
+        return PrettyName({ __PRETTY_FUNCTION__, sizeof(__PRETTY_FUNCTION__) - 2 });
+    #elif defined(_MSC_VER)
+        return PrettyName({ __FUNCSIG__, sizeof(__FUNCSIG__) - 17 });
+    #endif
+}
+////////////////////////////////////////////////////////////////////
+
+int main()
+{
+    LU_LOG_TRACE("{0}", n<Colour, Colour::Green>());
+    LU_LOG_TRACE("{0}", n<Colour, Colour::Blue>());
+    LU_LOG_TRACE("{0}", n<Colour, Colour::Red>());
 
     return 0;
 }

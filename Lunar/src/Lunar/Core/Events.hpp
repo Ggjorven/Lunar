@@ -4,11 +4,12 @@
 #include <string>
 #include <sstream>
 #include <variant>
+#include <concepts>
 #include <functional>
 #include <type_traits>
 
-#include "Lunar/Utils/Enum.hpp"
 #include "Lunar/Utils/Types.hpp"
+#include "Lunar/Enum/Bitwise.hpp"
 
 #include "Lunar/Core/Input/KeyCodes.hpp"
 #include "Lunar/Core/Input/MouseCodes.hpp"
@@ -168,7 +169,7 @@ namespace Lunar
 
         // Methods
         template <typename TEvent, typename F>
-        inline void Handle(F&& func) requires(Types::TypeInVariant<TEvent, Event>)
+        inline void Handle(const F&& func) requires (Types::TypeInVariant<TEvent, Event> && std::invocable<F, TEvent&>)
         {
             std::visit(
                 [&](auto&& obj) 

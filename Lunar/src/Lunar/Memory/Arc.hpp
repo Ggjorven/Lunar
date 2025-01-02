@@ -207,6 +207,9 @@ namespace Lunar
         inline T& operator * () { return *Raw(); }
         inline const T& operator * () const { return *Raw(); }
 
+        inline bool operator == (std::nullptr_t n) { return m_Memory == nullptr; }
+        inline bool operator != (std::nullptr_t n) { return !(*this == n); }
+
         // Methods
         inline uint32_t RefCount() const { return m_Memory ? m_Memory->RefCount.load(std::memory_order_acquire) : 0; }
 

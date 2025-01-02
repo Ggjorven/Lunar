@@ -66,7 +66,6 @@ namespace Lunar
         virtual WindowSpecification& GetSpecification() = 0;
 
         // Static methods
-        static Window& Get();
         static Arc<Window> Create(const WindowSpecification& windowSpecs);
 	};
 

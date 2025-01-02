@@ -159,8 +159,7 @@ namespace Lunar
 
     void DesktopWindow::SwapBuffers()
     {
-        LU_PROFILE("DesktopWindow::PollEvents");
-        glfwSwapBuffers(m_Window);
+        LU_PROFILE("DesktopWindow::SwapBuffers");
     }
 
     ////////////////////////////////////////////////////////////////////////////////////
