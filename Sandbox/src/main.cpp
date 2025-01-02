@@ -4,49 +4,36 @@
 
 enum class Colour
 {
-    Green,
+    Green = 7,
     Red,
-    Blue
+    Blue = 20
 };
-
-////////////////////////////////////////////////////////////////////
-// Impl
-////////////////////////////////////////////////////////////////////
-constexpr bool IsPretty(char ch)
-{
-    return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z');
-}
-
-constexpr std::string_view PrettyName(std::string_view sv)
-{
-    for (size_t n = sv.size() - 1; n > 0; --n) 
-    {
-        if (!IsPretty(sv[n])) 
-        {
-            sv.remove_prefix(n + 1);
-            break;
-        }
-    }
-
-    return sv;
-}
-
-template<typename TEnum, TEnum EValue>
-constexpr std::string_view n()
-{
-    #if defined(__GNUC__) || defined(__clang__)
-        return PrettyName({ __PRETTY_FUNCTION__, sizeof(__PRETTY_FUNCTION__) - 2 });
-    #elif defined(_MSC_VER)
-        return PrettyName({ __FUNCSIG__, sizeof(__FUNCSIG__) - 17 });
-    #endif
-}
-////////////////////////////////////////////////////////////////////
 
 int main()
 {
-    LU_LOG_TRACE("{0}", n<Colour, Colour::Green>());
-    LU_LOG_TRACE("{0}", n<Colour, Colour::Blue>());
-    LU_LOG_TRACE("{0}", n<Colour, Colour::Red>());
+    // Name tests
+    LU_LOG_TRACE("Name: {0}", Lunar::Enum::Internal::Name<Colour, Colour::Green>());
+    LU_LOG_TRACE("Name: {0}", Lunar::Enum::Internal::Name<Colour, Colour::Blue>());
+    LU_LOG_TRACE("Name: {0}", Lunar::Enum::Internal::Name<Colour, Colour::Red>());
+    LU_LOG_TRACE("Name: {0}", Lunar::Enum::Internal::Name<Colour, static_cast<Colour>(127)>());
+
+    // Validity
+    LU_LOG_TRACE("Valid: {0}", Lunar::Enum::Internal::IsValid<Colour, Colour::Green>());
+    LU_LOG_TRACE("Valid: {0}", Lunar::Enum::Internal::IsValid<Colour, static_cast<Colour>(127)>());
+
+    // Values
+    auto valueList = Lunar::Enum::Internal::Values<Colour>;
+    for (const auto& v : valueList)
+    {
+        LU_LOG_TRACE("Value: {0}", static_cast<typename std::underlying_type_t<Colour>>(v)); 
+    }
+
+    // Entries
+    auto entryList = Lunar::Enum::Internal::Entries<Colour>;
+    for (const auto& [colour, name] : entryList)
+    {
+        LU_LOG_TRACE("Entry: {0} - {1}", static_cast<typename std::underlying_type_t<Colour>>(colour), name);
+    }
 
     return 0;
 }

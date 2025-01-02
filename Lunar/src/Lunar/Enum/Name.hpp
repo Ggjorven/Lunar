@@ -1,32 +1,55 @@
 #pragma once
 
 #include <cstdint>
+#include <cstddef>
 #include <set>
 #include <map>
 #include <array>
 #include <utility>
+#include <ranges>
 #include <optional>
 #include <algorithm>
 #include <string_view>
 #include <type_traits>
 
+#include "Lunar/Utils/StaticString.hpp"
+
 namespace Lunar::Enum
 {
 
-    constexpr const int32_t g_MinValue = -128;
-    constexpr const int32_t g_MaxValue = 128;
-    constexpr const std::string_view g_InvalidName = "1nvalid";
+    template <typename TEnum> requires(std::is_enum_v<TEnum>)
+    struct Range
+    {
+    public:
+        inline static constexpr int32_t Min = -128;
+        inline static constexpr int32_t Max = 128;
+        
+        static_assert((Max - Min <= std::numeric_limits<uint16_t>::max()), "[Max - Min] must not exceed uint16 max value.");
+    };
 
+}
+
+namespace Lunar::Enum::Internal
+{
+
+    ////////////////////////////////////////////////////////////////////////////////////
+    // Global values
+    ////////////////////////////////////////////////////////////////////////////////////
+    constexpr const std::string_view g_InvalidName = "1nvalid";
+    
+    ////////////////////////////////////////////////////////////////////////////////////
+    // Internal naming
+    ////////////////////////////////////////////////////////////////////////////////////
     #if defined(_MSC_VER)
 
-    template <typename TEnum, TEnum EValue> requires(std::is_enum_v<TEnum>)
+    template<typename TEnum, TEnum EValue> requires(std::is_enum_v<TEnum>)
     class ConstexprName
     {
     public:
-        constexpr static const std::string_view ClassToken = "Lunar::Enum::ConstexprName<";
+        constexpr static const std::string_view ClassToken = "Lunar::Enum::Internal::ConstexprName<";
 
     public:
-        template <TEnum>
+        template <TEnum> requires(std::is_enum_v<TEnum>)
         constexpr static std::string_view FullNameImpl()
         {
             constexpr std::string_view FunctionToken = ">::FullNameImpl<";
@@ -87,66 +110,115 @@ namespace Lunar::Enum
     };
 
     #elif defined(__GNUC__) || defined(__clang__)
-        #error Enum not implemented on this compiler.
+        #error Constexprname not implemented on this compiler.
     #endif
 
-    class Internal
+    ////////////////////////////////////////////////////////////////////////////////////
+    // Helper functions
+    ////////////////////////////////////////////////////////////////////////////////////
+    template<typename TEnum, TEnum EValue> requires(std::is_enum_v<TEnum>)
+    constexpr std::string_view Name()
     {
-    public:
-        constexpr static bool Valid(const std::string_view str) 
-        { 
-            return !str.compare(g_InvalidName);
+        if constexpr (ConstexprName<TEnum, EValue>::ElementName == g_InvalidName)
+            return {};
+
+        return ConstexprName<TEnum, EValue>::ElementName;
+    }
+
+    template<typename TEnum, TEnum EValue> requires(std::is_enum_v<TEnum>)
+    constexpr bool IsValid()
+    {
+        constexpr TEnum value = static_cast<TEnum>(EValue);
+        return !Name<TEnum, value>().empty();
+    }
+
+    template<typename TEnum> requires(std::is_enum_v<TEnum>)
+    constexpr TEnum UAlue(size_t v)
+    {
+        return static_cast<TEnum>(Lunar::Enum::Range<TEnum>::Min + v);
+    }
+
+    template<size_t N>
+    constexpr size_t CountValues(const bool (&valid)[N])
+    {
+        size_t count = 0;
+        for (size_t n = 0; n < N; n++) 
+        {
+            if (valid[n])
+                ++count;
         }
 
-        template<typename TEnum>
-        constexpr static TEnum UAlue(size_t value) requires(std::is_enum_v<TEnum>)
-        {
-            return static_cast<TEnum>(g_MinValue + value);
-        }
+        return count;
+    }
 
-        template<size_t N>
-        constexpr static size_t CountValues(const bool (&valid)[N])
-        {
-            size_t count = 0;
+    ////////////////////////////////////////////////////////////////////////////////////
+    // Values
+    ////////////////////////////////////////////////////////////////////////////////////
+    template<typename TEnum, size_t... I> requires(std::is_enum_v<TEnum>)
+    constexpr auto ValuesImpl(std::index_sequence<I...>)
+    {
+        constexpr bool valid[sizeof...(I)] = { IsValid<TEnum, UAlue<TEnum>(I)>()... };
+        constexpr auto validCount = CountValues(valid);
+        static_assert(validCount > 0, "no support for empty enums");
 
-            for (size_t n = 0; n < N; ++n)
+        std::array<TEnum, validCount> values = {};
+        for (size_t offset = 0, n = 0; n < validCount; offset++) 
+        {
+            if (valid[offset]) 
             {
-                if (valid[n])
-                    ++count;
+                values[n] = UAlue<TEnum>(offset);
+                ++n;
             }
-
-            return count;
         }
 
-    public:
-        template<typename TEnum, size_t... I>
-        constexpr static auto Values(std::index_sequence<I...>) requires(std::is_enum_v<TEnum>)
+        return values;
+    }
+
+    template<typename TEnum> requires(std::is_enum_v<TEnum>)
+    constexpr auto ValuesImpl()
+    {
+        constexpr auto enumSize = Lunar::Enum::Range<TEnum>::Max - Lunar::Enum::Range<TEnum>::Min + 1;
+        return ValuesImpl<TEnum>(std::make_index_sequence<enumSize>({}));
+    }
+
+    template<typename TEnum> requires(std::is_enum_v<TEnum>)
+    inline constexpr auto Values = ValuesImpl<TEnum>();
+
+    ////////////////////////////////////////////////////////////////////////////////////
+    // Entries
+    ////////////////////////////////////////////////////////////////////////////////////
+    template<typename TEnum, size_t... I> requires(std::is_enum_v<TEnum>)
+    constexpr auto EntriesImpl(std::index_sequence<I...>)
+    {
+        return std::array<std::pair<TEnum, std::string_view>, sizeof...(I)>{
+            { { Values<TEnum>[I], Name<TEnum, Values<TEnum>[I]>() }... }
+        };
+    }
+    
+    template<typename TEnum> requires(std::is_enum_v<TEnum>)
+    inline constexpr auto Entries = EntriesImpl<TEnum>(std::make_index_sequence<Values<TEnum>.size()>());
+
+}
+
+
+namespace Lunar::Enum
+{
+
+    ////////////////////////////////////////////////////////////////////////////////////
+    // Public functions
+    ////////////////////////////////////////////////////////////////////////////////////
+    template<typename TEnum> requires(std::is_enum_v<TEnum>)
+    constexpr auto Name(const TEnum value) // UNTESTED
+    {
+        constexpr const auto entries = Lunar::Enum::Internal::Entries<TEnum>;
+        
+        for (const auto& [val, name] : entries)
         {
-            constexpr bool valid[sizeof...(I)] = { Valid(ConstexprName<TEnum, UAlue<TEnum>(I)>::ElementName)... };
-            constexpr size_t numberOfValid = CountValues(valid);
-
-            static_assert(numberOfValid > 0, "No support for empty enums.");
-
-            std::array<TEnum, numberOfValid> values;
-
-            for (size_t offset = 0, n = 0; n < numberOfValid; offset++) 
-            {
-                if (valid[offset]) 
-                {
-                    values[n] = UAlue<TEnum>(offset);
-                    ++n;
-                }
-            }
-
-            return values;
+            if (val == value)
+                return name;
         }
 
-        template<typename TEnum>
-        constexpr static auto Values()
-        {
-            constexpr auto enumSize = g_MaxValue - g_MinValue + 1;
-            return Values<TEnum>(std::make_index_sequence<enumSize>({}));
-        }
-    };
+        return "NO NAME";
+    }
 
 }
