@@ -5,8 +5,9 @@
 #include <set>
 #include <map>
 #include <array>
-#include <utility>
 #include <ranges>
+#include <utility>
+#include <numeric>
 #include <optional>
 #include <algorithm>
 #include <string_view>
@@ -17,7 +18,10 @@
 namespace Lunar::Enum
 {
 
-    template <typename TEnum> requires(std::is_enum_v<TEnum>)
+    ////////////////////////////////////////////////////////////////////////////////////
+    // Customizations
+    ////////////////////////////////////////////////////////////////////////////////////
+    template<typename TEnum> requires(std::is_enum_v<TEnum>)
     struct Range
     {
     public:
@@ -95,8 +99,8 @@ namespace Lunar::Enum::Internal
             // '::' marker
             constexpr auto startColon = fullName.find("::");
             constexpr auto endColon = startColon + std::string_view("::").size();
-            if (startColon == std::string_view::npos)
-                return g_InvalidName;
+            if (startColon == std::string_view::npos) // If not an enum class but a regular enum
+                return fullName;
 
             // Element name
             constexpr std::string_view elementName = fullName.substr(endColon, fullName.size() - endColon);
@@ -104,13 +108,75 @@ namespace Lunar::Enum::Internal
             return elementName;
         }
 
+        template<TEnum>
+        constexpr static std::string_view FunctionSignatureImpl()
+        {
+            return { __FUNCSIG__, sizeof(__FUNCSIG__) };
+        }
+
     public:
         constexpr static const std::string_view FullName = FullNameImpl<EValue>();
         constexpr static const std::string_view ElementName = ElementNameImpl();
+
+        constexpr static const std::string_view FunctionSignature = FunctionSignatureImpl<EValue>();
     };
 
     #elif defined(__GNUC__) || defined(__clang__)
-        #error Constexprname not implemented on this compiler.
+    
+    template <typename TEnum, TEnum EValue> requires(std::is_enum_v<TEnum>)
+    class ConstexprName
+    {
+        constexpr static std::string_view FullNameImpl()
+        {
+            // Ending marker
+            constexpr auto end = std::string_view(__PRETTY_FUNCTION__).find_last_of(';');
+            if (end == std::string_view::npos)
+                return g_InvalidName;
+            
+            // '=' marker
+            constexpr auto start = std::string_view(__PRETTY_FUNCTION__).find_last_of('=', end);
+            if (start == std::string_view::npos)
+                return g_InvalidName;
+            
+            // 0 <= start < end
+            if (end - start <= 2)
+                return g_InvalidName;
+
+            return std::string_view(__PRETTY_FUNCTION__).substr(start + 2, end - start - 2);
+        }
+
+        constexpr static std::string_view ElementNameImpl()
+        {
+            constexpr std::string_view fullName = FullNameImpl<EValue>();
+
+            // Check for invalid name
+            if (!fullName.compare(g_InvalidName))
+                return g_InvalidName;
+
+            // '::' marker
+            constexpr auto startColon = fullName.find("::");
+            constexpr auto endColon = startColon + std::string_view("::").size();
+            if (startColon == std::string_view::npos) // If not an enum class but a regular enum
+                return fullName;
+
+            // Element name
+            constexpr std::string_view elementName = fullName.substr(endColon, fullName.size() - endColon);
+
+            return elementName;
+        }
+
+        constexpr static std::string_view FunctionSignatureImpl() 
+        { 
+            return { __PRETTY_FUNCTION__, sizeof(__PRETTY_FUNCTION__) }; 
+        }
+
+    public:
+        constexpr static const std::string_view FullName = FullNameImpl();
+        constexpr static const std::string_view ElementName = ElementNameImpl();
+
+        constexpr static const std::string_view FunctionSignature = FunctionSignatureImpl();
+    };
+
     #endif
 
     ////////////////////////////////////////////////////////////////////////////////////
@@ -159,7 +225,7 @@ namespace Lunar::Enum::Internal
     {
         constexpr bool valid[sizeof...(I)] = { IsValid<TEnum, UAlue<TEnum>(I)>()... };
         constexpr auto validCount = CountValues(valid);
-        static_assert(validCount > 0, "no support for empty enums");
+        static_assert(validCount > 0, "No support for empty enums.");
 
         std::array<TEnum, validCount> values = {};
         for (size_t offset = 0, n = 0; n < validCount; offset++) 
@@ -200,7 +266,6 @@ namespace Lunar::Enum::Internal
 
 }
 
-
 namespace Lunar::Enum
 {
 
@@ -208,7 +273,7 @@ namespace Lunar::Enum
     // Public functions
     ////////////////////////////////////////////////////////////////////////////////////
     template<typename TEnum> requires(std::is_enum_v<TEnum>)
-    constexpr auto Name(const TEnum value) // UNTESTED
+    constexpr std::string_view Name(const TEnum value)
     {
         constexpr const auto entries = Lunar::Enum::Internal::Entries<TEnum>;
         
@@ -218,7 +283,7 @@ namespace Lunar::Enum
                 return name;
         }
 
-        return "NO NAME";
+        return "";
     }
 
 }

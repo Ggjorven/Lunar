@@ -7,6 +7,8 @@
 
 #include "Lunar/IO/Print.hpp"
 
+#include "Lunar/Enum/Name.hpp"
+
 #include "Lunar/Utils/Preprocessor.hpp"
 
 #include <vulkan/vulkan.h>
@@ -47,10 +49,10 @@ namespace Lunar
     ////////////////////////////////////////////////////////////////////////////////////
     // Helper
     ////////////////////////////////////////////////////////////////////////////////////
-    #define VK_VERIFY_IMPL(expr, str, num)                                                                     \
-        VkResult result##num = expr;                                                                              \
-        if (result##randomizedNr != VK_SUCCESS)                                                                            \
-        LU_LOG_ERROR("Expression {0} failed with error code: {1}", str, Hz::Enum::Name(result##randomizedNr))
+    #define VK_VERIFY_IMPL(expr, str, num)                                                                          \
+        VkResult result##num = expr;                                                                                \
+        if (result##randomizedNr != VK_SUCCESS)                                                                     \
+        LU_LOG_ERROR("Expression {0} failed with error code: {1}", str, ::Lunar::Enum::Name(result##randomizedNr))
 
     #if !defined(LU_CONFIG_DIST)
         #define VK_VERIFY(expr) VK_VERIFY_IMPL((expr), #expr, LU_EXPAND_MACRO(__COUNTER__))

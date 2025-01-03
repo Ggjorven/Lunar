@@ -1,39 +1,26 @@
 #include "Lunar/Enum/Name.hpp"
+#include "Lunar/Enum/Fuse.hpp"
 
 #include "Lunar/IO/Print.hpp"
 
-enum class Colour
+enum class Colour : uint32_t
 {
-    Green = 7,
+    Green = 1,
     Red,
-    Blue = 20
+    Blue,
+    Pink,
 };
 
-int main()
+enum class Direction : uint32_t
 {
-    // Name tests
-    LU_LOG_TRACE("Name: {0}", Lunar::Enum::Internal::Name<Colour, Colour::Green>());
-    LU_LOG_TRACE("Name: {0}", Lunar::Enum::Internal::Name<Colour, Colour::Blue>());
-    LU_LOG_TRACE("Name: {0}", Lunar::Enum::Internal::Name<Colour, Colour::Red>());
-    LU_LOG_TRACE("Name: {0}", Lunar::Enum::Internal::Name<Colour, static_cast<Colour>(127)>());
+    Up = 1,
+    Down,
+    Left,
+    Right
+};
 
-    // Validity
-    LU_LOG_TRACE("Valid: {0}", Lunar::Enum::Internal::IsValid<Colour, Colour::Green>());
-    LU_LOG_TRACE("Valid: {0}", Lunar::Enum::Internal::IsValid<Colour, static_cast<Colour>(127)>());
-
-    // Values
-    auto valueList = Lunar::Enum::Internal::Values<Colour>;
-    for (const auto& v : valueList)
-    {
-        LU_LOG_TRACE("Value: {0}", static_cast<typename std::underlying_type_t<Colour>>(v)); 
-    }
-
-    // Entries
-    auto entryList = Lunar::Enum::Internal::Entries<Colour>;
-    for (const auto& [colour, name] : entryList)
-    {
-        LU_LOG_TRACE("Entry: {0} - {1}", static_cast<typename std::underlying_type_t<Colour>>(colour), name);
-    }
-
+int main(int argc, char* argv[])
+{
+    LU_LOG_TRACE("{0}", Lunar::Enum::Name(Colour::Pink));
     return 0;
 }
