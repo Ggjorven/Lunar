@@ -7,6 +7,8 @@
 
 #include "Lunar/Utils/Profiler.hpp"
 
+#include "Lunar/Renderer/GraphicsContext.hpp"
+
 namespace Lunar
 {
 
@@ -44,7 +46,9 @@ namespace Lunar
         m_Window = glfwCreateWindow((int)specs.Width, (int)specs.Height, specs.Title.data(), nullptr, nullptr);
         LU_ASSERT(m_Window, "[Window] Failed to create a window.");
 
-        // TODO: Initialize GraphicsContext
+        GraphicsContext::AttachWindow(static_cast<void*>(m_Window));
+        if (!GraphicsContext::Initialized())
+            GraphicsContext::Init();
 
         // Making sure we can access the data in the callbacks
         glfwSetWindowUserPointer(m_Window, (void*)&m_Specification);
@@ -136,7 +140,7 @@ namespace Lunar
 
         //Renderer::Destroy();
 
-        //GraphicsContext::Destroy();
+        GraphicsContext::Destroy();
 
         glfwDestroyWindow(m_Window);
         m_Window = nullptr;

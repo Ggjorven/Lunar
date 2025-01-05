@@ -213,6 +213,15 @@ namespace Lunar
         // Methods
         inline uint32_t RefCount() const { return m_Memory ? m_Memory->RefCount.load(std::memory_order_acquire) : 0; }
 
+        inline void Reset() // Note: Make sure what you're doing when you call this.
+        {
+            if (m_Memory && m_Memory->Object)
+            {
+                delete m_Memory->Object;
+                m_Memory->Object = nullptr;
+            }
+        }
+
         inline T* Raw()
         {
             if (m_Memory) 

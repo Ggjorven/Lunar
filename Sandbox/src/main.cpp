@@ -1,26 +1,55 @@
-#include "Lunar/Enum/Name.hpp"
-#include "Lunar/Enum/Fuse.hpp"
+#include "Lunar/Core/Window.hpp"
 
-#include "Lunar/IO/Print.hpp"
-
-enum class Colour : uint32_t
+using namespace Lunar;
+class Application
 {
-    Green = 1,
-    Red,
-    Blue,
-    Pink,
-};
+public:
+    Application()
+    {
+        m_Window = Window::Create({ 
+            .Title = "Window Title",
+            .Width = 1280,
+            .Height = 720,
 
-enum class Direction : uint32_t
-{
-    Up = 1,
-    Down,
-    Left,
-    Right
+            .EventCallback = [this](Event e) { OnEvent(e); },
+
+            .VSync = false,
+            .Buffers = WindowSpecification::BufferMode::Triple,
+        });
+    }
+    ~Application() 
+    { 
+        m_Window->Close();
+    }
+
+    void Run()
+    {
+        while (m_Running)
+        {
+            m_Window->PollEvents();
+
+            // ...
+
+            m_Window->SwapBuffers();
+        }
+    }
+
+private:
+    void OnEvent(Event e) 
+    { 
+        EventHandler handler(e);
+        handler.Handle<WindowCloseEvent>([this](WindowCloseEvent& e) { m_Running = false; });
+    }
+
+private:
+    bool m_Running = true;
+    Arc<Window> m_Window = nullptr;
 };
 
 int main(int argc, char* argv[])
 {
-    LU_LOG_TRACE("{0}", Lunar::Enum::Name(Colour::Pink));
+    Application app;
+    app.Run();
+
     return 0;
 }

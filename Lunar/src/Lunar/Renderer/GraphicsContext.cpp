@@ -5,6 +5,10 @@
 
 #include "Lunar/Memory/Box.hpp"
 
+#if defined(LU_PLATFORM_DESKTOP)
+#include "Lunar/API/Vulkan/VulkanContext.hpp"
+#endif
+
 namespace Lunar
 {
 
@@ -28,17 +32,14 @@ namespace Lunar
     void GraphicsContext::AttachWindow(void* nativeWindow)
     {
         s_AttachedWindows.push_back(nativeWindow);
-
-        #if defined(LU_PLATFORM_DESKTOP)
-
-        #endif
     }
 
-    void GraphicsContext::Init(uint32_t width, uint32_t height, bool vsync, uint8_t framesInFlight)
+    void GraphicsContext::Init()
     {
         LU_ASSERT(!s_AttachedWindows.empty(), "[GraphicsContext] No window has been attached.");
         
         #if defined(LU_PLATFORM_DESKTOP)
+        s_GraphicsContext = Box<VulkanContext>::Create(s_AttachedWindows);
         #endif
     }
 

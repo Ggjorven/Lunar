@@ -23,7 +23,7 @@ namespace Lunar
 		// Static methods
         static void AttachWindow(void* nativeWindow);
 		
-		static void Init(uint32_t width, uint32_t height, bool vsync, uint8_t framesInFlight);
+		static void Init();
 		static void Destroy();
 	};
 

@@ -72,7 +72,7 @@ namespace Lunar
 		template<typename T2>
 		Box& operator = (Box<T2>&& other) noexcept
 		{
-			if (this != &other)
+            if (static_cast<void*>(this) != static_cast<void*>(&other))
 			{
 				m_Object = static_cast<T*>(other.m_Object);
 				other.m_Object = nullptr;
