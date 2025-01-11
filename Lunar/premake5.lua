@@ -8,6 +8,8 @@ project "Lunar"
 
 	architecture "x86_64"
 
+	warnings "Extra"
+
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
 

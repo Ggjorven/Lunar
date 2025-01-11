@@ -12,6 +12,8 @@
 namespace Lunar
 {
 
+    class Renderer;
+
     ////////////////////////////////////////////////////////////////////////////////////
     // Specification
     ////////////////////////////////////////////////////////////////////////////////////
@@ -64,6 +66,7 @@ namespace Lunar
 
         virtual void* GetNativeWindow() = 0;
         virtual WindowSpecification& GetSpecification() = 0;
+        virtual Arc<Renderer> GetRenderer() = 0;
 
         // Static methods
         static Arc<Window> Create(const WindowSpecification& windowSpecs);

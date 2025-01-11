@@ -24,8 +24,6 @@ namespace Lunar::Enum::Internal
     {
         size_t index = Index(value);
         return (hash << Lunar::Log2((Count<TEnum>() << 1) - 1)) | index;
-
-        return {};
     }
 
     template<typename TEnum> requires(std::is_enum_v<TEnum>)

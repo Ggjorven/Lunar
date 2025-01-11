@@ -71,26 +71,30 @@ namespace Lunar
                 data.EventCallback(event);
             });
 
-        glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods) 
+        glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int, int action, int) 
             {
                 WindowSpecification& data = *(WindowSpecification*)glfwGetWindowUserPointer(window);
 
-                switch (action) {
-                    case GLFW_PRESS: {
-                        KeyPressedEvent event = KeyPressedEvent(key, 0);
-                        data.EventCallback(event);
-                        break;
-                    }
-                    case GLFW_RELEASE: {
-                        KeyReleasedEvent event = KeyReleasedEvent(key);
-                        data.EventCallback(event);
-                        break;
-                    }
-                    case GLFW_REPEAT: {
-                        KeyPressedEvent event = KeyPressedEvent(key, 1);
-                        data.EventCallback(event);
-                        break;
-                    }
+                switch (action) 
+                {
+                case GLFW_PRESS: 
+                {
+                    KeyPressedEvent event = KeyPressedEvent(key, 0);
+                    data.EventCallback(event);
+                    break;
+                }
+                case GLFW_RELEASE: 
+                {
+                    KeyReleasedEvent event = KeyReleasedEvent(key);
+                    data.EventCallback(event);
+                    break;
+                }
+                case GLFW_REPEAT: 
+                {
+                    KeyPressedEvent event = KeyPressedEvent(key, 1);
+                    data.EventCallback(event);
+                    break;
+                }
                 }
             });
         glfwSetCharCallback(m_Window, [](GLFWwindow* window, unsigned int keycode) 
@@ -101,7 +105,7 @@ namespace Lunar
                 data.EventCallback(event);
             });
 
-        glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods) 
+        glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int) 
             {
                 WindowSpecification& data = *(WindowSpecification*)glfwGetWindowUserPointer(window);
 
@@ -132,20 +136,35 @@ namespace Lunar
                 MouseMovedEvent event = MouseMovedEvent((float)xPos, (float)yPos);
                 data.EventCallback(event);
             });
+
+        m_Renderer = Renderer::Create({
+            .WindowRef = *this,
+
+            .Width = m_Specification.Width,
+            .Height = m_Specification.Height,
+
+            .Buffers = m_Specification.Buffers,
+            .VSync = m_Specification.VSync,
+        });
+        m_Renderer->Recreate(m_Specification.Width, m_Specification.Height, m_Specification.VSync);
     }
 
     DesktopWindow::~DesktopWindow() 
     {
         m_Closed = true;
 
-        //Renderer::Destroy();
+        m_Renderer.Reset();
 
-        GraphicsContext::Destroy();
+        bool destroy = (--s_GLFWInstances == 0);
+        if (destroy)
+        {
+            GraphicsContext::Destroy();
+        }
 
         glfwDestroyWindow(m_Window);
         m_Window = nullptr;
 
-        if (--s_GLFWInstances == 0)
+        if (destroy)
         {
             glfwTerminate();
         }
@@ -188,7 +207,8 @@ namespace Lunar
 
     void DesktopWindow::SetVSync(bool vsync)
     {
-        // Renderer::Recreate(m_Specification.Width, m_Specification.Height, vsync);
+        m_Specification.VSync = vsync;
+        m_Renderer->Recreate(m_Specification.Width, m_Specification.Height, vsync);
     }
 
 }

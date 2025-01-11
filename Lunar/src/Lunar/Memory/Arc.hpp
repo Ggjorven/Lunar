@@ -41,7 +41,7 @@ namespace Lunar
         {
         }
 
-        Arc(std::nullptr_t n) 
+        Arc(std::nullptr_t) 
             : m_Memory(nullptr)
         {
         }
@@ -206,6 +206,8 @@ namespace Lunar
 
         inline T& operator * () { return *Raw(); }
         inline const T& operator * () const { return *Raw(); }
+
+        inline operator bool() const { return m_Memory != nullptr; }
 
         inline bool operator == (std::nullptr_t n) { return m_Memory == nullptr; }
         inline bool operator != (std::nullptr_t n) { return !(*this == n); }

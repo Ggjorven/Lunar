@@ -38,7 +38,7 @@ private:
     void OnEvent(Event e) 
     { 
         EventHandler handler(e);
-        handler.Handle<WindowCloseEvent>([this](WindowCloseEvent& e) { m_Running = false; });
+        handler.Handle<WindowCloseEvent>([this](WindowCloseEvent&) { m_Running = false; });
     }
 
 private:

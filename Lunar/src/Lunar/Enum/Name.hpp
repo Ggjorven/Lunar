@@ -64,25 +64,25 @@ namespace Lunar::Enum::Internal
             // Class token
             constexpr auto startClassToken = function.find(ClassToken);
             constexpr auto endClassToken = startClassToken + ClassToken.size();
-            if (startClassToken == std::string_view::npos)
+            if constexpr (startClassToken == std::string_view::npos)
                 return g_InvalidName;
 
             // Function token
             constexpr auto startFunctionToken = function.find(FunctionToken, endClassToken);
             constexpr auto endFunctionToken = startFunctionToken + FunctionToken.size();
-            if (startFunctionToken == std::string_view::npos)
+            if constexpr (startFunctionToken == std::string_view::npos)
                 return g_InvalidName;
 
             // Close marker
             constexpr auto closeMarker = function.find('>', endFunctionToken);
-            if (closeMarker == std::string_view::npos)
+            if constexpr (closeMarker == std::string_view::npos)
                 return g_InvalidName;
 
             // Full name
             constexpr std::string_view fullName = function.substr(endFunctionToken, closeMarker - endFunctionToken);
 
             // Brackets (if brackets, then not a valid enum name, ex. (enum Dummy)0xa instead of Dummy::First)
-            if (fullName.find('(') != std::string_view::npos)
+            if constexpr (fullName.find('(') != std::string_view::npos)
                 return g_InvalidName;
 
             return fullName;
@@ -93,13 +93,13 @@ namespace Lunar::Enum::Internal
             constexpr std::string_view fullName = FullNameImpl<EValue>();
 
             // Check for invalid name
-            if (!fullName.compare(g_InvalidName))
+            if constexpr (!fullName.compare(g_InvalidName))
                 return g_InvalidName;
 
             // '::' marker
             constexpr auto startColon = fullName.find("::");
             constexpr auto endColon = startColon + std::string_view("::").size();
-            if (startColon == std::string_view::npos) // If not an enum class but a regular enum
+            if constexpr (startColon == std::string_view::npos) // If not an enum class but a regular enum
                 return fullName;
 
             // Element name
@@ -130,16 +130,16 @@ namespace Lunar::Enum::Internal
         {
             // Ending marker
             constexpr auto end = std::string_view(__PRETTY_FUNCTION__).find_last_of(';');
-            if (end == std::string_view::npos)
+            if constexpr (end == std::string_view::npos)
                 return g_InvalidName;
             
             // '=' marker
             constexpr auto start = std::string_view(__PRETTY_FUNCTION__).find_last_of('=', end);
-            if (start == std::string_view::npos)
+            if constexpr (start == std::string_view::npos)
                 return g_InvalidName;
             
             // 0 <= start < end
-            if (end - start <= 2)
+            if constexpr (end - start <= 2)
                 return g_InvalidName;
 
             return std::string_view(__PRETTY_FUNCTION__).substr(start + 2, end - start - 2);
@@ -150,13 +150,13 @@ namespace Lunar::Enum::Internal
             constexpr std::string_view fullName = FullNameImpl<EValue>();
 
             // Check for invalid name
-            if (!fullName.compare(g_InvalidName))
+            if constexpr (!fullName.compare(g_InvalidName))
                 return g_InvalidName;
 
             // '::' marker
             constexpr auto startColon = fullName.find("::");
             constexpr auto endColon = startColon + std::string_view("::").size();
-            if (startColon == std::string_view::npos) // If not an enum class but a regular enum
+            if constexpr (startColon == std::string_view::npos) // If not an enum class but a regular enum
                 return fullName;
 
             // Element name

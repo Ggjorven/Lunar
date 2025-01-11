@@ -133,7 +133,7 @@ namespace Lunar
             else if constexpr (level == Level::Fatal)
                 return "F";
 
-            return "Unset Tag";
+            //return "Unset Tag";
         }
 
         template<Level level, typename ...TArgs>

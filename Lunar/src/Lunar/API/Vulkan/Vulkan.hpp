@@ -9,6 +9,8 @@
 
 #include "Lunar/Enum/Name.hpp"
 
+#include "Lunar/Renderer/Renderer.hpp"
+
 #include "Lunar/Utils/Preprocessor.hpp"
 
 #include <vulkan/vulkan.h>
@@ -16,6 +18,8 @@
 
 namespace Lunar
 {
+
+    class VulkanRenderer;
 
     ////////////////////////////////////////////////////////////////////////////////////
     // Configuration
@@ -85,64 +89,34 @@ namespace Lunar
     namespace Vk
     {
 
-        inline VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger)
-        {
-            auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
+        VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger);
+        void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator);
 
-            if (func != nullptr)
-                return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
+        VKAPI_ATTR VkBool32 VKAPI_CALL VulkanDebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData);
 
-            return VK_ERROR_EXTENSION_NOT_PRESENT;
-        }
-
-        inline void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator)
-        {
-            auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
-
-            if (func != nullptr)
-                func(instance, debugMessenger, pAllocator);
-        }
-
-        static VKAPI_ATTR VkBool32 VKAPI_CALL VulkanDebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData)
-        {
-            if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) 
-            {
-                LU_LOG_WARN("Validation layer: {0}", pCallbackData->pMessage);
-                return VK_FALSE;
-            }
-
-            return VK_FALSE;
-        }
-
-        static bool ValidationLayersSupported()
-        {
-            uint32_t layerCount;
-            vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
-
-            std::vector<VkLayerProperties> availableLayers(layerCount);
-            vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
-
-            // Check if all requested layers are actually accessible
-            for (const char* layerName : g_VkRequestedValidationLayers) 
-            {
-                bool layerFound = false;
-
-                for (const auto& layerProperties : availableLayers) 
-                {
-                    if (strcmp(layerName, layerProperties.layerName) == 0) 
-                    {
-                        layerFound = true;
-                        break;
-                    }
-                }
-
-                if (!layerFound)
-                    return false;
-            }
-
-            return true;
-        }
+        bool ValidationLayersSupported();
 
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////
+    // Helper structs
+    ////////////////////////////////////////////////////////////////////////////////////
+    class VulkanCommand
+    {
+    public:
+        VulkanCommand(const RendererID renderer, bool start);
+        ~VulkanCommand();
+
+        void Begin();
+        void End();
+        void Submit();
+        void EndAndSubmit();
+
+        inline const VkCommandBuffer GetVkCommandBuffer() const { return m_CommandBuffer; }
+
+    private:
+        const RendererID m_Renderer;
+        VkCommandBuffer m_CommandBuffer = VK_NULL_HANDLE;
+    };
 
 }

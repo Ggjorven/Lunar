@@ -12,7 +12,7 @@ namespace Lunar::Types
     template <typename T, typename Variant>
     concept TypeInVariant = requires 
     {
-        []<typename ...Types>(std::variant<Types...> obj) 
+        []<typename ...Types>(std::variant<Types...>) 
         {
             return (std::is_same_v<T, Types> || ...);
         }

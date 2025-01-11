@@ -3,6 +3,8 @@
 #if defined(LU_PLATFORM_DESKTOP)
 #include "Lunar/Core/Window.hpp"
 
+#include "Lunar/Renderer/Renderer.hpp"
+
 #include <GLFW/glfw3.h>
 
 namespace Lunar
@@ -36,12 +38,15 @@ namespace Lunar
 
         inline void* GetNativeWindow() override { return static_cast<void*>(m_Window); }
         inline WindowSpecification& GetSpecification() override { return m_Specification; }
+        inline Arc<Renderer> GetRenderer() override { return m_Renderer; }
 
 	private:
         WindowSpecification m_Specification;
         bool m_Closed = false;
 
         GLFWwindow* m_Window = nullptr;
+
+        Arc<Renderer> m_Renderer = nullptr;
 	};
 
 }

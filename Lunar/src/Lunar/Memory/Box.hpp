@@ -20,7 +20,7 @@ namespace Lunar
 		{
 		}
 
-		Box(std::nullptr_t n) 
+		Box(std::nullptr_t) 
 			: m_Object(nullptr)
 		{
 		}
@@ -92,8 +92,10 @@ namespace Lunar
 		inline T& operator * () { return *Raw(); }
 		inline const T& operator * () const { return *Raw(); }
 
-		inline bool operator == (std::nullptr_t n) { return m_Object == nullptr; }
-		inline bool operator != (std::nullptr_t n) { return !(*this == n); }
+		inline operator bool() const { return m_Object != nullptr; }
+
+		inline bool operator == (std::nullptr_t) { return m_Object == nullptr; }
+		inline bool operator != (std::nullptr_t) { return !(*this == nullptr); }
 
 		// Methods
 		inline void Reset()

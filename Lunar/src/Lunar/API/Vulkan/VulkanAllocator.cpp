@@ -14,17 +14,17 @@ namespace Lunar
     ////////////////////////////////////////////////////////////////////////////////////
     // Callbacks
     ////////////////////////////////////////////////////////////////////////////////////
-    static void* VKAPI_PTR VmaAllocFn(void* pUserData, size_t size, size_t alignment, VkSystemAllocationScope allocationScope)
+    static void* VKAPI_PTR VmaAllocFn(void*, size_t size, size_t, VkSystemAllocationScope)
     {
         return std::malloc(size);
     }
 
-    static void VKAPI_PTR VmaFreeFn(void* pUserData, void* pMemory)
+    static void VKAPI_PTR VmaFreeFn(void*, void* pMemory)
     {
         std::free(pMemory);
     }
 
-    static void* VKAPI_PTR VmaReallocFn(void* pUserData, void* pOriginal, size_t size, size_t alignment, VkSystemAllocationScope allocationScope)
+    static void* VKAPI_PTR VmaReallocFn(void*, void* pOriginal, size_t size, size_t, VkSystemAllocationScope)
     {
         return std::realloc(pOriginal, size);
     }
@@ -70,8 +70,7 @@ namespace Lunar
     ////////////////////////////////////////////////////////////////////////////////////
     // Buffers
     ////////////////////////////////////////////////////////////////////////////////////
-    /* TODO
-    VmaAllocation VulkanAllocator::AllocateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage, VkBuffer& dstBuffer, VkMemoryPropertyFlags requiredFlags)
+    VmaAllocation VulkanAllocator::AllocateBuffer(RendererID, VkDeviceSize size, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage, VkBuffer& dstBuffer, VkMemoryPropertyFlags requiredFlags)
     {
         VkBufferCreateInfo bufferInfo = {};
         bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -89,9 +88,9 @@ namespace Lunar
         return allocation;
     }
 
-    void VulkanAllocator::CopyBuffer(VkBuffer& srcBuffer, VkBuffer& dstBuffer, VkDeviceSize size, VkDeviceSize offset)
+    void VulkanAllocator::CopyBuffer(RendererID rendererID, VkBuffer& srcBuffer, VkBuffer& dstBuffer, VkDeviceSize size, VkDeviceSize offset)
     {
-        VulkanCommand command = VulkanCommand(true);
+        VulkanCommand command = VulkanCommand(rendererID, true);
 
         VkBufferCopy copyRegion = {};
         copyRegion.size = size;
@@ -101,17 +100,15 @@ namespace Lunar
         command.EndAndSubmit();
     }
 
-    void VulkanAllocator::DestroyBuffer(VkBuffer buffer, VmaAllocation allocation)
+    void VulkanAllocator::DestroyBuffer(RendererID, VkBuffer buffer, VmaAllocation allocation)
     {
-        vmaDestroyBuffer(s_VulkanAllocator, buffer, allocation);
+        vmaDestroyBuffer(s_Allocator, buffer, allocation);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////
     // Image
     ////////////////////////////////////////////////////////////////////////////////////
-    VmaAllocation VulkanAllocator::AllocateImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkFormat format,
-                                           VkImageTiling tiling, VkImageUsageFlags usage, VmaMemoryUsage memUsage,
-                                           VkImage& image, VkMemoryPropertyFlags requiredFlags)
+    VmaAllocation VulkanAllocator::AllocateImage(RendererID, uint32_t width, uint32_t height, uint32_t mipLevels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VmaMemoryUsage memUsage, VkImage& image, VkMemoryPropertyFlags requiredFlags)
     {
         VkImageCreateInfo imageInfo = {};
         imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -133,14 +130,14 @@ namespace Lunar
         allocCreateInfo.requiredFlags = requiredFlags;
 
         VmaAllocation allocation = VK_NULL_HANDLE;
-        VK_CHECK_RESULT(vmaCreateImage(s_VulkanAllocator, &imageInfo, &allocCreateInfo, &image, &allocation, nullptr));
+        VK_VERIFY(vmaCreateImage(s_Allocator, &imageInfo, &allocCreateInfo, &image, &allocation, nullptr));
 
         return allocation;
     }
 
-    void VulkanAllocator::CopyBufferToImage(VkBuffer& buffer, VkImage& image, uint32_t width, uint32_t height)
+    void VulkanAllocator::CopyBufferToImage(RendererID rendererID, VkBuffer& buffer, VkImage& image, uint32_t width, uint32_t height)
     {
-        VulkanCommand command = VulkanCommand(true);
+        VulkanCommand command = VulkanCommand(rendererID, true);
 
         VkBufferImageCopy region = {};
         region.bufferOffset = 0;
@@ -155,14 +152,12 @@ namespace Lunar
         region.imageOffset = { 0, 0, 0 };
         region.imageExtent = { width, height, 1 };
 
-        vkCmdCopyBufferToImage(command.GetVkCommandBuffer(), buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
-                               &region);
+        vkCmdCopyBufferToImage(command.GetVkCommandBuffer(), buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
 
         command.EndAndSubmit();
     }
 
-    VkImageView VulkanAllocator::CreateImageView(VkImage& image, VkFormat format, VkImageAspectFlags aspectFlags,
-                                           uint32_t mipLevels)
+    VkImageView VulkanAllocator::CreateImageView(RendererID, VkImage& image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels)
     {
         VkImageViewCreateInfo viewInfo = {};
         viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -176,13 +171,12 @@ namespace Lunar
         viewInfo.subresourceRange.aspectMask = aspectFlags;
 
         VkImageView imageView = VK_NULL_HANDLE;
-        VK_CHECK_RESULT(vkCreateImageView(VulkanContext::GetDevice()->GetVkDevice(), &viewInfo, nullptr, &imageView));
+        VK_VERIFY(vkCreateImageView(VulkanContext::GetVulkanDevice()->GetVkDevice(), &viewInfo, nullptr, &imageView));
 
         return imageView;
     }
 
-    VkSampler VulkanAllocator::CreateSampler(VkFilter magFilter, VkFilter minFilter, VkSamplerAddressMode addressmode,
-                                       VkSamplerMipmapMode mipmapMode, uint32_t mipLevels)
+    VkSampler VulkanAllocator::CreateSampler(RendererID, VkFilter magFilter, VkFilter minFilter, VkSamplerAddressMode addressmode, VkSamplerMipmapMode mipmapMode, uint32_t mipLevels)
     {
         VkSamplerCreateInfo samplerInfo = {};
         samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -193,7 +187,7 @@ namespace Lunar
         samplerInfo.addressModeW = addressmode;
 
         VkPhysicalDeviceProperties properties = {};
-        vkGetPhysicalDeviceProperties(VulkanContext::GetPhysicalDevice()->GetVkPhysicalDevice(), &properties);
+        vkGetPhysicalDeviceProperties(VulkanContext::GetVulkanPhysicalDevice()->GetVkPhysicalDevice(), &properties);
 
         samplerInfo.anisotropyEnable = VK_TRUE;                             // Can be disabled: just set VK_FALSE
         samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy; // And 1.0f
@@ -209,14 +203,14 @@ namespace Lunar
         samplerInfo.mipLodBias = 0.0f; // Optional
 
         VkSampler sampler = VK_NULL_HANDLE;
-        VK_CHECK_RESULT(vkCreateSampler(VulkanContext::GetDevice()->GetVkDevice(), &samplerInfo, nullptr, &sampler));
+        VK_VERIFY(vkCreateSampler(VulkanContext::GetVulkanDevice()->GetVkDevice(), &samplerInfo, nullptr, &sampler));
 
         return sampler;
     }
 
-    void VulkanAllocator::DestroyImage(VkImage image, VmaAllocation allocation)
+    void VulkanAllocator::DestroyImage(RendererID, VkImage image, VmaAllocation allocation)
     {
-        vmaDestroyImage(s_VulkanAllocator, image, allocation);
+        vmaDestroyImage(s_Allocator, image, allocation);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////
@@ -224,14 +218,24 @@ namespace Lunar
     ////////////////////////////////////////////////////////////////////////////////////
     void VulkanAllocator::MapMemory(VmaAllocation& allocation, void*& mapData)
     {
-        vmaMapMemory(s_VulkanAllocator, allocation, &mapData);
+        vmaMapMemory(s_Allocator, allocation, &mapData);
     }
 
     void VulkanAllocator::UnMapMemory(VmaAllocation& allocation)
     {
-        vmaUnmapMemory(s_VulkanAllocator, allocation);
+        vmaUnmapMemory(s_Allocator, allocation);
     }
-    */
+
+    void* VulkanAllocator::SetData(VmaAllocation& allocation, void* data, size_t size)
+    {
+        void* mappedData;
+
+        VulkanAllocator::MapMemory(allocation, mappedData);
+        memcpy(mappedData, data, size);
+        VulkanAllocator::UnMapMemory(allocation);
+
+        return mappedData;
+    }
    
 
 }

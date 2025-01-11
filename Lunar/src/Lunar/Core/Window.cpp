@@ -12,9 +12,10 @@ namespace Lunar
     {
         #if defined(LU_PLATFORM_DESKTOP)
             return Arc<DesktopWindow>::Create(windowSpecs);
+        #else
+            #error Window: Unsupported platform
+            return nullptr;
         #endif
-
-        return nullptr;
     }
 
 }
