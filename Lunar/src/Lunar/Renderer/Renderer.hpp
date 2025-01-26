@@ -5,10 +5,23 @@
 
 #include "Lunar/Core/Window.hpp"
 
+#include "Lunar/Enum/Bitwise.hpp"
+
 namespace Lunar
 {
 
-    //using FreeFn = std::copyable_function<void()>;
+    ////////////////////////////////////////////////////////////////////////////////////
+    // Configurations
+    ////////////////////////////////////////////////////////////////////////////////////
+    enum class ExecutionPolicy
+    {
+        InOrder = 1 << 0,           // Execute commands sequentially, submits to waited on by next (WaitForPrevious) commandBuffer
+        Parallel = 1 << 1,          // Execute commands in parallel but synchronized by the frame
+
+        WaitForPrevious = 1 << 2,   // Wait for the completion of the previous (InOrder) command buffer
+    };
+    LU_ENABLE_BITWISE(ExecutionPolicy)
+
     using FreeFn = std::function<void()>;
 
     ////////////////////////////////////////////////////////////////////////////////////
@@ -38,7 +51,12 @@ namespace Lunar
         virtual ~Renderer() = default;
       
         // Methods
+        virtual void BeginFrame() = 0;
+        virtual void EndFrame() = 0;
+        virtual void Present() = 0;
+
         virtual void Free(const FreeFn& fn) = 0;
+        virtual void FreeQueue() = 0;
         
         // TODO: Submit
 

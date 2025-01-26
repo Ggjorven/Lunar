@@ -10,6 +10,8 @@
 namespace Lunar
 {
 
+    class VulkanRenderer;
+    
     ////////////////////////////////////////////////////////////////////////////////////
     // Vulkan SwapChain
     ////////////////////////////////////////////////////////////////////////////////////
@@ -64,6 +66,8 @@ namespace Lunar
 
         uint32_t m_CurrentFrame = 0;
         uint32_t m_AcquiredImage = 0;
+
+        friend class VulkanRenderer;
     };
 
 }

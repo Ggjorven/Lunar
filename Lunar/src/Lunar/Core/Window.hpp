@@ -49,6 +49,8 @@ namespace Lunar
         virtual void PollEvents() = 0;
         virtual void SwapBuffers() = 0;
 
+        // Note: This is not resizing the window, it's resizing the drawing area.
+        virtual void Resize(uint32_t width, uint32_t height) = 0; 
         virtual void Close() = 0;
 
         // Getters

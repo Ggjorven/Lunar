@@ -1,4 +1,5 @@
 #include "Lunar/Core/Window.hpp"
+#include "Lunar/Renderer/Renderer.hpp"
 
 using namespace Lunar;
 class Application
@@ -27,9 +28,12 @@ public:
         while (m_Running)
         {
             m_Window->PollEvents();
+            m_Window->GetRenderer()->BeginFrame();
 
             // ...
 
+            m_Window->GetRenderer()->EndFrame();
+            m_Window->GetRenderer()->Present();
             m_Window->SwapBuffers();
         }
     }
@@ -38,7 +42,15 @@ private:
     void OnEvent(Event e) 
     { 
         EventHandler handler(e);
-        handler.Handle<WindowCloseEvent>([this](WindowCloseEvent&) { m_Running = false; });
+        handler.Handle<WindowResizeEvent>([this](WindowResizeEvent& e) 
+            { 
+                m_Window->Resize(e.GetWidth(), e.GetHeight()); 
+            });
+        handler.Handle<WindowCloseEvent>([this](WindowCloseEvent&) 
+            { 
+                m_Running = false; 
+                m_Window->Close();
+            });
     }
 
 private:

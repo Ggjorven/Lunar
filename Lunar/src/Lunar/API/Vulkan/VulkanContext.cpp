@@ -29,7 +29,6 @@ namespace Lunar
 
     VulkanContext::~VulkanContext()
     {
-        //Renderer::FreeObjects();
         VulkanAllocator::Destroy();
 
         m_PhysicalDevice.Reset();

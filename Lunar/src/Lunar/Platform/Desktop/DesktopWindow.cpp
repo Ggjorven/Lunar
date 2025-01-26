@@ -183,6 +183,12 @@ namespace Lunar
     void DesktopWindow::SwapBuffers()
     {
         LU_PROFILE("DesktopWindow::SwapBuffers");
+        m_Renderer->FreeQueue();
+    }
+
+    void DesktopWindow::Resize(uint32_t width, uint32_t height)
+    {
+        m_Renderer->Recreate(width, height, m_Specification.VSync);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////

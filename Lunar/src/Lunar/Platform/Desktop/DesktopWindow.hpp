@@ -21,6 +21,7 @@ namespace Lunar
         void PollEvents() override;
         void SwapBuffers() override;
 
+        void Resize(uint32_t width, uint32_t height) override;
         inline void Close() override { m_Closed = true; }
 
         // Getters

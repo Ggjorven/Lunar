@@ -136,7 +136,7 @@ namespace Lunar
 			{
 				compositeAlpha = compositeAlphaFlag;
 				break;
-			};
+			}
 		}
 
 		VkSwapchainCreateInfoKHR swapchainCI = {};
@@ -213,13 +213,14 @@ namespace Lunar
 			VkImageView imageView = VK_NULL_HANDLE;
 			VK_VERIFY(vkCreateImageView(device, &colorAttachmentView, nullptr, &imageView));
 
-			VulkanImageSpecification specs = {};
-			specs.Format = m_ColourFormat;
-            specs.Flags = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-			specs.Width = width;
-			specs.Height = height;
-			specs.Layout = VK_IMAGE_LAYOUT_UNDEFINED;
-			specs.MipMaps = false;
+			VulkanImageSpecification specs = {
+                .Width = width,
+                .Height = height,
+				.Flags = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+                .Layout = VK_IMAGE_LAYOUT_UNDEFINED,
+				.Format = m_ColourFormat,
+                .MipMaps = false
+			};
 
 			if (m_Images[i])
 			{
@@ -305,6 +306,7 @@ namespace Lunar
 			LU_LOG_ERROR("[VulkanSwapChain] Failed to acquire SwapChain image!");
 		}
 
+		m_AcquiredImage = imageIndex;
 		return imageIndex;
 	}
 
