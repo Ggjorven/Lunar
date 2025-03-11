@@ -39,6 +39,7 @@ project "Lunar"
 
 		"%{Dependencies.GLFW.IncludeDir}",
 		"%{Dependencies.glm.IncludeDir}",
+		"%{Dependencies.stb.IncludeDir}",
 		"%{Dependencies.Vulkan.IncludeDir}",
 	}
 
@@ -87,6 +88,7 @@ project "Lunar"
 
 			"%{Dependencies.GLFW.IncludeDir}",
 			"%{Dependencies.glm.IncludeDir}",
+			"%{Dependencies.stb.IncludeDir}",
 			"%{Dependencies.Vulkan.IncludeDir}",
 		}
 

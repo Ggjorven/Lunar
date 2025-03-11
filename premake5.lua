@@ -46,6 +46,10 @@ Dependencies =
 	{
 		IncludeDir = "%{wks.location}/vendor/glm/glm"
 	},
+	stb = 
+	{
+		IncludeDir = "%{wks.location}/vendor/stb/include"
+	},
 }
 
 ------------------------------------------------------------------------------

@@ -1,67 +1,57 @@
-#include "Lunar/Core/Window.hpp"
-#include "Lunar/Renderer/Renderer.hpp"
+///////////////////////////////////////////////////////////
+// Build test file
+///////////////////////////////////////////////////////////
+#include "Lunar/Internal/Core/Events.hpp"
 
-using namespace Lunar;
-class Application
+#include "Lunar/Internal/Enum/Bitwise.hpp"
+#include "Lunar/Internal/Enum/Fuse.hpp"
+#include "Lunar/Internal/Enum/Name.hpp"
+#include "Lunar/Internal/Enum/Utilities.hpp"
+
+#include "Lunar/Internal/IO/Print.hpp"
+
+#include "Lunar/Internal/Maths/Logarithm.hpp"
+#include "Lunar/Internal/Maths/Structs.hpp"
+
+#include "Lunar/Internal/Memory/Arc.hpp"
+#include "Lunar/Internal/Memory/AutoRelease.hpp"
+#include "Lunar/Internal/Memory/Box.hpp"
+#include "Lunar/Internal/Memory/Rc.hpp"
+
+#include "Lunar/Internal/Utils/Hash.hpp"
+#include "Lunar/Internal/Utils/Preprocessor.hpp"
+#include "Lunar/Internal/Utils/Profiler.hpp"
+#include "Lunar/Internal/Utils/Types.hpp"
+
+#include "Lunar/Enum/Name.hpp"
+#include "Lunar/Enum/Fuse.hpp"
+
+#include "Lunar/Maths/Structs.hpp"
+
+///////////////////////////////////////////////////////////
+// Test Enum
+///////////////////////////////////////////////////////////
+enum class Test : uint8_t
 {
-public:
-    Application()
-    {
-        m_Window = Window::Create({ 
-            .Title = "Window Title",
-            .Width = 1280,
-            .Height = 720,
-
-            .EventCallback = [this](Event e) { OnEvent(e); },
-
-            .VSync = false,
-            .Buffers = WindowSpecification::BufferMode::Triple,
-        });
-    }
-    ~Application() 
-    { 
-        m_Window->Close();
-    }
-
-    void Run()
-    {
-        while (m_Running)
-        {
-            m_Window->PollEvents();
-            m_Window->GetRenderer()->BeginFrame();
-
-            // ...
-
-            m_Window->GetRenderer()->EndFrame();
-            m_Window->GetRenderer()->Present();
-            m_Window->SwapBuffers();
-        }
-    }
-
-private:
-    void OnEvent(Event e) 
-    { 
-        EventHandler handler(e);
-        handler.Handle<WindowResizeEvent>([this](WindowResizeEvent& e) 
-            { 
-                m_Window->Resize(e.GetWidth(), e.GetHeight()); 
-            });
-        handler.Handle<WindowCloseEvent>([this](WindowCloseEvent&) 
-            { 
-                m_Running = false; 
-                m_Window->Close();
-            });
-    }
-
-private:
-    bool m_Running = true;
-    Arc<Window> m_Window = nullptr;
+    Hi = 0,
+    Hello = 27,
+    Hey,
 };
 
+///////////////////////////////////////////////////////////
+// Test main
+///////////////////////////////////////////////////////////
 int main(int argc, char* argv[])
 {
-    Application app;
-    app.Run();
+    // Enum Test
+    constexpr const Test compValue = Test::Hello;
+    volatile const Test runtimeValue = Test::Hey;
+
+    constexpr std::string_view compValueStr = Lunar::Enum::Name(compValue);
+    LU_LOG_TRACE("Compile time: {0}", compValueStr);
+    LU_LOG_TRACE("Runtime: {0}", Lunar::Enum::Name(runtimeValue));
+    
+
 
     return 0;
 }
