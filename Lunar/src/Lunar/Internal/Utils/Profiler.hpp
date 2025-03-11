@@ -9,9 +9,9 @@ namespace Lunar::Internal
 {
 
 	// Function name
-	#if defined(_MSC_VER)
+	#if defined(LU_COMPILER_MSVC)
 		#define LU_PRETTY_FUNCTION __FUNCSIG__
-	#elif defined(__GNUC__) || defined(__clang__)
+	#elif defined(LU_COMPILER_GCC) || defined(LU_COMPILER_CLANG)
 		#define LU_PRETTY_FUNCTION __PRETTY_FUNCTION__
 	#else 
 		#define LU_PRETTY_FUNCTION __func__ 

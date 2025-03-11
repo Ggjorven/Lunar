@@ -13,6 +13,8 @@
 #include <string_view>
 #include <type_traits>
 
+#include "Lunar/Internal/Utils/Preprocessor.hpp"
+
 namespace Lunar::Enum
 {
 
@@ -42,7 +44,7 @@ namespace Lunar::Internal::Enum
     ////////////////////////////////////////////////////////////////////////////////////
     // Internal naming
     ////////////////////////////////////////////////////////////////////////////////////
-    #if defined(_MSC_VER)
+    #if defined(LU_COMPILER_MSVC)
 
     template<typename TEnum, TEnum EValue> requires(std::is_enum_v<TEnum>)
     class ConstexprName
@@ -119,7 +121,7 @@ namespace Lunar::Internal::Enum
         constexpr static const std::string_view FunctionSignature = FunctionSignatureImpl<EValue>();
     };
 
-    #elif defined(__GNUC__) || defined(__clang__)
+    #elif defined(LU_COMPILER_GCC) || defined(LU_COMPILER_CLANG)
     
     template <typename TEnum, TEnum EValue> requires(std::is_enum_v<TEnum>)
     class ConstexprName
@@ -175,6 +177,8 @@ namespace Lunar::Internal::Enum
         constexpr static const std::string_view FunctionSignature = FunctionSignatureImpl();
     };
 
+    #else
+        #error Lunar Enum: Unsupported compiler...
     #endif
 
     ////////////////////////////////////////////////////////////////////////////////////

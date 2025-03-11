@@ -11,7 +11,7 @@ namespace Lunar::Internal
     // Vec2
     ////////////////////////////////////////////////////////////////////////////////////
     template <typename T>
-    struct Vec2Type;
+    struct Vec2Type { static_assert(false, "Unimplemented Vec2 type..."); };
 
     template<> struct Vec2Type<bool>            { using Type = glm::bvec2; };
     template<> struct Vec2Type<int>             { using Type = glm::ivec2; };
@@ -23,7 +23,7 @@ namespace Lunar::Internal
     // Vec3
     ////////////////////////////////////////////////////////////////////////////////////
     template <typename T>
-    struct Vec3Type;
+    struct Vec3Type { static_assert(false, "Unimplemented Vec3 type..."); };
 
     template<> struct Vec3Type<bool>            { using Type = glm::bvec3; };
     template<> struct Vec3Type<int>             { using Type = glm::ivec3; };
@@ -35,7 +35,7 @@ namespace Lunar::Internal
     // Vec4
     ////////////////////////////////////////////////////////////////////////////////////
     template <typename T>
-    struct Vec4Type;
+    struct Vec4Type { static_assert(false, "Unimplemented Vec4 type..."); };
 
     template<> struct Vec4Type<bool>            { using Type = glm::bvec4; };
     template<> struct Vec4Type<int>             { using Type = glm::ivec4; };

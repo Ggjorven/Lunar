@@ -36,4 +36,5 @@ namespace Lunar::Internal
             return combined ^ (combined >> 31);
         }
 	};
+
 }

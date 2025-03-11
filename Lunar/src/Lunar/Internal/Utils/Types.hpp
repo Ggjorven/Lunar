@@ -9,7 +9,7 @@ namespace Lunar::Internal::Types
 	////////////////////////////////////////////////////////////////////////////////////
     // Concepts
     ////////////////////////////////////////////////////////////////////////////////////
-    template <typename T, typename Variant>
+    template<typename T, typename Variant>
     concept TypeInVariant = requires 
     {
         []<typename ...Types>(std::variant<Types...>) 

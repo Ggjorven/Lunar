@@ -50,8 +50,6 @@ int main(int argc, char* argv[])
     constexpr std::string_view compValueStr = Lunar::Enum::Name(compValue);
     LU_LOG_TRACE("Compile time: {0}", compValueStr);
     LU_LOG_TRACE("Runtime: {0}", Lunar::Enum::Name(runtimeValue));
-    
-
 
     return 0;
 }
