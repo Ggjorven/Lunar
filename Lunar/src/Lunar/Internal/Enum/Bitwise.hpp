@@ -30,19 +30,19 @@ namespace Lunar::Internal::Enum
         inline constexpr auto operator&(e lhs, e rhs) noexcept                                                              \
         {                                                                                                                   \
             using U = std::underlying_type_t<e>;                                                                            \
-            return ::Lunar::Enum::Internal::EnumBitmask::EnumWrapper{ e(static_cast<U>(lhs) & static_cast<U>(rhs)) };       \
+            return ::Lunar::Internal::Enum::EnumBitmask::EnumWrapper{ e(static_cast<U>(lhs) & static_cast<U>(rhs)) };       \
         }                                                                                                                   \
         [[nodiscard]]                                                                                                       \
         inline constexpr auto operator|(e lhs, e rhs) noexcept                                                              \
         {                                                                                                                   \
             using U = std::underlying_type_t<e>;                                                                            \
-            return ::Lunar::Enum::Internal::EnumBitmask::EnumWrapper{ e(static_cast<U>(lhs) | static_cast<U>(rhs)) };       \
+            return ::Lunar::Internal::Enum::EnumBitmask::EnumWrapper{ e(static_cast<U>(lhs) | static_cast<U>(rhs)) };       \
         }                                                                                                                   \
         [[nodiscard]]                                                                                                       \
         inline constexpr auto operator^(e lhs, e rhs) noexcept                                                              \
         {                                                                                                                   \
             using U = std::underlying_type_t<e>;                                                                            \
-            return ::Lunar::Enum::Internal::EnumBitmask::EnumWrapper{ e(static_cast<U>(lhs) ^ static_cast<U>(rhs)) };       \
+            return ::Lunar::Internal::Enum::EnumBitmask::EnumWrapper{ e(static_cast<U>(lhs) ^ static_cast<U>(rhs)) };       \
         }                                                                                                                   \
         [[nodiscard]]                                                                                                       \
         inline constexpr e operator~(e value) noexcept                                                                      \

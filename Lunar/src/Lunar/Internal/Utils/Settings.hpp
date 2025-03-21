@@ -27,6 +27,16 @@ namespace Lunar::Internal::Info
 		// iOS,
 	};
 
+	enum class CppStd : uint8_t
+	{
+		Cpp11 = LU_CPPSTD_11,
+		Cpp14 = LU_CPPSTD_14,
+		Cpp17 = LU_CPPSTD_17,
+		Cpp20 = LU_CPPSTD_20,
+		Cpp23 = LU_CPPSTD_23,
+		Cpp26 = LU_CPPSTD_26,
+	};
+
 	enum class RenderingAPI : uint8_t
 	{
 		Vulkan = 0,
@@ -56,6 +66,8 @@ namespace Lunar::Internal::Info
 	#else 
 		#error Lunar Settings: Unsupported platform.
 	#endif
+
+	inline constexpr const CppStd g_CppStd = static_cast<CppStd>(LU_CPPSTD);
 
 	inline constexpr const RenderingAPI g_RenderingAPI = RenderingAPI::Vulkan;
 

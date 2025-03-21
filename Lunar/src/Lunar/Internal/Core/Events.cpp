@@ -18,17 +18,17 @@ namespace Lunar::Internal
     // Key events
     ////////////////////////////////////////////////////////////////////////////////////
     KeyPressedEvent::KeyPressedEvent(int keycode, int repeatCount) 
-        : m_KeyCode((Key)keycode), m_RepeatCount(repeatCount)
+        : m_KeyCode(static_cast<Key>(keycode)), m_RepeatCount(repeatCount)
     {
     }
 
     KeyReleasedEvent::KeyReleasedEvent(int keycode)
-        : m_KeyCode((Key)keycode)
+        : m_KeyCode(static_cast<Key>(keycode))
     {
     }
 
     KeyTypedEvent::KeyTypedEvent(int keycode)
-        : m_KeyCode((Key)keycode)
+        : m_KeyCode(static_cast<Key>(keycode))
     {
     }
 
@@ -46,12 +46,12 @@ namespace Lunar::Internal
     }
 
     MouseButtonPressedEvent::MouseButtonPressedEvent(int button) 
-        : m_Button((MouseButton)button)
+        : m_Button(static_cast<MouseButton>(button))
     {
     }
 
     MouseButtonReleasedEvent::MouseButtonReleasedEvent(int button)
-        : m_Button((MouseButton)button)
+        : m_Button(static_cast<MouseButton>(button))
     {
     }
 

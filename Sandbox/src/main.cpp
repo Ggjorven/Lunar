@@ -2,6 +2,7 @@
 // Build test file
 ///////////////////////////////////////////////////////////
 #include "Lunar/Internal/Core/Events.hpp"
+#include "Lunar/Internal/Core/Window.hpp"
 
 #include "Lunar/Internal/Enum/Bitwise.hpp"
 #include "Lunar/Internal/Enum/Fuse.hpp"
@@ -50,6 +51,27 @@ int main(int argc, char* argv[])
     constexpr std::string_view compValueStr = Lunar::Enum::Name(compValue);
     LU_LOG_TRACE("Compile time: {0}", compValueStr);
     LU_LOG_TRACE("Runtime: {0}", Lunar::Enum::Name(runtimeValue));
+
+    // Window Test
+	bool open = true;
+    Lunar::Internal::Window window({
+        .Title = "Window",
+
+        .Width = 1280,
+        .Height = 720,
+
+        .EventCallback = [openRef = &open](Lunar::Internal::Event e) 
+        { 
+            Lunar::Internal::EventHandler handler(e); 
+            handler.Handle<Lunar::Internal::WindowCloseEvent>([openRef](Lunar::Internal::WindowCloseEvent& we) { *openRef = false; });
+        }
+    });
+    
+    while (open)
+    {
+        window.PollEvents();
+        window.SwapBuffers();
+    }
 
     return 0;
 }
