@@ -6,6 +6,7 @@
 #include "Lunar/Internal/Renderer/RendererSpec.hpp"
 
 #include "Lunar/Internal/API/Vulkan/Vulkan.hpp"
+
 #include "Lunar/Internal/API/Vulkan/VulkanCommandBuffer.hpp"
 
 namespace Lunar::Internal
@@ -49,7 +50,7 @@ namespace Lunar::Internal
         std::vector<VkSemaphore>& GetSemaphores();
 
     private:
-        RendererID m_RendererID;
+        RendererID m_RendererID = {};
         std::mutex m_ThreadSafety = {};
 
         // The first vector index is the frame, the pair is first = semaphores to wait on by other cmdBufs, second = semaphores to only wait on by frame

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Lunar/Internal/API/Vulkan/Vulkan.hpp"
+
 #include "Lunar/Internal/API/Vulkan/VulkanDevice.hpp"
 #include "Lunar/Internal/API/Vulkan/VulkanPhysicalDevice.hpp"
 

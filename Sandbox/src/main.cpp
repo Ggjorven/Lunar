@@ -53,23 +53,31 @@ int main(int argc, char* argv[])
     LU_LOG_TRACE("Runtime: {0}", Lunar::Enum::Name(runtimeValue));
 
     // Window Test
-	bool open = true;
     Lunar::Internal::Window window({
         .Title = "Window",
 
         .Width = 1280,
         .Height = 720,
 
-        .EventCallback = [openRef = &open](Lunar::Internal::Event e) 
-        { 
-            Lunar::Internal::EventHandler handler(e); 
-            handler.Handle<Lunar::Internal::WindowCloseEvent>([openRef](Lunar::Internal::WindowCloseEvent& we) { *openRef = false; });
-        }
+        .EventCallback = [](Lunar::Internal::Event e) {}
     });
+
+    window.GetSpecification().EventCallback = [&](Lunar::Internal::Event e)
+    {
+        Lunar::Internal::EventHandler handler(e);
+        handler.Handle<Lunar::Internal::WindowResizeEvent>([&](Lunar::Internal::WindowResizeEvent& wre) { window.Resize(wre.GetWidth(), wre.GetHeight()); });
+        handler.Handle<Lunar::Internal::WindowCloseEvent>([&](Lunar::Internal::WindowCloseEvent&) { window.Close(); });
+    };
     
-    while (open)
+    while (window.IsOpen())
     {
         window.PollEvents();
+		window.GetRenderer().BeginFrame();
+
+        // ...
+
+		window.GetRenderer().EndFrame();
+		window.GetRenderer().Present();
         window.SwapBuffers();
     }
 

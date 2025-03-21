@@ -6,7 +6,6 @@
 #include <tuple>
 
 #include "Lunar/Enum/Name.hpp"
-#include "Lunar/Internal/Enum/Name.hpp"
 
 #include "Lunar/Internal/IO/Print.hpp"
 

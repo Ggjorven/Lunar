@@ -76,9 +76,9 @@ namespace Lunar::Internal
         void DestroyImage();
 
     private:
-        RendererID m_Renderer;
-        VulkanImageSpecification m_ImageSpecification;
-        VulkanSamplerSpecification m_SamplerSpecification;
+        RendererID m_Renderer = {};
+        VulkanImageSpecification m_ImageSpecification = {};
+        VulkanSamplerSpecification m_SamplerSpecification = {};
 
         VkImage m_Image = VK_NULL_HANDLE;
         VmaAllocation m_Allocation = VK_NULL_HANDLE;

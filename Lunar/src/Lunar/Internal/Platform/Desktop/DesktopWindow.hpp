@@ -22,8 +22,12 @@ namespace Lunar::Internal
 	{
 	public:
 		// Constructors & Destructor
-		DesktopWindow(const WindowSpecification& specs, Window* instance);
-		~DesktopWindow();
+		DesktopWindow() = default;
+		~DesktopWindow() = default;
+
+		// Init & Destroy
+		void Init(const WindowSpecification& specs, Window* instance);
+		void Destroy();
 
 		// Methods
 		void PollEvents();

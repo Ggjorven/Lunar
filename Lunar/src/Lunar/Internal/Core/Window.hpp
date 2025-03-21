@@ -25,8 +25,8 @@ namespace Lunar::Internal
 	{
 	public:
 		// Constructors & Destructor
-		inline Window(const WindowSpecification& specs) : m_Window(specs, this) {}
-		~Window() = default;
+		inline Window(const WindowSpecification& specs) { m_Window.Init(specs, this); }
+		inline ~Window() { m_Window.Destroy(); }
 
 		// Methods
 		inline void PollEvents() { m_Window.PollEvents(); }

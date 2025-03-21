@@ -24,9 +24,10 @@ namespace Lunar::Internal
     ////////////////////////////////////////////////////////////////////////////////////
     // Constructors & Destructor
     ////////////////////////////////////////////////////////////////////////////////////
-    DesktopWindow::DesktopWindow(const WindowSpecification& specs, Window* instance)
-        : m_Specification(specs)
+    void DesktopWindow::Init(const WindowSpecification& specs, Window* instance)
     {
+        m_Specification = specs;
+
         LU_ASSERT(!specs.Title.empty(), "[DesktopWindow] No title passed in.");
         LU_ASSERT(((specs.Width != 0) && (specs.Height != 0)), "[DesktopWindow] Invalid width & height passed in.");
         LU_ASSERT(static_cast<bool>(specs.EventCallback), "[DesktopWindow] No event callback passed in.");
@@ -153,7 +154,7 @@ namespace Lunar::Internal
         m_Renderer.Recreate(m_Specification.Width, m_Specification.Height, m_Specification.VSync);
     }
 
-    DesktopWindow::~DesktopWindow()
+    void DesktopWindow::Destroy()
     {
         m_Closed = true;
 

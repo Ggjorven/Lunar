@@ -2,11 +2,11 @@
 #include "VulkanTaskManager.hpp"
 
 #include "Lunar/Internal/IO/Print.hpp"
-
 #include "Lunar/Internal/Utils/Profiler.hpp"
 
+#include "Lunar/Internal/Renderer/Renderer.hpp"
+
 #include "Lunar/Internal/API/Vulkan/VulkanContext.hpp"
-#include "Lunar/Internal/API/Vulkan/VulkanRenderer.hpp"
 
 namespace Lunar::Internal
 {

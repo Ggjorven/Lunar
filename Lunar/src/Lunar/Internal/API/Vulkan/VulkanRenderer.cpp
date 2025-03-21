@@ -3,12 +3,11 @@
 
 #include "Lunar/Internal/IO/Print.hpp"
 #include "Lunar/Internal/Utils/Profiler.hpp"
+#include "Lunar/Internal/Utils/Settings.hpp"
 
 #include "Lunar/Internal/Core/Window.hpp"
 
 #include "Lunar/Internal/API/Vulkan/VulkanContext.hpp"
-
-#include "Lunar/Internal/Utils/Settings.hpp"
 
 #include <array>
 #include <numeric>
@@ -83,7 +82,7 @@ namespace Lunar::Internal
 
         VkPresentInfoKHR presentInfo = {};
         presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-        presentInfo.waitSemaphoreCount = (uint32_t)semaphores.size();
+        presentInfo.waitSemaphoreCount = static_cast<uint32_t>(semaphores.size());
         presentInfo.pWaitSemaphores = semaphores.data();
         presentInfo.swapchainCount = 1;
         presentInfo.pSwapchains = &m_SwapChain.m_SwapChain;

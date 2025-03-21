@@ -226,7 +226,7 @@ namespace Lunar::Internal
                 .MipMaps = false
 			};
 
-			if (m_Images[i].GetWidth() == 0 || m_Images[i].GetHeight() == 0)
+			if (m_Images[i].GetWidth() != 0 && m_Images[i].GetHeight() != 0)
 			{
                 VulkanImage& src = m_Images[i];
 
