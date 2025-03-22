@@ -64,10 +64,10 @@ namespace Lunar::Internal
         inline uint32_t GetHeight() const { return m_ImageSpecification.Height; }
 
         // Internal getters
-        inline const VkImage GetVkImage() const { return m_Image; }
-        inline const VmaAllocation GetVmaAllocation() const { return m_Allocation; }
-        inline const VkImageView GetVkImageView() const { return m_ImageView; }
-        inline const VkSampler GetVkSampler() const { return m_Sampler; }
+        inline VkImage GetVkImage() const { return m_Image; }
+        inline VmaAllocation GetVmaAllocation() const { return m_Allocation; }
+        inline VkImageView GetVkImageView() const { return m_ImageView; }
+        inline VkSampler GetVkSampler() const { return m_Sampler; }
 
     private:
         // Private methods

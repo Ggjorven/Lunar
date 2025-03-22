@@ -26,8 +26,8 @@ namespace Lunar::Internal
         static VulkanDevice& GetVulkanDevice();
         static VulkanPhysicalDevice& GetVulkanPhysicalDevice();
 
-        static const VkInstance GetVkInstance();
-        static const VkDebugUtilsMessengerEXT GetVkDebugger();
+        static VkInstance GetVkInstance();
+        static VkDebugUtilsMessengerEXT GetVkDebugger();
 
     private:
         // Private methods

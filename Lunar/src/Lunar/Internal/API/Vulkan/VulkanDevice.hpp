@@ -25,11 +25,11 @@ namespace Lunar::Internal
         void Wait() const;
 
         // Getters
-        inline const VkDevice GetVkDevice() const { return m_LogicalDevice; }
+        inline VkDevice GetVkDevice() const { return m_LogicalDevice; }
 
-        inline const VkQueue GetGraphicsQueue() const { return m_GraphicsQueue; }
-        inline const VkQueue GetComputeQueue() const { return m_ComputeQueue; }
-        inline const VkQueue GetPresentQueue() const { return m_PresentQueue; }
+        inline VkQueue GetGraphicsQueue() const { return m_GraphicsQueue; }
+        inline VkQueue GetComputeQueue() const { return m_ComputeQueue; }
+        inline VkQueue GetPresentQueue() const { return m_PresentQueue; }
 
         inline VulkanPhysicalDevice& GetPhysicalDevice() const { return *m_PhysicalDevice; }
 

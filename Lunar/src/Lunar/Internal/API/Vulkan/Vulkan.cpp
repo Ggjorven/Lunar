@@ -6,6 +6,8 @@
 #include "Lunar/Internal/API/Vulkan/VulkanContext.hpp"
 #include "Lunar/Internal/API/Vulkan/VulkanRenderer.hpp"
 
+#include <cstring>
+
 namespace Lunar::Internal
 {
 

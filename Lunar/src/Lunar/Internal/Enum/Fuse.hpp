@@ -9,13 +9,11 @@
 
 #include "Lunar/Internal/Maths/Logarithm.hpp"
 
-#include "Lunar/Internal/Utils/Hash.hpp"
-
 namespace Lunar::Internal::Enum
 {
 
     ////////////////////////////////////////////////////////////////////////////////////
-    // Helper functions
+    // Helper functions // TODO: Fix this for GCC and Clang
     ////////////////////////////////////////////////////////////////////////////////////
     template<typename TEnum> requires(std::is_enum_v<TEnum>)
     constexpr uintmax_t FuseOne(uintmax_t hash, TEnum value)

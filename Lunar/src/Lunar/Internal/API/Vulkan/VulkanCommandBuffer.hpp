@@ -20,9 +20,9 @@ namespace Lunar::Internal
         // The Begin, End & Submit methods are in the Renderer class.
 
         // Getters
-        inline const VkSemaphore GetVkRenderFinishedSemaphore(uint32_t index) const { return m_RenderFinishedSemaphores[index]; }
-        inline const VkFence GetVkInFlightFence(uint32_t index) const { return m_InFlightFences[index]; }
-        inline const VkCommandBuffer GetVkCommandBuffer(uint32_t index) const { return m_CommandBuffers[index]; }
+        inline VkSemaphore GetVkRenderFinishedSemaphore(uint32_t index) const { return m_RenderFinishedSemaphores[index]; }
+        inline VkFence GetVkInFlightFence(uint32_t index) const { return m_InFlightFences[index]; }
+        inline VkCommandBuffer GetVkCommandBuffer(uint32_t index) const { return m_CommandBuffers[index]; }
 
     private:
         const RendererID m_RendererID;

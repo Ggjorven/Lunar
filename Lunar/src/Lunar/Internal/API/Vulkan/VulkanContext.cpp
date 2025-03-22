@@ -56,12 +56,12 @@ namespace Lunar::Internal
         return GraphicsContext::GetInternalContext().m_PhysicalDevice;
     }
 
-    const VkInstance VulkanContext::GetVkInstance()
+    VkInstance VulkanContext::GetVkInstance()
     {
         return GraphicsContext::GetInternalContext().m_Instance;
     }
 
-    const VkDebugUtilsMessengerEXT VulkanContext::GetVkDebugger()
+    VkDebugUtilsMessengerEXT VulkanContext::GetVkDebugger()
     {
         return GraphicsContext::GetInternalContext().m_DebugMessenger;
     }

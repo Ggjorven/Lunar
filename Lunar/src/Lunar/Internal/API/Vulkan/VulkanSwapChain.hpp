@@ -30,7 +30,7 @@ namespace Lunar::Internal
         void Resize(uint32_t width, uint32_t height, bool vsync, uint8_t framesInFlight);
 
         // Getters
-        inline const VkFormat GetColourFormat() const { return m_ColourFormat; }
+        inline VkFormat GetColourFormat() const { return m_ColourFormat; }
 
         inline uint32_t GetCurrentFrame() const { return m_CurrentFrame; }
         inline uint32_t GetAquiredImage() const { return m_AcquiredImage; }
@@ -38,11 +38,11 @@ namespace Lunar::Internal
         inline std::vector<VulkanImage>& GetSwapChainImages() { return m_Images; }
         inline VulkanImage& GetDepthImage() { return m_DepthStencil; }
 
-        inline const VkSurfaceKHR GetVkSurface() const { return m_Surface; }
-        inline const VkCommandPool GetVkCommandPool() const { return m_CommandPool; }
+        inline VkSurfaceKHR GetVkSurface() const { return m_Surface; }
+        inline VkCommandPool GetVkCommandPool() const { return m_CommandPool; }
 
-        inline const VkSemaphore GetImageAvailableSemaphore(uint32_t index) const { return m_ImageAvailableSemaphores[index]; }
-        inline const VkSemaphore GetCurrentImageAvailableSemaphore() const { return GetImageAvailableSemaphore(m_CurrentFrame); }
+        inline VkSemaphore GetImageAvailableSemaphore(uint32_t index) const { return m_ImageAvailableSemaphores[index]; }
+        inline VkSemaphore GetCurrentImageAvailableSemaphore() const { return GetImageAvailableSemaphore(m_CurrentFrame); }
 
     private:
         // Private methods

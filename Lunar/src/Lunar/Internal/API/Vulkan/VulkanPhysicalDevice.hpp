@@ -53,7 +53,7 @@ namespace Lunar::Internal
         VkFormat FindSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features) const;
 
         // Getters
-        inline const VkPhysicalDevice GetVkPhysicalDevice() const { return m_PhysicalDevice; }
+        inline VkPhysicalDevice GetVkPhysicalDevice() const { return m_PhysicalDevice; }
         
     private:
         // Private methods
