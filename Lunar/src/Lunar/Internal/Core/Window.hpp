@@ -12,9 +12,9 @@ namespace Lunar::Internal
 	template<Info::Platform Platform>
 	struct WindowSelect;
 
-	template<> struct WindowSelect<Info::Platform::Windows>		{ using Type = typename DesktopWindow; };
-	template<> struct WindowSelect<Info::Platform::Linux>		{ using Type = typename DesktopWindow; };
-	template<> struct WindowSelect<Info::Platform::MacOS>		{ using Type = typename DesktopWindow; };
+	template<> struct WindowSelect<Info::Platform::Windows>		{ using Type = DesktopWindow; };
+	template<> struct WindowSelect<Info::Platform::Linux>		{ using Type = DesktopWindow; };
+	template<> struct WindowSelect<Info::Platform::MacOS>		{ using Type = DesktopWindow; };
 
 	using WindowType = typename WindowSelect<Info::g_Platform>::Type;
 

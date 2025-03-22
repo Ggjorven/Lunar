@@ -15,7 +15,7 @@ namespace Lunar::Internal
 	template<Info::RenderingAPI API>
 	struct ContextSelect;
 
-	template<> struct ContextSelect<Info::RenderingAPI::Vulkan>		{ using Type = typename VulkanContext; };
+	template<> struct ContextSelect<Info::RenderingAPI::Vulkan>		{ using Type = VulkanContext; };
 
 	////////////////////////////////////////////////////////////////////////////////////
 	// GraphicsContext

@@ -25,8 +25,8 @@ namespace Lunar::Enum
     struct Range
     {
     public:
-        inline static constexpr int32_t Min = -128;
-        inline static constexpr int32_t Max = 128;
+        inline static constexpr int32_t Min = ((std::is_signed_v<std::underlying_type_t<TEnum>>) ? -128 : 0);
+        inline static constexpr int32_t Max = ((std::is_signed_v<std::underlying_type_t<TEnum>>) ? 128 : 255);
         
         static_assert((Max - Min <= std::numeric_limits<uint16_t>::max()), "[Max - Min] must not exceed uint16 max value.");
     };

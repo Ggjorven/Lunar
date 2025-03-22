@@ -15,7 +15,7 @@ namespace Lunar::Internal
     template<Info::RenderingAPI API>
     struct RendererSelect;
 
-    template<> struct RendererSelect<Info::RenderingAPI::Vulkan> { using Type = typename VulkanRenderer; };
+    template<> struct RendererSelect<Info::RenderingAPI::Vulkan> { using Type = VulkanRenderer; };
 
 	using RendererType = typename RendererSelect<Info::g_RenderingAPI>::Type;
 

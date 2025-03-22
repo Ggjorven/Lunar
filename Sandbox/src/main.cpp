@@ -59,7 +59,7 @@ int main(int argc, char* argv[])
         .Width = 1280,
         .Height = 720,
 
-        .EventCallback = [](Lunar::Internal::Event e) {}
+        .EventCallback = [](Lunar::Internal::Event) {}
     });
 
     window.GetSpecification().EventCallback = [&](Lunar::Internal::Event e)

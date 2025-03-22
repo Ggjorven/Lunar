@@ -18,18 +18,23 @@ namespace Lunar::Internal
 	#elif defined(__ANDROID__) && !defined(LU_PLATFORM_ANDROID)
 		#define LU_PLATFORM_ANDROID
 		#define LU_PLATFORM_MOBILE
+		#define LU_PLATFORM_UNIX
 	#elif defined(__APPLE__) && (!defined(LU_PLATFORM_MACOS) || defined(LU_PLATFORM_IOS))
 		#include <TargetConditionals.h>
 		#if TARGET_OS_MAC
 			#define LU_PLATFORM_MACOS
 			#define LU_PLATFORM_DESKTOP
+			#define LU_PLATFORM_UNIX
+			#define LU_PLATFORM_APPLE
 		#elif TARGET_OS_IPHONE
 			#define LU_PLATFORM_IOS
 			#define LU_PLATFORM_MOBILE
+			#define LU_PLATFORM_APPLE
 		#endif
 	#elif defined(__linux__) && !defined(LU_PLATFORM_LINUX)
 		#define LU_PLATFORM_LINUX
 		#define LU_PLATFORM_DESKTOP
+		#define LU_PLATFORM_UNIX
 	#endif
 
 	#define LU_CPPSTD_11 11
