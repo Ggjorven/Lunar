@@ -52,6 +52,10 @@ int main(int argc, char* argv[])
     LU_LOG_TRACE("Compile time: {0}", compValueStr);
     LU_LOG_TRACE("Runtime: {0}", Lunar::Enum::Name(runtimeValue));
 
+    // Types Test
+	constexpr std::string_view typeName = Lunar::Internal::Types::ConstexprName<Test>::TypeName;
+	LU_LOG_TRACE("Type name: {0}", typeName);
+
     // Window Test
     Lunar::Internal::Window window({
         .Title = "Window",

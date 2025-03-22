@@ -10,6 +10,7 @@
 #include "Lunar/Internal/Maths/Logarithm.hpp"
 
 #include "Lunar/Internal/Utils/Hash.hpp"
+#include "Lunar/Internal/Utils/Types.hpp"
 
 namespace Lunar::Internal::Enum
 {
@@ -20,8 +21,8 @@ namespace Lunar::Internal::Enum
     template<typename TEnum> requires(std::is_enum_v<TEnum>)
     constexpr uintmax_t FuseOne(uintmax_t hash, TEnum value)
     {
-        constexpr uintmax_t typeHash = static_cast<uintmax_t>(typeid(TEnum).hash_code());
-        constexpr uintmax_t integerValue = static_cast<uintmax_t>(value);
+		constexpr auto typeHash = Hash::fnv1a(Types::ConstexprName<TEnum>::TypeName);
+        uintmax_t integerValue = static_cast<uintmax_t>(value);
 
         return (hash * 31) ^ (typeHash + integerValue);
     }
