@@ -115,7 +115,7 @@ namespace Lunar::Internal
         void Submit();
         void EndAndSubmit();
 
-        inline const VkCommandBuffer GetVkCommandBuffer() const { return m_CommandBuffer; }
+        inline VkCommandBuffer GetVkCommandBuffer() const { return m_CommandBuffer; }
 
     private:
         const RendererID m_Renderer;

@@ -68,6 +68,29 @@ project "Sandbox"
 		systemversion(MacOSVersion)
 		staticruntime "on"
 
+		libdirs
+		{
+			"%{Dependencies.Vulkan.LibDir}"
+		}
+
+		links
+		{
+			"%{Dependencies.Vulkan.LibName}",
+			"%{Dependencies.ShaderC.LibName}",
+
+			"AppKit.framework",
+			"IOKit.framework",
+			"CoreGraphics.framework",
+			"CoreFoundation.framework",
+			"QuartzCore.framework",
+		}
+
+		postbuildcommands
+		{
+			'{COPYFILE} "%{Dependencies.Vulkan.LibDir}/libvulkan.1.dylib" "%{cfg.targetdir}"',
+			'{COPYFILE} "%{Dependencies.Vulkan.LibDir}/lib%{Dependencies.Vulkan.LibName}.dylib" "%{cfg.targetdir}"',
+		}
+
 	filter "action:xcode*"
 		-- Note: If we don't add the header files to the externalincludedirs
 		-- we can't use <angled> brackets to include files.

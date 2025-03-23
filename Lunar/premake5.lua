@@ -46,9 +46,6 @@ project "Lunar"
 	links
 	{
 		"%{Dependencies.GLFW.LibName}",
-
-		"%{Dependencies.Vulkan.LibDir}/%{Dependencies.Vulkan.LibName}",
-		"%{Dependencies.Vulkan.LibDir}/%{Dependencies.ShaderC.LibName}",
 	}
 
 	filter "system:windows"
@@ -63,11 +60,23 @@ project "Lunar"
             "NOMINMAX"
         }
 
+		links
+		{
+			"%{Dependencies.Vulkan.LibDir}/%{Dependencies.Vulkan.LibName}",
+			"%{Dependencies.Vulkan.LibDir}/%{Dependencies.ShaderC.LibName}",
+		}
+
 	filter "system:linux"
 		defines "LU_PLATFORM_DESKTOP"
 		defines "LU_PLATFORM_LINUX"
 		systemversion "latest"
 		staticruntime "on"
+
+		links
+		{
+			"%{Dependencies.Vulkan.LibDir}/%{Dependencies.Vulkan.LibName}",
+			"%{Dependencies.Vulkan.LibDir}/%{Dependencies.ShaderC.LibName}",
+		}
 
     filter "system:macosx"
 		defines "LU_PLATFORM_DESKTOP"

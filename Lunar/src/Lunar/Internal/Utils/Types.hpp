@@ -50,7 +50,7 @@ namespace Lunar::Internal::Types
         }
 
     public:
-        constexpr static const std::string_view TypeName = Name();
+        constexpr static const std::string_view TypeName = Name(); // TODO: Fix on Apple Clang
     };
 
 }

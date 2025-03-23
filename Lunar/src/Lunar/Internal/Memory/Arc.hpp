@@ -209,7 +209,7 @@ namespace Lunar::Internal
 
         inline operator bool() const { return m_Memory != nullptr; }
 
-        inline bool operator == (std::nullptr_t n) { return m_Memory == nullptr; }
+        inline bool operator == (std::nullptr_t) { return m_Memory == nullptr; }
         inline bool operator != (std::nullptr_t n) { return !(*this == n); }
 
         // Methods

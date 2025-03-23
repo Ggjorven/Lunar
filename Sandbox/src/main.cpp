@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
         handler.Handle<Lunar::Internal::WindowCloseEvent>([&](Lunar::Internal::WindowCloseEvent&) { window.Close(); });
     };
     
-    while (window.IsOpen())
+	while (window.IsOpen()) // TODO: Fix Vulkan message vkAquireNextImageKHR on Apple Clang
     {
         window.PollEvents();
 		window.GetRenderer().BeginFrame();

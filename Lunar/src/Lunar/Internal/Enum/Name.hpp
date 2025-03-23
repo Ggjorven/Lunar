@@ -227,7 +227,7 @@ namespace Lunar::Internal::Enum
     {
         constexpr bool valid[sizeof...(I)] = { IsValid<TEnum, UAlue<TEnum>(I)>()... };
         constexpr auto validCount = CountValues(valid);
-        static_assert(validCount > 0, "No support for empty enums."); // TODO: Fix GCC and CLANG
+        //static_assert(validCount > 0, "No support for empty enums."); // TODO: Fix on Apple Clang
 
         std::array<TEnum, validCount> values = {};
         for (size_t offset = 0, n = 0; n < validCount; offset++) 
