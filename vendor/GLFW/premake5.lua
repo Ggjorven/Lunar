@@ -64,7 +64,9 @@ project "GLFW"
 			"GLFW/src/posix_time.c",
 			"GLFW/src/posix_thread.c",
 			"GLFW/src/posix_module.c",
+			"GLFW/src/posix_poll.c",
 			"GLFW/src/egl_context.c",
+			"GLFW/src/glx_context.c",
 			"GLFW/src/osmesa_context.c",
 			"GLFW/src/linux_joystick.c"
         }

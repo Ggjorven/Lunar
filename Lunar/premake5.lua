@@ -76,6 +76,8 @@ project "Lunar"
 		{
 			"%{Dependencies.Vulkan.LibDir}/%{Dependencies.Vulkan.LibName}",
 			"%{Dependencies.Vulkan.LibDir}/%{Dependencies.ShaderC.LibName}",
+
+			"Xrandr", "Xi", "GLU", "GL", "GLX", "X11", "dl", "pthread", "stdc++fs"
 		}
 
     filter "system:macosx"

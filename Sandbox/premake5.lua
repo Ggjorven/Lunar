@@ -62,6 +62,14 @@ project "Sandbox"
 		systemversion "latest"
 		staticruntime "on"
 
+		links
+		{
+			"%{Dependencies.GLFW.LibName}",
+
+			"%{Dependencies.Vulkan.LibDir}/%{Dependencies.Vulkan.LibName}",
+			"%{Dependencies.Vulkan.LibDir}/%{Dependencies.ShaderC.LibName}",
+		}
+
     filter "system:macosx"
 		defines "LU_PLATFORM_DESKTOP"
 		defines "LU_PLATFORM_MACOS"
