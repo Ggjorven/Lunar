@@ -103,8 +103,6 @@ namespace Lunar::Internal
     void VulkanTaskManager::RemoveFromAll(VkFence fence)
     {
         LU_PROFILE("VkTaskManager::RemoveFromAll(Semaphore)");
-        std::scoped_lock<std::mutex> lock(m_ThreadSafety);
-
         for (uint32_t frame = 0; frame < (uint32_t)VulkanRenderer::GetRenderer(m_RendererID).GetSpecification().Buffers; frame++)
             Remove(fence, frame);
     }
@@ -112,8 +110,6 @@ namespace Lunar::Internal
     void VulkanTaskManager::RemoveFromAll(VkSemaphore semaphore)
     {
         LU_PROFILE("VkTaskManager::RemoveFromAll(Semaphore)");
-        std::scoped_lock<std::mutex> lock(m_ThreadSafety);
-
         for (uint32_t frame = 0; frame < (uint32_t)VulkanRenderer::GetRenderer(m_RendererID).GetSpecification().Buffers; frame++)
             Remove(semaphore, frame);
     }

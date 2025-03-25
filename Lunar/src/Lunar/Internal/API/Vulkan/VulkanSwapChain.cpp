@@ -217,12 +217,12 @@ namespace Lunar::Internal
 			VkImageView imageView = VK_NULL_HANDLE;
 			VK_VERIFY(vkCreateImageView(device, &colorAttachmentView, nullptr, &imageView));
 
-			VulkanImageSpecification specs = {
+			ImageSpecification specs = {
+				.Usage = ImageUsage::Colour,
+                .Layout = ImageLayout::Undefined,
+				.Format = VkFormatToImageFormat(m_ColourFormat),
                 .Width = width,
                 .Height = height,
-				.Flags = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-                .Layout = VK_IMAGE_LAYOUT_UNDEFINED,
-				.Format = m_ColourFormat,
                 .MipMaps = false
 			};
 
@@ -246,20 +246,21 @@ namespace Lunar::Internal
 
 			// We transition manually since, the layout set in the specification doesn't get used
 			// since we manually set all the data.
-			m_Images[i].Transition(VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+			m_Images[i].Transition(ImageLayout::Undefined, ImageLayout::PresentSrcKHR);
 		}
 
 		if (m_DepthStencil.GetWidth() == 0 || m_DepthStencil.GetHeight() == 0)
 		{
-			VulkanImageSpecification specs = {};
-            specs.Format = VulkanContext::GetVulkanPhysicalDevice().FindDepthFormat();
-			specs.Flags = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-			specs.Width = width;
-			specs.Height = height;
-            specs.Layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-			specs.MipMaps = false;
+			ImageSpecification specs = {
+				.Usage = ImageUsage::DepthStencil | ImageUsage::Sampled,
+				.Layout = ImageLayout::DepthStencil,
+				.Format = VkFormatToImageFormat(VulkanContext::GetVulkanPhysicalDevice().FindDepthFormat()),
+				.Width = width,
+				.Height = height,
+				.MipMaps = false,
+			};
 
-			m_DepthStencil.Init(m_Window->GetRenderer().GetID(), specs, VulkanSamplerSpecification());
+			m_DepthStencil.Init(m_Window->GetRenderer().GetID(), specs, SamplerSpecification());
 		}
 		else
 			m_DepthStencil.Resize(width, height);

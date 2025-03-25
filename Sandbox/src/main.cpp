@@ -19,9 +19,11 @@
 #include "Lunar/Internal/Memory/Box.hpp"
 #include "Lunar/Internal/Memory/Rc.hpp"
 
+#include "Lunar/Internal/Renderer/Renderer.hpp"
+
 #include "Lunar/Internal/Utils/Hash.hpp"
 #include "Lunar/Internal/Utils/Preprocessor.hpp"
-#include "Lunar/Internal/Utils/Profiler.hpp"
+#include "Lunar/Internal/Utils/Profiler.hpp"`
 #include "Lunar/Internal/Utils/Types.hpp"
 
 #include "Lunar/Enum/Name.hpp"
@@ -72,17 +74,27 @@ int main(int argc, char* argv[])
         handler.Handle<Lunar::Internal::WindowResizeEvent>([&](Lunar::Internal::WindowResizeEvent& wre) { window.Resize(wre.GetWidth(), wre.GetHeight()); });
         handler.Handle<Lunar::Internal::WindowCloseEvent>([&](Lunar::Internal::WindowCloseEvent&) { window.Close(); });
     };
-    
-	while (window.IsOpen()) // TODO: Fix Vulkan message vkAquireNextImageKHR on GCC & Clang
+
+	// Renderer Test
     {
-        window.PollEvents();
-		window.GetRenderer().BeginFrame();
+        Lunar::Internal::CommandBuffer cmdBuf(window.GetRenderer().GetID());
 
-        // ...
+        while (window.IsOpen()) // TODO: Fix Vulkan message vkAquireNextImageKHR on GCC & Clang
+        {
+            window.PollEvents();
+            window.GetRenderer().BeginFrame();
 
-		window.GetRenderer().EndFrame();
-		window.GetRenderer().Present();
-        window.SwapBuffers();
+            window.GetRenderer().Begin(cmdBuf);
+
+            // ...
+
+            window.GetRenderer().End(cmdBuf);
+            window.GetRenderer().Submit(cmdBuf, Lunar::Internal::ExecutionPolicy::InOrder);
+
+            window.GetRenderer().EndFrame();
+            window.GetRenderer().Present();
+            window.SwapBuffers();
+        }
     }
 
     return 0;

@@ -29,8 +29,17 @@ namespace Lunar::Internal
 
     void VulkanRenderer::Destroy()
     {
+		// Wait for the device to finish
+        {
+            VulkanContext::GetVulkanDevice().Wait();
+		    vkQueueWaitIdle(VulkanContext::GetVulkanDevice().GetQueue(Queue::Graphics));
+		    vkQueueWaitIdle(VulkanContext::GetVulkanDevice().GetQueue(Queue::Compute));
+		    vkQueueWaitIdle(VulkanContext::GetVulkanDevice().GetQueue(Queue::Present));
+        }
+
         FreeQueue();
         m_SwapChain.Destroy();
+		m_TaskManager.Destroy();
         FreeQueue();
     }
 
@@ -53,8 +62,8 @@ namespace Lunar::Internal
             {
                 auto device = VulkanContext::GetVulkanDevice().GetVkDevice();
 
-                vkWaitForFences(device, (uint32_t)fences.size(), fences.data(), VK_TRUE, std::numeric_limits<uint64_t>::max());
-                vkResetFences(device, (uint32_t)fences.size(), fences.data());
+                vkWaitForFences(device, static_cast<uint32_t>(fences.size()), fences.data(), VK_TRUE, std::numeric_limits<uint64_t>::max());
+                vkResetFences(device, static_cast<uint32_t>(fences.size()), fences.data());
             }
             m_TaskManager.ResetFences();
 
@@ -116,9 +125,87 @@ namespace Lunar::Internal
         }
 
         m_TaskManager.ResetSemaphores();
-        m_SwapChain.m_CurrentFrame = (m_SwapChain.m_CurrentFrame + 1) % (uint32_t)m_Specification.Buffers;
+        m_SwapChain.m_CurrentFrame = (m_SwapChain.m_CurrentFrame + 1) % static_cast<uint32_t>(m_Specification.Buffers);
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////
+    // Object methods
+    ////////////////////////////////////////////////////////////////////////////////////
+    void VulkanRenderer::Begin(CommandBuffer& cmdBuf)
+    {
+        LU_PROFILE_SCOPE("VkRenderer::Begin(CommandBuffer)");
+        VulkanCommandBuffer& vkCmdBuf = cmdBuf.GetInternalCommandBuffer();
+
+        uint32_t currentFrame = m_SwapChain.GetCurrentFrame();
+        VkCommandBuffer commandBuffer = vkCmdBuf.m_CommandBuffers[currentFrame];
+
+        vkResetFences(VulkanContext::GetVulkanDevice().GetVkDevice(), 1, &vkCmdBuf.m_InFlightFences[currentFrame]);
+        vkResetCommandBuffer(commandBuffer, 0);
+
+        VkCommandBufferBeginInfo beginInfo = {};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+        VK_VERIFY(vkBeginCommandBuffer(commandBuffer, &beginInfo));
+    }
+
+    void VulkanRenderer::End(CommandBuffer& cmdBuf)
+    {
+        LU_PROFILE_SCOPE("VkRenderer::End(CommandBuffer)");
+        VulkanCommandBuffer& vkCmdBuf = cmdBuf.GetInternalCommandBuffer();
+
+        VK_VERIFY(vkEndCommandBuffer(vkCmdBuf.m_CommandBuffers[m_SwapChain.GetCurrentFrame()]));
+    }
+
+    void VulkanRenderer::Submit(CommandBuffer& cmdBuf, ExecutionPolicy policy, Queue queue, PipelineStage waitStage, const std::vector<CommandBuffer*>& waitOn)
+    {
+        LU_PROFILE_SCOPE("VkRenderer::Submit(CommandBuffer)");
+        VulkanCommandBuffer& vkCmdBuf = cmdBuf.GetInternalCommandBuffer();
+
+        uint32_t currentFrame = m_SwapChain.GetCurrentFrame();
+        VkCommandBuffer commandBuffer = vkCmdBuf.m_CommandBuffers[currentFrame];
+
+        VkSubmitInfo submitInfo = {};
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+        std::vector<VkSemaphore> semaphores = { };
+
+        for (auto& cmd : waitOn)
+        {
+            VulkanCommandBuffer& vkCmd = cmd->GetInternalCommandBuffer();
+            auto semaphore = vkCmd.m_RenderFinishedSemaphores[currentFrame];
+
+            semaphores.push_back(semaphore);
+            m_TaskManager.Remove(semaphore); // Removes it if it exists
+        }
+
+        if (policy & ExecutionPolicy::WaitForPrevious)
+        {
+            auto semaphore = m_TaskManager.GetNext();
+
+            // Check if it's not nullptr
+            if (semaphore)
+                semaphores.push_back(semaphore);
+        }
+
+        std::vector<VkPipelineStageFlags> waitStages(semaphores.size(), (VkPipelineStageFlagBits)waitStage);
+
+        submitInfo.waitSemaphoreCount = (uint32_t)semaphores.size();
+        submitInfo.pWaitSemaphores = semaphores.data();
+        submitInfo.pWaitDstStageMask = waitStages.data();
+
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers = &commandBuffer;
+        submitInfo.signalSemaphoreCount = 1;
+        submitInfo.pSignalSemaphores = &vkCmdBuf.m_RenderFinishedSemaphores[currentFrame];
+
+        // Submission
+        VK_VERIFY(vkQueueSubmit(VulkanContext::GetVulkanDevice().GetQueue(queue), 1, &submitInfo, vkCmdBuf.m_InFlightFences[currentFrame]));
+        m_TaskManager.Add(vkCmdBuf, policy);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////
+    // Internal methods
+    ////////////////////////////////////////////////////////////////////////////////////
     void VulkanRenderer::Free(const FreeFn& fn)
     {
         std::scoped_lock<std::mutex> lock(m_FreeMutex);
@@ -127,6 +214,7 @@ namespace Lunar::Internal
 
     void VulkanRenderer::FreeQueue()
     {
+        LU_PROFILE_SCOPE("VkRenderer::FreeQueue");
         std::scoped_lock<std::mutex> lock(m_FreeMutex);
         while (!m_FreeQueue.empty())
         {

@@ -7,6 +7,8 @@
 namespace Lunar::Internal
 {
 
+    class VulkanRenderer;
+
     ////////////////////////////////////////////////////////////////////////////////////
     // VulkanCommandBuffer
     ////////////////////////////////////////////////////////////////////////////////////
@@ -14,8 +16,12 @@ namespace Lunar::Internal
     {
     public:
         // Constructor & Destructor
-        VulkanCommandBuffer(RendererID rendererID);
-        ~VulkanCommandBuffer();
+        VulkanCommandBuffer() = default;
+        ~VulkanCommandBuffer() = default;
+
+        // Init & Destroy
+		void Init(RendererID rendererID);
+        void Destroy();
 
         // The Begin, End & Submit methods are in the Renderer class.
 
@@ -24,13 +30,17 @@ namespace Lunar::Internal
         inline VkFence GetVkInFlightFence(uint32_t index) const { return m_InFlightFences[index]; }
         inline VkCommandBuffer GetVkCommandBuffer(uint32_t index) const { return m_CommandBuffers[index]; }
 
+		inline RendererID GetRendererID() const { return m_RendererID; }
+
     private:
-        const RendererID m_RendererID;
+        RendererID m_RendererID = {};
         std::vector<VkCommandBuffer> m_CommandBuffers = {};
 
         // Synchronization objects
         std::vector<VkSemaphore> m_RenderFinishedSemaphores = {};
         std::vector<VkFence> m_InFlightFences = {};
+
+        friend class VulkanRenderer;
     };
 
 }

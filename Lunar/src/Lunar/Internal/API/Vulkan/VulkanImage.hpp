@@ -3,7 +3,7 @@
 #include "Lunar/Internal/API/Vulkan/Vulkan.hpp"
 
 #include "Lunar/Internal/Renderer/RendererSpec.hpp"
-//#include "Lunar/Internal/Renderer/ImageSpec.hpp"
+#include "Lunar/Internal/Renderer/ImageSpec.hpp"
 
 namespace Lunar::Internal
 {
@@ -11,29 +11,21 @@ namespace Lunar::Internal
     class VulkanSwapChain;
 
     ////////////////////////////////////////////////////////////////////////////////////
-    // Internal structs
+    // Convert functions
     ////////////////////////////////////////////////////////////////////////////////////
-    struct VulkanImageSpecification
-    {
-    public:
-        uint32_t Width = 0;
-        uint32_t Height = 0;
+	ImageUsage VkImageUsageToImageUsage(VkImageUsageFlags usage);
+	VkImageUsageFlags ImageUsageToVkImageUsage(ImageUsage usage);
+	ImageLayout VkImageLayoutToImageLayout(VkImageLayout layout);
+	VkImageLayout ImageLayoutToVkImageLayout(ImageLayout layout);
+	ImageFormat VkFormatToImageFormat(VkFormat format);
+	VkFormat ImageFormatToVkFormat(ImageFormat format);
 
-        VkImageUsageFlags Flags = VK_IMAGE_USAGE_SAMPLED_BIT;
-        VkImageLayout Layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        VkFormat Format = VK_FORMAT_R8G8B8A8_UNORM;
-
-        bool MipMaps = true;
-    };
-
-    struct VulkanSamplerSpecification
-    {
-    public:
-        VkFilter MagFilter = VK_FILTER_LINEAR;
-        VkFilter MinFilter = VK_FILTER_LINEAR;
-        VkSamplerAddressMode AddressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT; // For U, V & W
-        VkSamplerMipmapMode MipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-    };
+	FilterMode VkFilterToFilterMode(VkFilter filter);
+	VkFilter FilterModeToVkFilter(FilterMode filter);
+	AddressMode VkSamplerAddressModeToAddressMode(VkSamplerAddressMode mode);
+	VkSamplerAddressMode AddressModeToVkSamplerAddressMode(AddressMode mode);
+	MipmapMode VkSamplerMipmapModeToMipmapMode(VkSamplerMipmapMode mode);
+	VkSamplerMipmapMode MipmapModeToVkSamplerMipmapMode(MipmapMode mode);
 
     ////////////////////////////////////////////////////////////////////////////////////
     // VulkanImage
@@ -46,8 +38,8 @@ namespace Lunar::Internal
         ~VulkanImage() = default;
 
 		// Init & Destroy
-        void Init(RendererID renderer, const VulkanImageSpecification& imageSpecs, const VulkanSamplerSpecification& samplerSpecs);
-        void Init(RendererID renderer, const VulkanImageSpecification& imageSpecs, const VkImage image, const VkImageView imageView); // Note: This exists for swapchain images
+        void Init(const RendererID renderer, const ImageSpecification& imageSpecs, const SamplerSpecification& samplerSpecs);
+        void Init(const RendererID renderer, const ImageSpecification& imageSpecs, const VkImage image, const VkImageView imageView); // Note: This exists for swapchain images
         void Destroy();
 
         // Methods
@@ -55,10 +47,12 @@ namespace Lunar::Internal
 
         void Resize(uint32_t width, uint32_t height);
 
-        void Transition(VkImageLayout initial, VkImageLayout final);
+        void Transition(ImageLayout initial, ImageLayout final);
 
         // Getters
-        inline const VulkanImageSpecification& GetSpecification() const { return m_ImageSpecification; }
+		inline RendererID GetRendererID() const { return m_RendererID; }
+        inline const ImageSpecification& GetSpecification() const { return m_ImageSpecification; }
+		inline const SamplerSpecification& GetSamplerSpecification() const { return m_SamplerSpecification; }
 
         inline uint32_t GetWidth() const { return m_ImageSpecification.Width; }
         inline uint32_t GetHeight() const { return m_ImageSpecification.Height; }
@@ -76,9 +70,9 @@ namespace Lunar::Internal
         void DestroyImage();
 
     private:
-        RendererID m_Renderer = {};
-        VulkanImageSpecification m_ImageSpecification = {};
-        VulkanSamplerSpecification m_SamplerSpecification = {};
+        RendererID m_RendererID = {};
+        ImageSpecification m_ImageSpecification = {};
+        SamplerSpecification m_SamplerSpecification = {};
 
         VkImage m_Image = VK_NULL_HANDLE;
         VmaAllocation m_Allocation = VK_NULL_HANDLE;

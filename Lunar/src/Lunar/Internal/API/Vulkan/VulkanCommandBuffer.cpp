@@ -11,11 +11,12 @@ namespace Lunar::Internal
 {
     
     ////////////////////////////////////////////////////////////////////////////////////
-    // Constructor & Destructor
+    // Init & Destroy
     ////////////////////////////////////////////////////////////////////////////////////
-    VulkanCommandBuffer::VulkanCommandBuffer(RendererID rendererID) 
-        : m_RendererID(rendererID)
+    void VulkanCommandBuffer::Init(RendererID rendererID) 
     {
+        m_RendererID = rendererID;
+
         VkDevice device = VulkanContext::GetVulkanDevice().GetVkDevice();
         const uint32_t framesInFlight = static_cast<uint32_t>(Renderer::GetRenderer(m_RendererID).GetSpecification().Buffers);
         m_CommandBuffers.resize(framesInFlight);
@@ -45,7 +46,7 @@ namespace Lunar::Internal
         }
     }
 
-    VulkanCommandBuffer::~VulkanCommandBuffer()
+    void VulkanCommandBuffer::Destroy()
     {
         Renderer::GetRenderer(m_RendererID).Free([rendererID = m_RendererID, commandBuffers = m_CommandBuffers, renderFinishedSemaphores = m_RenderFinishedSemaphores, inFlightFences = m_InFlightFences]() 
         {
@@ -59,7 +60,7 @@ namespace Lunar::Internal
             {
                 // Note: In obscure ways this sometimes gets called after the renderer is destroyed.
                 // I don't want to impose some kind of lifetime rules, so this is the solution.
-                if (&renderer != nullptr) 
+                if (&renderer != nullptr) // I know this shouldn't be null according to C++ rules, but we mess with the way references are usually used.
                 {
                     renderer.GetTaskManager().RemoveFromAll(renderFinishedSemaphores[i]);
                     renderer.GetTaskManager().RemoveFromAll(inFlightFences[i]);

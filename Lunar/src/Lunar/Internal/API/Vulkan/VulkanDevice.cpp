@@ -84,4 +84,23 @@ namespace Lunar::Internal
 		vkDeviceWaitIdle(m_LogicalDevice);
 	}
 
+	////////////////////////////////////////////////////////////////////////////////////
+	// Getters
+	////////////////////////////////////////////////////////////////////////////////////
+	VkQueue VulkanDevice::GetQueue(Queue queue) const
+	{
+		switch (queue)
+		{
+		case Queue::Graphics:	return m_GraphicsQueue;
+		case Queue::Compute:	return m_ComputeQueue;
+		case Queue::Present:	return m_PresentQueue;
+
+		default: 
+			LU_ASSERT(false, "Invalid queue type!");
+			break;
+		}
+
+		return nullptr;
+	}
+
 }

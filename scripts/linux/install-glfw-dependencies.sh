@@ -5,22 +5,22 @@ set -e
 # Function to install packages on Ubuntu/Debian
 install_ubuntu_debian() {
     sudo apt-get update
-    sudo apt-get install -y libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev
+    sudo apt-get install -y libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libgl1-mesa-dev libglu1-mesa-dev
 }
 
 # Function to install packages on Fedora
 install_fedora() {
-    sudo dnf install -y libX11-devel libXcursor-devel libXrandr-devel libXinerama-devel libXi-devel
+    sudo dnf install -y libX11-devel libXcursor-devel libXrandr-devel libXinerama-devel libXi-devel mesa-libGL-devel mesa-libGLU-devel
 }
 
 # Function to install packages on CentOS/RHEL
 install_centos_rhel() {
-    sudo yum install -y libX11-devel libXcursor-devel libXrandr-devel libXinerama-devel libXi-devel
+    sudo yum install -y libX11-devel libXcursor-devel libXrandr-devel libXinerama-devel libXi-devel mesa-libGL-devel mesa-libGLU-devel
 }
 
 # Function to install packages on Arch
 install_arch() {
-    sudo pacman -S --noconfirm libx11 libxcursor libxrandr libxinerama libxi
+    sudo pacman -S --noconfirm libx11 libxcursor libxrandr libxinerama libxi mesa glu
 }
 
 # Detect the distribution

@@ -4,6 +4,8 @@
 
 #include "Lunar/Internal/API/Vulkan/VulkanPhysicalDevice.hpp"
 
+#include "Lunar/Internal/Renderer/RendererSpec.hpp"
+
 namespace Lunar::Internal
 {
 
@@ -27,6 +29,7 @@ namespace Lunar::Internal
         // Getters
         inline VkDevice GetVkDevice() const { return m_LogicalDevice; }
 
+		VkQueue GetQueue(Queue queue) const;
         inline VkQueue GetGraphicsQueue() const { return m_GraphicsQueue; }
         inline VkQueue GetComputeQueue() const { return m_ComputeQueue; }
         inline VkQueue GetPresentQueue() const { return m_PresentQueue; }

@@ -23,6 +23,13 @@ namespace Lunar::Internal
     };
     LU_ENABLE_BITWISE(ExecutionPolicy)
 
+    enum class Queue : uint8_t 
+    { 
+        Graphics, 
+        Present, 
+        Compute 
+    };
+
     using FreeFn = std::function<void()>;
 
     ////////////////////////////////////////////////////////////////////////////////////

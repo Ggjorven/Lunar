@@ -5,6 +5,8 @@
 #include <mutex>
 
 #include "Lunar/Internal/Renderer/RendererSpec.hpp"
+#include "Lunar/Internal/Renderer/CommandBuffer.hpp"
+#include "Lunar/Internal/Renderer/PipelineSpec.hpp"
 
 #include "Lunar/Internal/API/Vulkan/Vulkan.hpp"
 
@@ -33,10 +35,14 @@ namespace Lunar::Internal
         void EndFrame();
         void Present();
 
+        // Object methods
+        void Begin(CommandBuffer& cmdBuf);
+        void End(CommandBuffer& cmdBuf);
+        void Submit(CommandBuffer& cmdBuf, ExecutionPolicy policy, Queue queue, PipelineStage waitStage, const std::vector<CommandBuffer*>& waitOn);
+
+        // Internal
         void Free(const FreeFn& fn);
         void FreeQueue();
-
-        // TODO: Submit
 
         void Recreate(uint32_t width, uint32_t height, bool vsync);
 
