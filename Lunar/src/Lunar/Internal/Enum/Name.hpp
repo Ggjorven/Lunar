@@ -128,16 +128,30 @@ namespace Lunar::Internal::Enum
     {
         constexpr static std::string_view FullNameImpl()
         {
+            #if defined(LU_COMPILER_CLANG)
+            constexpr auto end = std::string_view(__PRETTY_FUNCTION__).find_last_of(']');
+            if constexpr (end == std::string_view::npos)
+                return g_InvalidName;
+
+            // '=' marker
+            constexpr auto start = std::string_view(__PRETTY_FUNCTION__).rfind("EValue = ") + 7;
+            if constexpr (start == std::string_view::npos)
+                return g_InvalidName;
+
+            #else
+
             // Ending marker
             constexpr auto end = std::string_view(__PRETTY_FUNCTION__).find_last_of(';');
             if constexpr (end == std::string_view::npos)
                 return g_InvalidName;
-            
+
             // '=' marker
             constexpr auto start = std::string_view(__PRETTY_FUNCTION__).find_last_of('=', end);
             if constexpr (start == std::string_view::npos)
                 return g_InvalidName;
-            
+
+            #endif
+
             // 0 <= start < end
             if constexpr (end - start <= 2)
                 return g_InvalidName;
@@ -227,7 +241,7 @@ namespace Lunar::Internal::Enum
     {
         constexpr bool valid[sizeof...(I)] = { IsValid<TEnum, UAlue<TEnum>(I)>()... };
         constexpr auto validCount = CountValues(valid);
-        //static_assert(validCount > 0, "No support for empty enums."); // TODO: Fix on Apple Clang
+        static_assert(validCount > 0, "No support for empty enums.");
 
         std::array<TEnum, validCount> values = {};
         for (size_t offset = 0, n = 0; n < validCount; offset++) 
