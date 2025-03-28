@@ -23,7 +23,7 @@
 
 #include "Lunar/Internal/Utils/Hash.hpp"
 #include "Lunar/Internal/Utils/Preprocessor.hpp"
-#include "Lunar/Internal/Utils/Profiler.hpp"`
+#include "Lunar/Internal/Utils/Profiler.hpp"
 #include "Lunar/Internal/Utils/Types.hpp"
 
 #include "Lunar/Enum/Name.hpp"
@@ -79,7 +79,7 @@ int main(int argc, char* argv[])
     {
         Lunar::Internal::CommandBuffer cmdBuf(window.GetRenderer().GetID());
 
-        while (window.IsOpen()) // TODO: Fix Vulkan message vkAquireNextImageKHR on GCC & Clang
+        while (window.IsOpen())
         {
             window.PollEvents();
             window.GetRenderer().BeginFrame();

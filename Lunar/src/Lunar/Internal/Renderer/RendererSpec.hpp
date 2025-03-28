@@ -19,7 +19,7 @@ namespace Lunar::Internal
         InOrder = 1 << 0,           // Execute commands sequentially, submits to waited on by next (WaitForPrevious) commandBuffer
         Parallel = 1 << 1,          // Execute commands in parallel but synchronized by the frame
 
-        WaitForPrevious = 1 << 2,   // Wait for the completion of the previous (InOrder) command buffer
+        NoWaiting = 1 << 2,         // Don't wait for the completion of the previous (InOrder) command buffer
     };
     LU_ENABLE_BITWISE(ExecutionPolicy)
 

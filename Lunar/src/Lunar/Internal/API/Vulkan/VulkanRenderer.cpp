@@ -100,19 +100,8 @@ namespace Lunar::Internal
 
         VkResult result = VK_SUCCESS;
         {
-            // Note: Without this line there is a memory leak on windows when validation layers are enabled.
-            #if defined(LU_PLATFORM_WINDOWS)
-            if constexpr (g_VkValidation) 
-            {
-                LU_PROFILE("VkRenderer::WaitIdle");
-                vkQueueWaitIdle(VulkanContext::GetVulkanDevice().GetGraphicsQueue());
-            }
-            #endif
-
-            {
-                LU_PROFILE("VkRenderer::QueuePresent");
-                result = vkQueuePresentKHR(VulkanContext::GetVulkanDevice().GetPresentQueue(), &presentInfo);
-            }
+            LU_PROFILE("VkRenderer::QueuePresent");
+            result = vkQueuePresentKHR(VulkanContext::GetVulkanDevice().GetPresentQueue(), &presentInfo);
         }
 
         if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) 
@@ -168,7 +157,6 @@ namespace Lunar::Internal
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
         std::vector<VkSemaphore> semaphores = { };
-
         for (auto& cmd : waitOn)
         {
             VulkanCommandBuffer& vkCmd = cmd->GetInternalCommandBuffer();
@@ -178,18 +166,34 @@ namespace Lunar::Internal
             m_TaskManager.Remove(semaphore); // Removes it if it exists
         }
 
-        if (policy & ExecutionPolicy::WaitForPrevious)
+        if (!(policy & ExecutionPolicy::NoWaiting))
         {
             auto semaphore = m_TaskManager.GetNext();
 
             // Check if it's not nullptr
             if (semaphore)
-                semaphores.push_back(semaphore);
+            {
+                #if !defined(LU_CONFIG_DIST) // Check if semaphore not already exists
+				bool exists = false;
+                for (const auto& sem : semaphores)
+                {
+					if (sem == semaphore) [[unlikely]]
+					{
+						LU_LOG_WARN("[VulkanRenderer] Semaphore already exists in the waitOn list!");
+						exists = true;
+						break;
+					}
+                }
+                #endif
+
+				if (!exists) [[unlikely]]
+                    semaphores.push_back(semaphore);
+            }
         }
 
         std::vector<VkPipelineStageFlags> waitStages(semaphores.size(), (VkPipelineStageFlagBits)waitStage);
 
-        submitInfo.waitSemaphoreCount = (uint32_t)semaphores.size();
+        submitInfo.waitSemaphoreCount = static_cast<uint32_t>(semaphores.size());
         submitInfo.pWaitSemaphores = semaphores.data();
         submitInfo.pWaitDstStageMask = waitStages.data();
 

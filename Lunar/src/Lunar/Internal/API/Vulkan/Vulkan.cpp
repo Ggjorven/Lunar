@@ -34,9 +34,15 @@ namespace Lunar::Internal
 
 		VKAPI_ATTR VkBool32 VKAPI_CALL VulkanDebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void*)
 		{
-			if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
+			if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
 			{
-				LU_LOG_WARN("Validation layer: {0}", pCallbackData->pMessage);
+				// Note for future: Make sure to check if the vkQueuePresentKHR is NOT waiting on the imageAvailable semaphore, as it will cause a deadlock and many errors.
+				LU_LOG_ERROR("Validation Error: {0}", pCallbackData->pMessage);
+				return VK_TRUE;
+			}
+			else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
+			{
+				LU_LOG_WARN("Validation Warning: {0}", pCallbackData->pMessage);
 				return VK_FALSE;
 			}
 

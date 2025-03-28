@@ -58,13 +58,8 @@ namespace Lunar::Internal
 
             for (size_t i = 0; i < renderFinishedSemaphores.size(); i++) 
             {
-                // Note: In obscure ways this sometimes gets called after the renderer is destroyed.
-                // I don't want to impose some kind of lifetime rules, so this is the solution.
-                if (&renderer != nullptr) // I know this shouldn't be null according to C++ rules, but we mess with the way references are usually used.
-                {
-                    renderer.GetTaskManager().RemoveFromAll(renderFinishedSemaphores[i]);
-                    renderer.GetTaskManager().RemoveFromAll(inFlightFences[i]);
-                }
+                renderer.GetTaskManager().RemoveFromAll(renderFinishedSemaphores[i]);
+                renderer.GetTaskManager().RemoveFromAll(inFlightFences[i]);
 
                 vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
                 vkDestroyFence(device, inFlightFences[i], nullptr);

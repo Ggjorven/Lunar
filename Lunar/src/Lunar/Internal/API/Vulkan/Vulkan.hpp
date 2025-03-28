@@ -44,7 +44,8 @@ namespace Lunar::Internal
     #endif
 
     inline constexpr auto g_VkRequestedValidationLayers = std::to_array<const char*>({
-        "VK_LAYER_KHRONOS_validation"
+        "VK_LAYER_KHRONOS_validation", "VK_LAYER_KHRONOS_synchronization2",
+        // "VK_EXT_debug_utils"
     });
 
     inline constexpr auto g_VkRequestedDeviceExtensions = std::to_array<const char*>({
