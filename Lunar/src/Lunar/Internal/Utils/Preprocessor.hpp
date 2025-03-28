@@ -6,35 +6,38 @@ namespace Lunar::Internal
 	// Defines
 	#if defined(_MSC_VER)
 		#define LU_COMPILER_MSVC
-	#elif defined(__GNUC__)
-		#define LU_COMPILER_GCC
 	#elif defined(__clang__)
 		#define LU_COMPILER_CLANG
+	#elif defined(__GNUC__)
+		#define LU_COMPILER_GCC
 	#endif
 
-	#if (defined(_WIN32) || defined(_WIN64)) && !defined(LU_PLATFORM_WINDOWS)
+	#if (defined(_WIN32) || defined(_WIN64)) && (!defined(LU_PLATFORM_WINDOWS) && !defined(LU_PLATFORM_DESKTOP))
 		#define LU_PLATFORM_WINDOWS
 		#define LU_PLATFORM_DESKTOP
-	#elif defined(__ANDROID__) && !defined(LU_PLATFORM_ANDROID)
+	#elif defined(__ANDROID__) && (!defined(LU_PLATFORM_ANDROID) && !defined(LU_PLATFORM_MOBILE))
 		#define LU_PLATFORM_ANDROID
 		#define LU_PLATFORM_MOBILE
-		#define LU_PLATFORM_UNIX
-	#elif defined(__APPLE__) && (!defined(LU_PLATFORM_MACOS) || defined(LU_PLATFORM_IOS))
+	#elif defined(__APPLE__) && ((!defined(LU_PLATFORM_MACOS) || defined(LU_PLATFORM_IOS)) && (!defined(LU_PLATFORM_DESKTOP) || !defined(LU_PLATFORM_MOBILE)))
 		#include <TargetConditionals.h>
 		#if TARGET_OS_MAC
 			#define LU_PLATFORM_MACOS
 			#define LU_PLATFORM_DESKTOP
-			#define LU_PLATFORM_UNIX
-			#define LU_PLATFORM_APPLE
 		#elif TARGET_OS_IPHONE
 			#define LU_PLATFORM_IOS
 			#define LU_PLATFORM_MOBILE
-			#define LU_PLATFORM_APPLE
 		#endif
-	#elif defined(__linux__) && !defined(LU_PLATFORM_LINUX)
+	#elif defined(__linux__) && (!defined(LU_PLATFORM_LINUX) && !defined(LU_PLATFORM_DESKTOP))
 		#define LU_PLATFORM_LINUX
 		#define LU_PLATFORM_DESKTOP
+	#endif
+
+	#if defined(__ANDROID__) || defined(__linux__) || defined(__APPLE__)
 		#define LU_PLATFORM_UNIX
+	#endif
+
+	#if defined(__APPLE__)
+		#define LU_PLATFORM_APPLE
 	#endif
 
 	#define LU_CPPSTD_11 11

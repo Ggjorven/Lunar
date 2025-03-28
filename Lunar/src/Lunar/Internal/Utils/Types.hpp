@@ -31,24 +31,14 @@ namespace Lunar::Internal::Types
     template<typename T>
     struct ConstexprName
     {
-    private:
-        constexpr static std::string_view FullName()
-        {
-            #if defined(LU_COMPILER_MSVC)
-                return __FUNCSIG__;
-            #elif defined(LU_COMPILER_GCC) || defined(LU_COMPILER_CLANG)
-                return __PRETTY_FUNCTION__;
-            #else
-                #error Lunar Types: Unsupported compiler...
-            #endif
-        }
-
     public:
-        constexpr static std::string_view Name(std::string_view fn)
+        constexpr static std::string_view TypeNameImpl()
         {
+            constexpr std::string_view fn = FunctionSignatureImpl();
+
             #if defined(LU_COMPILER_MSVC) || defined(LU_COMPILER_CLANG)
                 constexpr std::string_view startSeq = "ConstexprName<";
-                constexpr std::string_view endSeq = ">::FullName";
+                constexpr std::string_view endSeq = ">::FunctionSignatureImpl";
 
                 size_t start = fn.find(startSeq);
                 if (start == std::string_view::npos)
@@ -65,7 +55,9 @@ namespace Lunar::Internal::Types
                     typeName = typeName.substr(spacePos + 1); // Move past the space
 
                 return typeName;
+
             #elif defined(LU_COMPILER_GCC)
+
                 constexpr std::string_view startSeq = "with T = ";
                 constexpr std::string_view endSeq = ";";
 
@@ -84,7 +76,21 @@ namespace Lunar::Internal::Types
             #endif
         }
 
-        constexpr static const std::string_view TypeName = Name(FullName());
+        constexpr static std::string_view FunctionSignatureImpl()
+        {
+            #if defined(LU_COMPILER_MSVC)
+                return { __FUNCSIG__, sizeof(__FUNCSIG__) };
+            #elif defined(LU_COMPILER_GCC) || defined(LU_COMPILER_CLANG)
+                return { __PRETTY_FUNCTION__, sizeof(__PRETTY_FUNCTION__)};
+            #else
+                #error Lunar Types: Unsupported compiler...
+            #endif
+        }
+
+    public:
+        constexpr static const std::string_view TypeName = TypeNameImpl();
+
+        constexpr static const std::string_view FunctionSignature = FunctionSignatureImpl();
     };
 
 }
