@@ -2,6 +2,7 @@
 
 #include "Lunar/Internal/Utils/Settings.hpp"
 
+#include "Lunar/Internal/Renderer/RendererSpec.hpp"
 #include "Lunar/Internal/Renderer/ImageSpec.hpp"
 
 #include "Lunar/Internal/API/Vulkan/VulkanImage.hpp"

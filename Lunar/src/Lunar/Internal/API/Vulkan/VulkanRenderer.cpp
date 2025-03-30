@@ -7,7 +7,14 @@
 
 #include "Lunar/Internal/Core/Window.hpp"
 
+#include "Lunar/Internal/Renderer/Image.hpp"
+#include "Lunar/Internal/Renderer/Renderpass.hpp"
+#include "Lunar/Internal/Renderer/CommandBuffer.hpp"
+
 #include "Lunar/Internal/API/Vulkan/VulkanContext.hpp"
+#include "Lunar/Internal/API/Vulkan/VulkanImage.hpp"
+#include "Lunar/Internal/API/Vulkan/VulkanRenderpass.hpp"
+#include "Lunar/Internal/API/Vulkan/VulkanCommandBuffer.hpp"
 
 #include <array>
 #include <numeric>
@@ -117,6 +124,83 @@ namespace Lunar::Internal
         m_SwapChain.m_CurrentFrame = (m_SwapChain.m_CurrentFrame + 1) % static_cast<uint32_t>(m_Specification.Buffers);
     }
 
+    void VulkanRenderer::BeginDynamic(CommandBuffer& cmdBuf, const DynamicRenderState& state)
+    {
+        LU_PROFILE("VkRenderer::BeginDynamic");
+        VulkanCommandBuffer& vkCmdBuf = cmdBuf.GetInternalCommandBuffer();
+
+        VkRenderingAttachmentInfo colourAttachment = {};
+        colourAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+        colourAttachment.imageView = (state.ColourAttachment ? state.ColourAttachment->GetInternalImage().GetVkImageView() : VK_NULL_HANDLE);
+        colourAttachment.imageLayout = (state.ColourAttachment ? ImageLayoutToVkImageLayout(state.ColourAttachment->GetSpecification().Layout) : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+        colourAttachment.loadOp = LoadOperationToVkAttachmentLoadOp(state.ColourLoadOp);
+        colourAttachment.storeOp = StoreOperationToVkAttachmentStoreOp(state.ColourStoreOp);
+        colourAttachment.clearValue = { state.ColourClearValue.r, state.ColourClearValue.g, state.ColourClearValue.b, state.ColourClearValue.a };
+
+        VkRenderingAttachmentInfo depthAttachment = {};
+        depthAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+        depthAttachment.imageView = (state.DepthAttachment ? state.DepthAttachment->GetInternalImage().GetVkImageView() : VK_NULL_HANDLE);
+        depthAttachment.imageLayout = (state.DepthAttachment ? ImageLayoutToVkImageLayout(state.DepthAttachment->GetSpecification().Layout) : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+        depthAttachment.loadOp = LoadOperationToVkAttachmentLoadOp(state.DepthLoadOp);
+        depthAttachment.storeOp = StoreOperationToVkAttachmentStoreOp(state.DepthStoreOp);
+        depthAttachment.clearValue = { state.DepthClearValue };
+
+        uint32_t width = 0, height = 0;
+        if (state.ColourAttachment)
+        {
+            width = state.ColourAttachment->GetSpecification().Width;
+            height = state.ColourAttachment->GetSpecification().Height;
+        }
+        else if (state.DepthAttachment)
+        {
+            width = state.DepthAttachment->GetSpecification().Width;
+            height = state.DepthAttachment->GetSpecification().Height;
+        }
+        else
+        {
+            LU_ASSERT(false, "[VulkanRenderer] No Colour or Depth attachment passed in to BeginDynamic(..., state)");
+        }
+
+        VkRenderingInfo renderingInfo = {};
+        renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+        renderingInfo.renderArea.offset = { 0, 0 };
+        renderingInfo.renderArea.extent = { width, height };
+        renderingInfo.layerCount = 1;
+        renderingInfo.colorAttachmentCount = (state.ColourAttachment ? 1 : 0);
+        renderingInfo.pColorAttachments = (state.ColourAttachment ? &colourAttachment : nullptr);
+        renderingInfo.pDepthAttachment = (state.DepthAttachment ? &depthAttachment : nullptr);
+
+        vkCmdBeginRendering(vkCmdBuf.GetVkCommandBuffer(m_SwapChain.GetCurrentFrame()), &renderingInfo);
+    }
+
+    void VulkanRenderer::EndDynamic(CommandBuffer& cmdBuf)
+    {
+        LU_PROFILE("VkRenderer::EndDynamic");
+        VulkanCommandBuffer& vkCmdBuf = cmdBuf.GetInternalCommandBuffer();
+
+        vkCmdEndRendering(vkCmdBuf.GetVkCommandBuffer(m_SwapChain.GetCurrentFrame()));
+    }
+
+    void VulkanRenderer::SetViewportAndScissor(CommandBuffer& cmdBuf, uint32_t width, uint32_t height)
+    {
+        LU_PROFILE("VkRenderer::SetViewportAndScissor");
+        VulkanCommandBuffer& vkCmdBuf = cmdBuf.GetInternalCommandBuffer();
+
+        VkViewport viewport = {};
+        viewport.x = 0.0f;
+        viewport.y = 0.0f;
+        viewport.width = (float)width;
+        viewport.height = (float)height;
+        viewport.minDepth = 0.0f;
+        viewport.maxDepth = 1.0f;
+        vkCmdSetViewport(vkCmdBuf.m_CommandBuffers[m_SwapChain.GetCurrentFrame()], 0, 1, &viewport);
+
+        VkRect2D scissor = {};
+        scissor.offset = { 0, 0 };
+        scissor.extent = { width, height };
+        vkCmdSetScissor(vkCmdBuf.m_CommandBuffers[m_SwapChain.GetCurrentFrame()], 0, 1, &scissor);
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////
     // Object methods
     ////////////////////////////////////////////////////////////////////////////////////
@@ -137,12 +221,60 @@ namespace Lunar::Internal
         VK_VERIFY(vkBeginCommandBuffer(commandBuffer, &beginInfo));
     }
 
+    void VulkanRenderer::Begin(Renderpass& renderpass)
+    {
+        LU_PROFILE("VkRenderer::Begin(Renderpass)");
+        CommandBuffer& cmdBuf = renderpass.GetCommandBuffer();
+        VulkanRenderpass& vkRenderpass = renderpass.GetInternalRenderpass();
+        VulkanCommandBuffer& vkCmdBuf = cmdBuf.GetInternalCommandBuffer();
+
+        Begin(cmdBuf);
+
+        auto size = renderpass.GetSize();
+        VkExtent2D extent = { size.x, size.y };
+
+        VkRenderPassBeginInfo renderPassInfo = {};
+        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        renderPassInfo.renderPass = vkRenderpass.m_RenderPass;
+        renderPassInfo.framebuffer = vkRenderpass.m_Framebuffers[m_SwapChain.GetAquiredImage()];
+        renderPassInfo.renderArea.offset = { 0, 0 };
+        renderPassInfo.renderArea.extent = extent;
+
+        std::vector<VkClearValue> clearValues = {};
+        if (!vkRenderpass.m_Specification.ColourAttachment.empty())
+        {
+            VkClearValue colourClear = { { { vkRenderpass.m_Specification.ColourClearColour.r, vkRenderpass.m_Specification.ColourClearColour.g, vkRenderpass.m_Specification.ColourClearColour.b, vkRenderpass.m_Specification.ColourClearColour.a } } };
+            clearValues.push_back(colourClear);
+        }
+        if (vkRenderpass.m_Specification.DepthAttachment)
+        {
+            VkClearValue depthClear = { { { 1.0f, 0 } } };
+            clearValues.push_back(depthClear);
+        }
+
+        renderPassInfo.clearValueCount = (uint32_t)clearValues.size();
+        renderPassInfo.pClearValues = clearValues.data();
+
+        vkCmdBeginRenderPass(vkCmdBuf.m_CommandBuffers[m_SwapChain.GetCurrentFrame()], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+        SetViewportAndScissor(cmdBuf, extent.width, extent.height);
+    }
+
     void VulkanRenderer::End(CommandBuffer& cmdBuf)
     {
         LU_PROFILE_SCOPE("VkRenderer::End(CommandBuffer)");
         VulkanCommandBuffer& vkCmdBuf = cmdBuf.GetInternalCommandBuffer();
 
         VK_VERIFY(vkEndCommandBuffer(vkCmdBuf.m_CommandBuffers[m_SwapChain.GetCurrentFrame()]));
+    }
+
+    void VulkanRenderer::End(Renderpass& renderpass)
+    {
+        LU_PROFILE("VkRenderer::End(Renderpass)");
+        VulkanCommandBuffer& vkCmdBuf = renderpass.GetCommandBuffer().GetInternalCommandBuffer();
+        vkCmdEndRenderPass(vkCmdBuf.m_CommandBuffers[m_SwapChain.GetCurrentFrame()]);
+
+        End(renderpass.GetCommandBuffer());
     }
 
     void VulkanRenderer::Submit(CommandBuffer& cmdBuf, ExecutionPolicy policy, Queue queue, PipelineStage waitStage, const std::vector<CommandBuffer*>& waitOn)
@@ -207,6 +339,12 @@ namespace Lunar::Internal
         m_TaskManager.Add(vkCmdBuf, policy);
     }
 
+    void VulkanRenderer::Submit(Renderpass& renderpass, ExecutionPolicy policy, Queue queue, PipelineStage waitStage, const std::vector<CommandBuffer*>& waitOn)
+    {
+        LU_PROFILE("VkRenderer::Submit(Renderpass)");
+        Submit(renderpass.GetCommandBuffer(), policy, queue, waitStage, waitOn);
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////
     // Internal methods
     ////////////////////////////////////////////////////////////////////////////////////
@@ -230,6 +368,24 @@ namespace Lunar::Internal
     void VulkanRenderer::Recreate(uint32_t width, uint32_t height, bool vsync)
     {
         m_SwapChain.Resize(width, height, vsync, static_cast<uint8_t>(m_Specification.Buffers));
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////
+    // Getters
+    ////////////////////////////////////////////////////////////////////////////////////
+    std::vector<Image*> VulkanRenderer::GetSwapChainImages()
+    {
+        std::vector<Image*> images(m_SwapChain.m_Images.size());
+        
+        for (size_t i = 0; i < images.size(); i++)
+            images[i] = reinterpret_cast<Image*>(&m_SwapChain.m_Images[i]);
+
+        return images;
+    }
+
+    Image* VulkanRenderer::GetDepthImage()
+    {
+        return reinterpret_cast<Image*>(&m_SwapChain.m_DepthStencil);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////

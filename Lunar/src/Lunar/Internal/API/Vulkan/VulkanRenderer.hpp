@@ -5,8 +5,9 @@
 #include <mutex>
 
 #include "Lunar/Internal/Renderer/RendererSpec.hpp"
+#include "Lunar/Internal/Renderer/Renderpass.hpp"
 #include "Lunar/Internal/Renderer/CommandBuffer.hpp"
-#include "Lunar/Internal/Renderer/PipelineSpec.hpp"
+#include "Lunar/Internal/Renderer/PipelineSpec.hpp" // TODO: Replace with pipeline
 
 #include "Lunar/Internal/API/Vulkan/Vulkan.hpp"
 
@@ -35,10 +36,18 @@ namespace Lunar::Internal
         void EndFrame();
         void Present();
 
+        void BeginDynamic(CommandBuffer& cmdBuf, const DynamicRenderState& state);
+        void EndDynamic(CommandBuffer& cmdBuf);
+
+        void SetViewportAndScissor(CommandBuffer& cmdBuf, uint32_t width, uint32_t height);
+
         // Object methods
         void Begin(CommandBuffer& cmdBuf);
+        void Begin(Renderpass& renderpass);
         void End(CommandBuffer& cmdBuf);
+        void End(Renderpass& renderpass);
         void Submit(CommandBuffer& cmdBuf, ExecutionPolicy policy, Queue queue, PipelineStage waitStage, const std::vector<CommandBuffer*>& waitOn);
+        void Submit(Renderpass& renderpass, ExecutionPolicy policy, Queue queue, PipelineStage waitStage, const std::vector<CommandBuffer*>& waitOn);
 
         // Internal
         void Free(const FreeFn& fn);
@@ -49,8 +58,12 @@ namespace Lunar::Internal
 		// Getters
         inline RendererID GetID() const { return m_ID; }
         inline const RendererSpecification& GetSpecification() const { return m_Specification; }
-        inline VulkanTaskManager& GetTaskManager() { return m_TaskManager; }
 
+        std::vector<Image*> GetSwapChainImages();
+        Image* GetDepthImage();
+
+        // Internal getters
+        inline VulkanTaskManager& GetTaskManager() { return m_TaskManager; }
         inline VulkanSwapChain& GetVulkanSwapChain() { return m_SwapChain; }
 
         // Static methods

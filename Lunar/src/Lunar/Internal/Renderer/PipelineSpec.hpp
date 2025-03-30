@@ -3,15 +3,17 @@
 #include "Lunar/Internal/Enum/Bitwise.hpp"
 
 #include "Lunar/Internal/Renderer/ImageSpec.hpp"
+#include "Lunar/Internal/Renderer/ShaderSpec.hpp"
+#include "Lunar/Internal/Renderer/BuffersSpec.hpp"
 
 #include <unordered_map>
 
 namespace Lunar::Internal
 {
 
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Specification
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////
+    // Pipeline Spec
+    ////////////////////////////////////////////////////////////////////////////////////
     // Note: Used in Renderer::Submit as a waitStage
 	enum class PipelineStage : uint32_t
     {
@@ -77,7 +79,16 @@ namespace Lunar::Internal
         RayTracingNV
     };
 
-    /*
+	enum class PipelineBindPoint : uint8_t
+    {
+        Graphics = 0,
+        Compute,
+        RayTracingKHR,
+        SubpassShadingHuawei,
+
+        RayTracingNV = RayTracingKHR
+    };
+
     // Global specification for push constants
     struct PushConstantsSpecification
     {
@@ -113,6 +124,5 @@ namespace Lunar::Internal
         // Raytracing KHR
         uint32_t MaxRayRecursion = 1;
     };
-	*/
 
 }

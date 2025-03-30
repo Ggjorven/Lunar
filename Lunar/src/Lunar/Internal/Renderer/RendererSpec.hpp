@@ -6,10 +6,15 @@
 #include "Lunar/Internal/Core/WindowSpec.hpp"
 #include "Lunar/Internal/Enum/Bitwise.hpp"
 
+#include "Lunar/Internal/Renderer/RenderpassSpec.hpp"
+
+#include "Lunar/Maths/Structs.hpp"
+
 namespace Lunar::Internal
 {
 
     class Window;
+    class Image;
 
     ////////////////////////////////////////////////////////////////////////////////////
     // Configurations
@@ -31,6 +36,23 @@ namespace Lunar::Internal
     };
 
     using FreeFn = std::function<void()>;
+
+    ////////////////////////////////////////////////////////////////////////////////////
+    // Dynamic Rendering
+    ////////////////////////////////////////////////////////////////////////////////////
+    struct DynamicRenderState
+    {
+    public:
+        Image* ColourAttachment = nullptr; // If using swapchain images use Renderer::GetAcquiredImage() as the index.
+        LoadOperation ColourLoadOp = LoadOperation::Clear;
+        StoreOperation ColourStoreOp = StoreOperation::Store;
+        Vec4<float> ColourClearValue = { 0.0f, 0.0f, 0.0f, 1.0f };
+
+        Image* DepthAttachment = nullptr;
+        LoadOperation DepthLoadOp = LoadOperation::Clear;
+        StoreOperation DepthStoreOp = StoreOperation::Store;
+        float DepthClearValue = 1.0f;
+    };
 
     ////////////////////////////////////////////////////////////////////////////////////
     // RendererSpecification

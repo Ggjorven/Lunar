@@ -24,6 +24,7 @@
 #include "Lunar/Internal/Utils/Hash.hpp"
 #include "Lunar/Internal/Utils/Preprocessor.hpp"
 #include "Lunar/Internal/Utils/Profiler.hpp"
+#include "Lunar/Internal/Utils/Settings.hpp"
 #include "Lunar/Internal/Utils/Types.hpp"
 
 #include "Lunar/Enum/Name.hpp"
@@ -78,18 +79,22 @@ int main(int argc, char* argv[])
 	// Renderer Test
     {
         Lunar::Internal::CommandBuffer cmdBuf(window.GetRenderer().GetID());
+        Lunar::Internal::Renderpass renderpass(window.GetRenderer().GetID(), Lunar::Internal::RenderpassSpecification({
+            .ColourAttachment = window.GetRenderer().GetSwapChainImages(),
+            .ColourClearColour = { 1.0f, 0.0f, 0.0f, 1.0f }
+        }), &cmdBuf);
 
         while (window.IsOpen())
         {
             window.PollEvents();
             window.GetRenderer().BeginFrame();
 
-            window.GetRenderer().Begin(cmdBuf);
+            window.GetRenderer().Begin(renderpass);
 
             // ...
 
-            window.GetRenderer().End(cmdBuf);
-            window.GetRenderer().Submit(cmdBuf, Lunar::Internal::ExecutionPolicy::InOrder);
+            window.GetRenderer().End(renderpass);
+            window.GetRenderer().Submit(renderpass, Lunar::Internal::ExecutionPolicy::InOrder);
 
             window.GetRenderer().EndFrame();
             window.GetRenderer().Present();

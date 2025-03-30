@@ -4,8 +4,9 @@
 
 #include "Lunar/Internal/Utils/Settings.hpp"
 
-#include "Lunar/Internal/Renderer/CommandBuffer.hpp"
 #include "Lunar/Internal/Renderer/PipelineSpec.hpp"
+#include "Lunar/Internal/Renderer/CommandBuffer.hpp"
+#include "Lunar/Internal/Renderer/Renderpass.hpp"
 
 #include "Lunar/Internal/API/Vulkan/VulkanRenderer.hpp"
 
@@ -41,10 +42,18 @@ namespace Lunar::Internal
         inline void EndFrame() { m_Renderer.EndFrame(); }
         inline void Present() { m_Renderer.Present(); }
 
+        // Note: These are only when you actually want to use dynamic rendering, 'static' rendering using renderpasses can be done just with Begin() etc.
+        // Note 2: You still have to call Begin, End & Submit for the CommandBuffer yourself.
+        inline void BeginDynamic(CommandBuffer& cmdBuf, const DynamicRenderState& state) { m_Renderer.BeginDynamic(cmdBuf, state); }
+        inline void EndDynamic(CommandBuffer& cmdBuf) { m_Renderer.EndDynamic(cmdBuf); }
+
         // Object methods
 		inline void Begin(CommandBuffer& cmdBuf) { m_Renderer.Begin(cmdBuf); }
+		inline void Begin(Renderpass& renderpass) { m_Renderer.Begin(renderpass); }
 		inline void End(CommandBuffer& cmdBuf) { m_Renderer.End(cmdBuf); }
+		inline void End(Renderpass& renderpass) { m_Renderer.End(renderpass); }
         inline void Submit(CommandBuffer& cmdBuf, ExecutionPolicy policy, Queue queue = Queue::Graphics, PipelineStage waitStage = PipelineStage::ColourAttachmentOutput, const std::vector<CommandBuffer*>& waitOn = {}) { m_Renderer.Submit(cmdBuf, policy, queue, waitStage, waitOn); }
+        inline void Submit(Renderpass& renderpass, ExecutionPolicy policy, Queue queue = Queue::Graphics, PipelineStage waitStage = PipelineStage::ColourAttachmentOutput, const std::vector<CommandBuffer*>& waitOn = {}) { m_Renderer.Submit(renderpass, policy, queue, waitStage, waitOn); }
 
         // Internal
         inline void Free(const FreeFn& fn) { m_Renderer.Free(fn); }
@@ -55,6 +64,9 @@ namespace Lunar::Internal
         // Getters
 		inline RendererID GetID() const { return m_ID; }
 		inline const RendererSpecification& GetSpecification() const { return m_Renderer.GetSpecification(); }
+
+        inline std::vector<Image*> GetSwapChainImages() { return m_Renderer.GetSwapChainImages(); }
+        inline Image* GetDepthImage() { return m_Renderer.GetDepthImage(); }
 
         // Internal
         // Note: This is an internal function, do not call.
