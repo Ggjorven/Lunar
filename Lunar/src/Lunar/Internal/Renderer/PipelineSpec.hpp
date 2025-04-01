@@ -71,7 +71,7 @@ namespace Lunar::Internal
         FillRectangleNV,
     };
 
-    enum class PipelineType : uint8_t
+    enum class PipelineUsage : uint8_t
     {
         Graphics = 0,
         Compute,
@@ -81,7 +81,8 @@ namespace Lunar::Internal
 
 	enum class PipelineBindPoint : uint8_t
     {
-        Graphics = 0,
+        None = 0,
+        Graphics,
         Compute,
         RayTracingKHR,
         SubpassShadingHuawei,
@@ -100,7 +101,7 @@ namespace Lunar::Internal
     struct PipelineSpecification
     {
     public:
-        PipelineType Type = PipelineType::Graphics;
+        PipelineUsage Usage = PipelineUsage::Graphics;
 
         // Note: Keep in mind that pushConstants most of the time only have a size of 128 bytes (two mat4's).
         // Note 2: Here's an example of how to use pushConstants across multiple shader stages:

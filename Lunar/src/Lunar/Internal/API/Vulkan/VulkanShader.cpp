@@ -122,4 +122,57 @@ namespace Lunar::Internal
         return shaderModule;
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////
+    // Convert functions
+    ////////////////////////////////////////////////////////////////////////////////////
+    ShaderStage VkShaderStageFlagsToShaderStage(VkShaderStageFlags stage)
+    {
+        ShaderStage result = ShaderStage::None;
+
+        if (stage & VK_SHADER_STAGE_VERTEX_BIT)                             result |= ShaderStage::Vertex;
+        if (stage & VK_SHADER_STAGE_FRAGMENT_BIT)                           result |= ShaderStage::Fragment;
+        if (stage & VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT)            result |= ShaderStage::TessellationEvaluation;
+        if (stage & VK_SHADER_STAGE_GEOMETRY_BIT)                           result |= ShaderStage::Geometry;
+        if (stage & VK_SHADER_STAGE_FRAGMENT_BIT)                           result |= ShaderStage::Fragment;
+        if (stage & VK_SHADER_STAGE_COMPUTE_BIT)                            result |= ShaderStage::Compute;
+
+        if (stage & VK_SHADER_STAGE_RAYGEN_BIT_KHR)                         result |= ShaderStage::RayGenKHR;
+        if (stage & VK_SHADER_STAGE_ANY_HIT_BIT_KHR)                        result |= ShaderStage::AnyHitKHR;
+        if (stage & VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR)                    result |= ShaderStage::ClosestHitKHR;
+        if (stage & VK_SHADER_STAGE_MISS_BIT_KHR)                           result |= ShaderStage::MissKHR;
+        if (stage & VK_SHADER_STAGE_INTERSECTION_BIT_KHR)                   result |= ShaderStage::IntersectionKHR;
+        if (stage & VK_SHADER_STAGE_CALLABLE_BIT_KHR)                       result |= ShaderStage::CallableKHR;
+        if (stage & VK_SHADER_STAGE_TASK_BIT_EXT)                           result |= ShaderStage::TaskEXT;
+        if (stage & VK_SHADER_STAGE_MESH_BIT_EXT)                           result |= ShaderStage::MeshEXT;
+        if (stage & VK_SHADER_STAGE_SUBPASS_SHADING_BIT_HUAWEI)             result |= ShaderStage::SubpassShadingHuawei;
+        if (stage & VK_SHADER_STAGE_CLUSTER_CULLING_BIT_HUAWEI)             result |= ShaderStage::ClusterCullingHuawei;
+
+        return result;
+    }
+
+    VkShaderStageFlags ShaderStageToVkShaderStageFlags(ShaderStage stage)
+    {
+        VkShaderStageFlags result = 0;
+
+        if (stage & ShaderStage::Vertex)                                    result |= VK_SHADER_STAGE_VERTEX_BIT;
+        if (stage & ShaderStage::Fragment)                                  result |= VK_SHADER_STAGE_FRAGMENT_BIT;
+        if (stage & ShaderStage::TessellationEvaluation)                    result |= VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
+        if (stage & ShaderStage::Geometry)                                  result |= VK_SHADER_STAGE_GEOMETRY_BIT;
+        if (stage & ShaderStage::Fragment)                                  result |= VK_SHADER_STAGE_FRAGMENT_BIT;
+        if (stage & ShaderStage::Compute)                                   result |= VK_SHADER_STAGE_COMPUTE_BIT;
+
+        if (stage & ShaderStage::RayGenKHR)                                 result |= VK_SHADER_STAGE_RAYGEN_BIT_KHR;
+        if (stage & ShaderStage::AnyHitKHR)                                 result |= VK_SHADER_STAGE_ANY_HIT_BIT_KHR;
+        if (stage & ShaderStage::ClosestHitKHR)                             result |= VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
+        if (stage & ShaderStage::MissKHR)                                   result |= VK_SHADER_STAGE_MISS_BIT_KHR;
+        if (stage & ShaderStage::IntersectionKHR)                           result |= VK_SHADER_STAGE_INTERSECTION_BIT_KHR;
+        if (stage & ShaderStage::CallableKHR)                               result |= VK_SHADER_STAGE_CALLABLE_BIT_KHR;
+        if (stage & ShaderStage::TaskEXT)                                   result |= VK_SHADER_STAGE_TASK_BIT_EXT;
+        if (stage & ShaderStage::MeshEXT)                                   result |= VK_SHADER_STAGE_MESH_BIT_EXT;
+        if (stage & ShaderStage::SubpassShadingHuawei)                      result |= VK_SHADER_STAGE_SUBPASS_SHADING_BIT_HUAWEI;
+        if (stage & ShaderStage::ClusterCullingHuawei)                      result |= VK_SHADER_STAGE_CLUSTER_CULLING_BIT_HUAWEI;
+
+        return result;
+    }
+
 }

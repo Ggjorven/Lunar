@@ -9,6 +9,7 @@ namespace Lunar::Internal
 {
 
     class VulkanSwapChain;
+    class VulkanDescriptorSet;
 
     ////////////////////////////////////////////////////////////////////////////////////
     // Convert functions
@@ -82,6 +83,7 @@ namespace Lunar::Internal
         uint32_t m_Miplevels = 1;
 
         friend class VulkanSwapChain;
+        friend class VulkanDescriptorSet;
     };
 
 }

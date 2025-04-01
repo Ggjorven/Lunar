@@ -53,6 +53,8 @@ namespace Lunar::Internal
 		void CreateFramebuffers(uint32_t width, uint32_t height);
 		void DestroyRenderpass();
 
+		std::vector<VkSubpassDependency> GetDependencies(RenderpassUsage usage);
+
 	private:
 		RendererID m_RendererID = 0;
 		RenderpassSpecification m_Specification = {};

@@ -50,6 +50,11 @@ Dependencies =
 	{
 		IncludeDir = "%{wks.location}/vendor/stb/include"
 	},
+	Tracy = 
+	{
+		LibName = "Tracy",
+		IncludeDir = "%{wks.location}/vendor/tracy/tracy/public"
+	},
 }
 
 ------------------------------------------------------------------------------
@@ -108,6 +113,7 @@ workspace "Lunar"
 
 group "Dependencies"
 	include "vendor/GLFW"
+	include "vendor/tracy"
 group ""
 
 group "Lunar"

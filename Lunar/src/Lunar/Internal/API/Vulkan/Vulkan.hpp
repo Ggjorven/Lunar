@@ -100,6 +100,13 @@ namespace Lunar::Internal
 
         bool ValidationLayersSupported();
 
+        template<typename T, typename T2>
+        inline T* Cast(T2* from)
+        {
+            // Note: This is temporary (or at least supposed to be)
+            return reinterpret_cast<T*>(from);
+        }
+
     }
 
     ////////////////////////////////////////////////////////////////////////////////////

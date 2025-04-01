@@ -2,6 +2,7 @@
 #include "VulkanSwapChain.hpp"
 
 #include "Lunar/Internal/IO/Print.hpp"
+#include "Lunar/Internal/Utils/Profiler.hpp"
 
 #include "Lunar/Internal/Core/Window.hpp"
 
@@ -291,6 +292,7 @@ namespace Lunar::Internal
     ////////////////////////////////////////////////////////////////////////////////////
     uint32_t VulkanSwapChain::AcquireNextImage()
 	{
+		LU_PROFILE("VkSwapChain::AcquireImage");
 		uint32_t imageIndex = 0;
 
 		VkResult result = vkAcquireNextImageKHR(VulkanContext::GetVulkanDevice().GetVkDevice(), m_SwapChain, std::numeric_limits<uint64_t>::max(), m_ImageAvailableSemaphores[m_CurrentFrame], VK_NULL_HANDLE, &imageIndex);

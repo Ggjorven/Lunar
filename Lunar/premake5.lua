@@ -40,12 +40,14 @@ project "Lunar"
 		"%{Dependencies.GLFW.IncludeDir}",
 		"%{Dependencies.glm.IncludeDir}",
 		"%{Dependencies.stb.IncludeDir}",
+		"%{Dependencies.Tracy.IncludeDir}",
 		"%{Dependencies.Vulkan.IncludeDir}",
 	}
 
 	links
 	{
 		"%{Dependencies.GLFW.LibName}",
+		"%{Dependencies.Tracy.LibName}",
 	}
 
 	filter "system:windows"
@@ -100,6 +102,7 @@ project "Lunar"
 			"%{Dependencies.GLFW.IncludeDir}",
 			"%{Dependencies.glm.IncludeDir}",
 			"%{Dependencies.stb.IncludeDir}",
+			"%{Dependencies.Tracy.IncludeDir}",
 			"%{Dependencies.Vulkan.IncludeDir}",
 		}
 

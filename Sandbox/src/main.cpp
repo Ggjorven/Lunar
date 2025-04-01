@@ -80,6 +80,8 @@ int main(int argc, char* argv[])
     {
         Lunar::Internal::CommandBuffer cmdBuf(window.GetRenderer().GetID());
         Lunar::Internal::Renderpass renderpass(window.GetRenderer().GetID(), Lunar::Internal::RenderpassSpecification({
+            .Usage = Lunar::Internal::RenderpassUsage::Forward,
+
             .ColourAttachment = window.GetRenderer().GetSwapChainImages(),
             .ColourClearColour = { 1.0f, 0.0f, 0.0f, 1.0f }
         }), &cmdBuf);

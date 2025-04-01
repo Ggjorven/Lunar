@@ -4,9 +4,19 @@
 
 #include "Lunar/Internal/Utils/Preprocessor.hpp"
 
+#include <tracy/Tracy.hpp>
+
+#include <new>
+#include <cstdlib>
+
 // Note: For future profiling 
 namespace Lunar::Internal
 {
+
+	// Settings
+	// Note: Profiling leaks memory (on windows), so don't keep on during any tests, since it will skew results.
+	#define LU_ENABLE_PROFILING 1
+	#define LU_MEM_PROFILING 0
 
 	// Function name
 	#if defined(LU_COMPILER_MSVC)
@@ -26,13 +36,20 @@ namespace Lunar::Internal
 	#define LU_EXPAND_FUNC_NAME_1(fn, cls) cls + "::" + std::string(__func__)
 
 	// Profiling macros
-	#if !defined(LU_CONFIG_DIST)
-		#define LU_MARK_FRAME()
+	#if !defined(LU_CONFIG_DIST) && LU_ENABLE_PROFILING
+		#define LU_MARK_FRAME() FrameMark
 		
-		#define LU_PROFILE(name)
+		#define LU_PROFILE(name) ZoneScopedN(name)
 		
 		// Note: Optional class argument
-		#define LU_PROFILE_SCOPE(...)
+		// TODO: Function scope naming
+		#define LU_PROFILE_SCOPE(...) ZoneScopedN("TODO")
+
+		#if LU_MEM_PROFILING
+			void* operator new(size_t size);
+			void operator delete(void* ptr) noexcept;
+			void operator delete(void* ptr, size_t size) noexcept;
+		#endif
 	#else
 		#define LU_MARK_FRAME()
 

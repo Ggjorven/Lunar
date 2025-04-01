@@ -36,6 +36,7 @@ project "Sandbox"
 
 		"%{Dependencies.GLFW.IncludeDir}",
 		"%{Dependencies.glm.IncludeDir}",
+		"%{Dependencies.Tracy.IncludeDir}",
 		"%{Dependencies.Vulkan.IncludeDir}",
 	}
 
@@ -65,6 +66,7 @@ project "Sandbox"
 		links
 		{
 			"%{Dependencies.GLFW.LibName}",
+			"%{Dependencies.Tracy.LibName}",
 
 			"%{Dependencies.Vulkan.LibDir}/%{Dependencies.Vulkan.LibName}",
 			"%{Dependencies.Vulkan.LibDir}/%{Dependencies.ShaderC.LibName}",
@@ -110,6 +112,7 @@ project "Sandbox"
 
 			"%{Dependencies.GLFW.IncludeDir}",
 			"%{Dependencies.glm.IncludeDir}",
+			"%{Dependencies.Tracy.IncludeDir}",
 			"%{Dependencies.Vulkan.IncludeDir}",
 		}
 

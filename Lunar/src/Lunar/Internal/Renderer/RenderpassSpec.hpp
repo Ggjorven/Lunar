@@ -39,9 +39,21 @@ namespace Lunar::Internal
         NoneEXT = None,
     };
 
+    enum class RenderpassUsage : uint8_t
+    {
+        None = 0,
+        Forward, Graphics = Forward,
+        ComputeToTexture, 
+        Offscreen, GBuffer = Offscreen
+    };
+
     struct RenderpassSpecification
     {
     public:
+        // General
+        RenderpassUsage Usage = RenderpassUsage::None;
+
+        // Colour
         std::vector<Image*> ColourAttachment = { }; // This is a vector since the swapchain has multiple images (most of the time).
         LoadOperation ColourLoadOp = LoadOperation::Clear;
         StoreOperation ColourStoreOp = StoreOperation::Store;
@@ -49,6 +61,7 @@ namespace Lunar::Internal
         ImageLayout PreviousColourImageLayout = ImageLayout::Undefined;
         ImageLayout FinalColourImageLayout = ImageLayout::PresentSrcKHR;
 
+        // Depth
         Image* DepthAttachment = nullptr;
         LoadOperation DepthLoadOp = LoadOperation::Clear;
         StoreOperation DepthStoreOp = StoreOperation::Store;

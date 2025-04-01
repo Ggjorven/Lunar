@@ -55,7 +55,7 @@ namespace Lunar::Internal
     ////////////////////////////////////////////////////////////////////////////////////
     void VulkanRenderer::BeginFrame()
     {
-        LU_PROFILE("VulkanRenderer::BeginFrame");
+        LU_PROFILE("VkRenderer::BeginFrame");
         if (m_Specification.WindowRef->IsMinimized())
             return;
 
@@ -67,6 +67,7 @@ namespace Lunar::Internal
             auto& fences = m_TaskManager.GetFences();
             if (!fences.empty()) 
             {
+                LU_PROFILE("VkRenderer::BeginFrame::WaitFences");
                 auto device = VulkanContext::GetVulkanDevice().GetVkDevice();
 
                 vkWaitForFences(device, static_cast<uint32_t>(fences.size()), fences.data(), VK_TRUE, std::numeric_limits<uint64_t>::max());
@@ -83,14 +84,14 @@ namespace Lunar::Internal
 
     void VulkanRenderer::EndFrame()
     {
-        LU_PROFILE("VulkanRenderer::EndFrame");
+        LU_PROFILE("VkRenderer::EndFrame");
         if (m_Specification.WindowRef->IsMinimized())
             return;
     }
 
     void VulkanRenderer::Present()
     {
-        LU_PROFILE("VulkanRenderer::Present");
+        LU_PROFILE("VkRenderer::Present");
         if (m_Specification.WindowRef->IsMinimized())
             return;
 
@@ -206,19 +207,28 @@ namespace Lunar::Internal
     ////////////////////////////////////////////////////////////////////////////////////
     void VulkanRenderer::Begin(CommandBuffer& cmdBuf)
     {
-        LU_PROFILE_SCOPE("VkRenderer::Begin(CommandBuffer)");
+        LU_PROFILE("VkRenderer::Begin(CommandBuffer)");
         VulkanCommandBuffer& vkCmdBuf = cmdBuf.GetInternalCommandBuffer();
 
         uint32_t currentFrame = m_SwapChain.GetCurrentFrame();
         VkCommandBuffer commandBuffer = vkCmdBuf.m_CommandBuffers[currentFrame];
 
-        vkResetFences(VulkanContext::GetVulkanDevice().GetVkDevice(), 1, &vkCmdBuf.m_InFlightFences[currentFrame]);
-        vkResetCommandBuffer(commandBuffer, 0);
+        {
+            LU_PROFILE("VkRenderer::Begin::ResetFences");
+            vkResetFences(VulkanContext::GetVulkanDevice().GetVkDevice(), 1, &vkCmdBuf.m_InFlightFences[currentFrame]);
+        }
+        {
+            LU_PROFILE("VkRenderer::Begin::ResetCmdBuf");
+            vkResetCommandBuffer(commandBuffer, 0);
+        }
 
         VkCommandBufferBeginInfo beginInfo = {};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
-        VK_VERIFY(vkBeginCommandBuffer(commandBuffer, &beginInfo));
+        {
+            LU_PROFILE("VkRenderer::Begin::BeginCmdBuf");
+            VK_VERIFY(vkBeginCommandBuffer(commandBuffer, &beginInfo));
+        }
     }
 
     void VulkanRenderer::Begin(Renderpass& renderpass)
@@ -255,31 +265,41 @@ namespace Lunar::Internal
         renderPassInfo.clearValueCount = (uint32_t)clearValues.size();
         renderPassInfo.pClearValues = clearValues.data();
 
-        vkCmdBeginRenderPass(vkCmdBuf.m_CommandBuffers[m_SwapChain.GetCurrentFrame()], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+        {
+            LU_PROFILE("VkRenderer::Begin::BeginPass");
+            vkCmdBeginRenderPass(vkCmdBuf.m_CommandBuffers[m_SwapChain.GetCurrentFrame()], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+        }
 
         SetViewportAndScissor(cmdBuf, extent.width, extent.height);
     }
 
     void VulkanRenderer::End(CommandBuffer& cmdBuf)
     {
-        LU_PROFILE_SCOPE("VkRenderer::End(CommandBuffer)");
+        LU_PROFILE("VkRenderer::End(CommandBuffer)");
         VulkanCommandBuffer& vkCmdBuf = cmdBuf.GetInternalCommandBuffer();
 
-        VK_VERIFY(vkEndCommandBuffer(vkCmdBuf.m_CommandBuffers[m_SwapChain.GetCurrentFrame()]));
+        {
+            LU_PROFILE("VkRenderer::End::EndCmdBuf");
+            VK_VERIFY(vkEndCommandBuffer(vkCmdBuf.m_CommandBuffers[m_SwapChain.GetCurrentFrame()]));
+        }
     }
 
     void VulkanRenderer::End(Renderpass& renderpass)
     {
         LU_PROFILE("VkRenderer::End(Renderpass)");
         VulkanCommandBuffer& vkCmdBuf = renderpass.GetCommandBuffer().GetInternalCommandBuffer();
-        vkCmdEndRenderPass(vkCmdBuf.m_CommandBuffers[m_SwapChain.GetCurrentFrame()]);
+        
+        {
+            LU_PROFILE("VkRenderer::End::EndPass");
+            vkCmdEndRenderPass(vkCmdBuf.m_CommandBuffers[m_SwapChain.GetCurrentFrame()]);
+        }
 
         End(renderpass.GetCommandBuffer());
     }
 
     void VulkanRenderer::Submit(CommandBuffer& cmdBuf, ExecutionPolicy policy, Queue queue, PipelineStage waitStage, const std::vector<CommandBuffer*>& waitOn)
     {
-        LU_PROFILE_SCOPE("VkRenderer::Submit(CommandBuffer)");
+        LU_PROFILE("VkRenderer::Submit(CommandBuffer)");
         VulkanCommandBuffer& vkCmdBuf = cmdBuf.GetInternalCommandBuffer();
 
         uint32_t currentFrame = m_SwapChain.GetCurrentFrame();
@@ -335,7 +355,10 @@ namespace Lunar::Internal
         submitInfo.pSignalSemaphores = &vkCmdBuf.m_RenderFinishedSemaphores[currentFrame];
 
         // Submission
-        VK_VERIFY(vkQueueSubmit(VulkanContext::GetVulkanDevice().GetQueue(queue), 1, &submitInfo, vkCmdBuf.m_InFlightFences[currentFrame]));
+        {
+            LU_PROFILE("VkRenderer::Submit::QueueSubmit");
+            VK_VERIFY(vkQueueSubmit(VulkanContext::GetVulkanDevice().GetQueue(queue), 1, &submitInfo, vkCmdBuf.m_InFlightFences[currentFrame]));
+        }
         m_TaskManager.Add(vkCmdBuf, policy);
     }
 
@@ -356,7 +379,7 @@ namespace Lunar::Internal
 
     void VulkanRenderer::FreeQueue()
     {
-        LU_PROFILE_SCOPE("VkRenderer::FreeQueue");
+        LU_PROFILE("VkRenderer::FreeQueue");
         std::scoped_lock<std::mutex> lock(m_FreeMutex);
         while (!m_FreeQueue.empty())
         {
@@ -378,14 +401,14 @@ namespace Lunar::Internal
         std::vector<Image*> images(m_SwapChain.m_Images.size());
         
         for (size_t i = 0; i < images.size(); i++)
-            images[i] = reinterpret_cast<Image*>(&m_SwapChain.m_Images[i]);
+            images[i] = Vk::Cast<Image>(&m_SwapChain.m_Images[i]);
 
         return images;
     }
 
     Image* VulkanRenderer::GetDepthImage()
     {
-        return reinterpret_cast<Image*>(&m_SwapChain.m_DepthStencil);
+        return Vk::Cast<Image>(&m_SwapChain.m_DepthStencil);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////
