@@ -36,6 +36,7 @@ project "Sandbox"
 
 		"%{Dependencies.GLFW.IncludeDir}",
 		"%{Dependencies.glm.IncludeDir}",
+		"%{Dependencies.Tracy.IncludeDir}",
 		"%{Dependencies.Vulkan.IncludeDir}",
 	}
 
@@ -62,11 +63,43 @@ project "Sandbox"
 		systemversion "latest"
 		staticruntime "on"
 
+		links
+		{
+			"%{Dependencies.GLFW.LibName}",
+			"%{Dependencies.Tracy.LibName}",
+
+			"%{Dependencies.Vulkan.LibDir}/%{Dependencies.Vulkan.LibName}",
+			"%{Dependencies.Vulkan.LibDir}/%{Dependencies.ShaderC.LibName}",
+		}
+
     filter "system:macosx"
 		defines "LU_PLATFORM_DESKTOP"
 		defines "LU_PLATFORM_MACOS"
 		systemversion(MacOSVersion)
 		staticruntime "on"
+
+		libdirs
+		{
+			"%{Dependencies.Vulkan.LibDir}"
+		}
+
+		links
+		{
+			"%{Dependencies.Vulkan.LibName}",
+			"%{Dependencies.ShaderC.LibName}",
+
+			"AppKit.framework",
+			"IOKit.framework",
+			"CoreGraphics.framework",
+			"CoreFoundation.framework",
+			"QuartzCore.framework",
+		}
+
+		postbuildcommands
+		{
+			'{COPYFILE} "%{Dependencies.Vulkan.LibDir}/libvulkan.1.dylib" "%{cfg.targetdir}"',
+			'{COPYFILE} "%{Dependencies.Vulkan.LibDir}/lib%{Dependencies.Vulkan.LibName}.dylib" "%{cfg.targetdir}"',
+		}
 
 	filter "action:xcode*"
 		-- Note: If we don't add the header files to the externalincludedirs
@@ -79,6 +112,7 @@ project "Sandbox"
 
 			"%{Dependencies.GLFW.IncludeDir}",
 			"%{Dependencies.glm.IncludeDir}",
+			"%{Dependencies.Tracy.IncludeDir}",
 			"%{Dependencies.Vulkan.IncludeDir}",
 		}
 
@@ -97,3 +131,4 @@ project "Sandbox"
 		defines "LU_CONFIG_DIST"
 		runtime "Release"
 		optimize "Full"
+		linktimeoptimization "on"

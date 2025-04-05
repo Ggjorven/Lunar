@@ -39,15 +39,15 @@ project "Lunar"
 
 		"%{Dependencies.GLFW.IncludeDir}",
 		"%{Dependencies.glm.IncludeDir}",
+		"%{Dependencies.stb.IncludeDir}",
+		"%{Dependencies.Tracy.IncludeDir}",
 		"%{Dependencies.Vulkan.IncludeDir}",
 	}
 
 	links
 	{
 		"%{Dependencies.GLFW.LibName}",
-
-		"%{Dependencies.Vulkan.LibDir}/%{Dependencies.Vulkan.LibName}",
-		"%{Dependencies.Vulkan.LibDir}/%{Dependencies.ShaderC.LibName}",
+		"%{Dependencies.Tracy.LibName}",
 	}
 
 	filter "system:windows"
@@ -62,11 +62,25 @@ project "Lunar"
             "NOMINMAX"
         }
 
+		links
+		{
+			"%{Dependencies.Vulkan.LibDir}/%{Dependencies.Vulkan.LibName}",
+			"%{Dependencies.Vulkan.LibDir}/%{Dependencies.ShaderC.LibName}",
+		}
+
 	filter "system:linux"
 		defines "LU_PLATFORM_DESKTOP"
 		defines "LU_PLATFORM_LINUX"
 		systemversion "latest"
 		staticruntime "on"
+
+		links
+		{
+			"%{Dependencies.Vulkan.LibDir}/%{Dependencies.Vulkan.LibName}",
+			"%{Dependencies.Vulkan.LibDir}/%{Dependencies.ShaderC.LibName}",
+
+			"Xrandr", "Xi", "GLU", "GL", "GLX", "X11", "dl", "pthread", "stdc++fs"
+		}
 
     filter "system:macosx"
 		defines "LU_PLATFORM_DESKTOP"
@@ -87,6 +101,8 @@ project "Lunar"
 
 			"%{Dependencies.GLFW.IncludeDir}",
 			"%{Dependencies.glm.IncludeDir}",
+			"%{Dependencies.stb.IncludeDir}",
+			"%{Dependencies.Tracy.IncludeDir}",
 			"%{Dependencies.Vulkan.IncludeDir}",
 		}
 
@@ -114,3 +130,4 @@ project "Lunar"
 		defines "LU_CONFIG_DIST"
 		runtime "Release"
 		optimize "Full"
+		linktimeoptimization "on"

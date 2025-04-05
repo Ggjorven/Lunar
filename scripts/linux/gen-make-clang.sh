@@ -2,5 +2,4 @@
 
 cd ../..
 
-premake5 gmake2 --os=linux --cc=clang
-premake5 clangd-support --os=linux --cc=clang
+premake gmake --os=linux --cc=clang

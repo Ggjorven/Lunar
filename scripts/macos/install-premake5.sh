@@ -5,7 +5,7 @@ if ! command -v premake5 &> /dev/null; then
     echo "premake5 not found, installing..."
 
     # Download premake5
-    curl -L https://github.com/premake/premake-core/releases/download/v5.0.0-beta2/premake-5.0.0-beta2-macosx.tar.gz -o premake5.tar.gz
+    curl -L https://github.com/premake/premake-core/releases/download/v5.0.0-beta5/premake-5.0.0-beta5-macosx.tar.gz -o premake5.tar.gz
 
     # Extract the tarball
     tar -xvf premake5.tar.gz
