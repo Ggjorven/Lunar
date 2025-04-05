@@ -41,7 +41,7 @@ namespace Lunar::Internal
     ////////////////////////////////////////////////////////////////////////////////////
     void VulkanDescriptorSet::Bind(Pipeline& pipeline, CommandBuffer& commandBuffer, PipelineBindPoint bindPoint, const std::vector<uint32_t>& dynamicOffsets)
     {
-        LU_PROFILE("VkDescriptorSet::Bind");
+        LU_PROFILE("VkDescriptorSet::Bind()");
         uint32_t currentFrame = VulkanRenderer::GetRenderer(m_RendererID).GetVulkanSwapChain().GetCurrentFrame();
         auto vkPipelineLayout = pipeline.GetInternalPipeline().GetVkPipelineLayout();
         auto vkCmdBuf = commandBuffer.GetInternalCommandBuffer().GetVkCommandBuffer(currentFrame);
@@ -51,7 +51,7 @@ namespace Lunar::Internal
 
     void VulkanDescriptorSet::Upload(const std::vector<Uploadable>& elements)
     {
-        LU_PROFILE("VkDescriptorSet::Upload");
+        LU_PROFILE("VkDescriptorSet::Upload()");
         std::vector<VkWriteDescriptorSet> writes;
         writes.reserve(elements.size());
 
@@ -85,6 +85,7 @@ namespace Lunar::Internal
     ////////////////////////////////////////////////////////////////////////////////////
     void VulkanDescriptorSet::UploadImage(std::vector<VkWriteDescriptorSet>& writes, std::vector<VkDescriptorImageInfo>& imageInfos, VulkanImage& image, Descriptor descriptor, uint32_t arrayIndex, uint32_t frame)
     {
+		LU_PROFILE("VkDescriptorSet::UploadImage()");
         VkDescriptorImageInfo& imageInfo = imageInfos.emplace_back();
         imageInfo.imageLayout = ImageLayoutToVkImageLayout(image.m_ImageSpecification.Layout);
         imageInfo.imageView = image.m_ImageView;
@@ -102,6 +103,7 @@ namespace Lunar::Internal
 
     void VulkanDescriptorSet::UploadUniformBuffer(std::vector<VkWriteDescriptorSet>& writes, std::vector<VkDescriptorBufferInfo>& bufferInfos, VulkanUniformBuffer& buffer, Descriptor descriptor, uint32_t arrayIndex, uint32_t frame)
     {
+        LU_PROFILE("VkDescriptorSet::UploadUniformBuffer()");
         VkDescriptorBufferInfo& bufferInfo = bufferInfos.emplace_back();
         bufferInfo.buffer = buffer.m_Buffers[frame];
         bufferInfo.offset = 0;
@@ -119,6 +121,7 @@ namespace Lunar::Internal
 
     void VulkanDescriptorSet::UploadStorageBuffer(std::vector<VkWriteDescriptorSet>& writes, std::vector<VkDescriptorBufferInfo>& bufferInfos, VulkanStorageBuffer& buffer, Descriptor descriptor, uint32_t arrayIndex, uint32_t frame)
     {
+        LU_PROFILE("VkDescriptorSet::UploadStorageBuffer()");
         VkDescriptorBufferInfo& bufferInfo = bufferInfos.emplace_back();
         bufferInfo.buffer = buffer.m_Buffers[frame];
         bufferInfo.offset = 0;

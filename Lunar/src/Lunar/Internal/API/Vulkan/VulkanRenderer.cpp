@@ -55,7 +55,7 @@ namespace Lunar::Internal
     ////////////////////////////////////////////////////////////////////////////////////
     void VulkanRenderer::BeginFrame()
     {
-        LU_PROFILE("VkRenderer::BeginFrame");
+        LU_PROFILE("VkRenderer::BeginFrame()");
         if (m_Specification.WindowRef->IsMinimized())
             return;
 
@@ -84,14 +84,14 @@ namespace Lunar::Internal
 
     void VulkanRenderer::EndFrame()
     {
-        LU_PROFILE("VkRenderer::EndFrame");
+        LU_PROFILE("VkRenderer::EndFrame()");
         if (m_Specification.WindowRef->IsMinimized())
             return;
     }
 
     void VulkanRenderer::Present()
     {
-        LU_PROFILE("VkRenderer::Present");
+        LU_PROFILE("VkRenderer::Present()");
         if (m_Specification.WindowRef->IsMinimized())
             return;
 
@@ -108,7 +108,7 @@ namespace Lunar::Internal
 
         VkResult result = VK_SUCCESS;
         {
-            LU_PROFILE("VkRenderer::QueuePresent");
+            LU_PROFILE("VkRenderer::Present::QueuePresent");
             result = vkQueuePresentKHR(VulkanContext::GetVulkanDevice().GetPresentQueue(), &presentInfo);
         }
 
@@ -127,7 +127,7 @@ namespace Lunar::Internal
 
     void VulkanRenderer::BeginDynamic(CommandBuffer& cmdBuf, const DynamicRenderState& state)
     {
-        LU_PROFILE("VkRenderer::BeginDynamic");
+        LU_PROFILE("VkRenderer::BeginDynamic()");
         VulkanCommandBuffer& vkCmdBuf = cmdBuf.GetInternalCommandBuffer();
 
         VkRenderingAttachmentInfo colourAttachment = {};
@@ -176,7 +176,7 @@ namespace Lunar::Internal
 
     void VulkanRenderer::EndDynamic(CommandBuffer& cmdBuf)
     {
-        LU_PROFILE("VkRenderer::EndDynamic");
+        LU_PROFILE("VkRenderer::EndDynamic()");
         VulkanCommandBuffer& vkCmdBuf = cmdBuf.GetInternalCommandBuffer();
 
         vkCmdEndRendering(vkCmdBuf.GetVkCommandBuffer(m_SwapChain.GetCurrentFrame()));
@@ -184,7 +184,7 @@ namespace Lunar::Internal
 
     void VulkanRenderer::SetViewportAndScissor(CommandBuffer& cmdBuf, uint32_t width, uint32_t height)
     {
-        LU_PROFILE("VkRenderer::SetViewportAndScissor");
+        LU_PROFILE("VkRenderer::SetViewportAndScissor()");
         VulkanCommandBuffer& vkCmdBuf = cmdBuf.GetInternalCommandBuffer();
 
         VkViewport viewport = {};
@@ -370,7 +370,7 @@ namespace Lunar::Internal
 
     void VulkanRenderer::Draw(CommandBuffer& cmdBuf, uint32_t vertexCount, uint32_t instanceCount)
     {
-        LU_PROFILE("VkRenderer::Draw");
+        LU_PROFILE("VkRenderer::Draw()");
         VulkanCommandBuffer& vkCmdBuf = cmdBuf.GetInternalCommandBuffer();
 
         vkCmdDraw(vkCmdBuf.GetVkCommandBuffer(m_SwapChain.GetCurrentFrame()), vertexCount, instanceCount, 0, 0);
@@ -378,7 +378,7 @@ namespace Lunar::Internal
 
     void VulkanRenderer::DrawIndexed(CommandBuffer& cmdBuf, uint32_t indexCount, uint32_t instanceCount)
     {
-        LU_PROFILE("VkRenderer::DrawIndexed");
+        LU_PROFILE("VkRenderer::DrawIndexed()");
         VulkanCommandBuffer& vkCmdBuf = cmdBuf.GetInternalCommandBuffer();
 
         vkCmdDrawIndexed(vkCmdBuf.GetVkCommandBuffer(m_SwapChain.GetCurrentFrame()), indexCount, instanceCount, 0, 0, 0);

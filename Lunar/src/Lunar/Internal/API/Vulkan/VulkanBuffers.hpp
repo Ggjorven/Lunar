@@ -59,21 +59,31 @@ namespace Lunar::Internal
 	class VulkanIndexBuffer
 	{
 	public:
+		enum class Type : uint8_t { None = 0, UInt8, UInt16, UInt32 };
+	public:
 		// Constructor & Destructor
 		VulkanIndexBuffer() = default;
 		~VulkanIndexBuffer() = default;
 
 		// Init & Destroy
+		void Init(const RendererID renderer, const BufferSpecification& specs, uint8_t* indices, uint32_t count);
+		void Init(const RendererID renderer, const BufferSpecification& specs, uint16_t* indices, uint32_t count);
 		void Init(const RendererID renderer, const BufferSpecification& specs, uint32_t* indices, uint32_t count);
 		void Destroy();
 
 		// Methods
 		void Bind(CommandBuffer& cmdBuf) const;
 
+		void SetData(uint8_t* indices, uint32_t count, size_t countOffset);
+		void SetData(uint16_t* indices, uint32_t count, size_t countOffset);
 		void SetData(uint32_t* indices, uint32_t count, size_t countOffset);
 
 		// Getters
 		inline uint32_t GetCount() const { return m_Count; }
+
+	private:
+		// Private methods
+		void SetData(void* indices, size_t size, size_t offset);
 
 	private:
 		RendererID m_RendererID = 0;
@@ -81,6 +91,7 @@ namespace Lunar::Internal
 		VkBuffer m_Buffer = VK_NULL_HANDLE;
 		VmaAllocation m_Allocation = VK_NULL_HANDLE;
 
+		Type m_Type = Type::None;
 		uint32_t m_Count = 0;
 	};
 

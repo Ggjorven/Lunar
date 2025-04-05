@@ -102,7 +102,7 @@ namespace Lunar::Internal
 
     void VulkanTaskManager::RemoveFromAll(VkFence fence)
     {
-        LU_PROFILE("VkTaskManager::RemoveFromAll(Semaphore)");
+        LU_PROFILE("VkTaskManager::RemoveFromAll(Fence)");
         for (uint32_t frame = 0; frame < static_cast<uint32_t>(VulkanRenderer::GetRenderer(m_RendererID).GetSpecification().Buffers); frame++)
             Remove(fence, frame);
     }
@@ -116,14 +116,14 @@ namespace Lunar::Internal
 
     void VulkanTaskManager::ResetFences()
     {
-        LU_PROFILE("VkTaskManager::ResetFences");
+        LU_PROFILE("VkTaskManager::ResetFences()");
         uint32_t frame = VulkanRenderer::GetRenderer(m_RendererID).GetVulkanSwapChain().GetCurrentFrame();
         m_Fences[frame].clear();
     }
 
     void VulkanTaskManager::ResetSemaphores()
     {
-        LU_PROFILE("VkTaskManager::ResetSemaphores");
+        LU_PROFILE("VkTaskManager::ResetSemaphores()");
 
         uint32_t frame = VulkanRenderer::GetRenderer(m_RendererID).GetVulkanSwapChain().GetCurrentFrame();
 
@@ -136,7 +136,7 @@ namespace Lunar::Internal
     ////////////////////////////////////////////////////////////////////////////////////
     VkSemaphore VulkanTaskManager::GetNext()
     {
-        LU_PROFILE("VkTaskManager::GetNext");
+        LU_PROFILE("VkTaskManager::GetNext()");
         std::scoped_lock<std::mutex> lock(m_ThreadSafety);
 
         uint32_t frame = VulkanRenderer::GetRenderer(m_RendererID).GetVulkanSwapChain().GetCurrentFrame();

@@ -181,13 +181,13 @@ namespace Lunar::Internal
     void DesktopWindow::PollEvents()
     {
         LU_MARK_FRAME();
-        LU_PROFILE("DesktopWindow::PollEvents");
+        LU_PROFILE("DesktopWindow::PollEvents()");
         glfwPollEvents();
     }
 
     void DesktopWindow::SwapBuffers()
     {
-        LU_PROFILE("DesktopWindow::SwapBuffers");
+        LU_PROFILE("DesktopWindow::SwapBuffers()");
         m_Renderer.FreeQueue();
     }
 

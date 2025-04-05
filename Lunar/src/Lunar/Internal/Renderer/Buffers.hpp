@@ -73,6 +73,8 @@ namespace Lunar::Internal
 	{
 	public:
 		// Constructor & Destructor
+		inline IndexBuffer(const RendererID renderer, const BufferSpecification& specs, uint8_t* indices, uint32_t count) { m_IndexBuffer.Init(renderer, specs, indices, count); }
+		inline IndexBuffer(const RendererID renderer, const BufferSpecification& specs, uint16_t* indices, uint32_t count) { m_IndexBuffer.Init(renderer, specs, indices, count); }
 		inline IndexBuffer(const RendererID renderer, const BufferSpecification& specs, uint32_t* indices, uint32_t count) { m_IndexBuffer.Init(renderer, specs, indices, count); }
 		inline ~IndexBuffer() { m_IndexBuffer.Destroy(); }
 
@@ -80,6 +82,8 @@ namespace Lunar::Internal
 		inline void Bind(CommandBuffer& cmdBuf) const { m_IndexBuffer.Bind(cmdBuf); }
 
 		// The offset is in count, so 1,2,3,4,5 instead of size(uint32_t)
+		inline void SetData(uint8_t* indices, uint32_t count, size_t countOffset = 0) { m_IndexBuffer.SetData(indices, count, countOffset); }
+		inline void SetData(uint16_t* indices, uint32_t count, size_t countOffset = 0) { m_IndexBuffer.SetData(indices, count, countOffset); }
 		inline void SetData(uint32_t* indices, uint32_t count, size_t countOffset = 0) { m_IndexBuffer.SetData(indices, count, countOffset); }
 
 		// Getters

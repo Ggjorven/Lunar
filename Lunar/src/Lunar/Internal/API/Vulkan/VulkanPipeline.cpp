@@ -2,6 +2,7 @@
 #include "VulkanPipeline.hpp"
 
 #include "Lunar/Internal/IO/Print.hpp"
+#include "Lunar/Internal/Utils/Profiler.hpp"
 
 #include "Lunar/Internal/Renderer/Image.hpp"
 #include "Lunar/Internal/Renderer/Shader.hpp"
@@ -95,6 +96,7 @@ namespace Lunar::Internal
 
     void VulkanPipeline::Use(CommandBuffer& cmdBuf, PipelineBindPoint bindPoint)
     {
+        LU_PROFILE("VkPipeline::Use()");
         VulkanCommandBuffer& vkCmdBuf = cmdBuf.GetInternalCommandBuffer();
 
         vkCmdBindPipeline(vkCmdBuf.GetVkCommandBuffer(VulkanRenderer::GetRenderer(m_RendererID).GetVulkanSwapChain().GetCurrentFrame()), PipelineBindPointToVkPipelineBindPoint(bindPoint), m_Pipeline);

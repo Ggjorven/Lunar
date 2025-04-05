@@ -9,6 +9,13 @@
 #include "Lunar/Internal/API/Vulkan/VulkanRenderer.hpp"
 #include "Lunar/Internal/API/Vulkan/VulkanAllocator.hpp"
 
+#include <filesystem>
+
+#define STBI_ASSERT(x) LU_ASSERT(x, std::format("[VkImage:stb_image] '{0}'", #x))
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb/stb_image.h>
+
 namespace Lunar::Internal
 {
 
@@ -20,15 +27,26 @@ namespace Lunar::Internal
 	////////////////////////////////////////////////////////////////////////////////////
 	// Init & Destroy
 	////////////////////////////////////////////////////////////////////////////////////
-	void VulkanImage::Init(const RendererID renderer, const ImageSpecification& specs, const SamplerSpecification& samplerSpecs)
+	void VulkanImage::Init(const RendererID renderer, const ImageSpecification& imageSpecs, const SamplerSpecification& samplerSpecs)
 	{
 		m_RendererID = renderer;
-		m_ImageSpecification = specs;
+		m_ImageSpecification = imageSpecs;
 		m_SamplerSpecification = samplerSpecs;
 
 		LU_ASSERT(((m_ImageSpecification.Usage & ImageUsage::Colour) || (m_ImageSpecification.Usage & ImageUsage::DepthStencil)), "[VulkanImage] Tried to create image without specifying if it's a Colour or Depth image.");
 
 		CreateImage(m_ImageSpecification.Width, m_ImageSpecification.Height);
+	}
+
+	void VulkanImage::Init(const RendererID renderer, const ImageSpecification& imageSpecs, const SamplerSpecification& samplerSpecs, const std::filesystem::path& imagePath)
+	{
+		m_RendererID = renderer;
+		m_ImageSpecification = imageSpecs;
+		m_SamplerSpecification = samplerSpecs;
+
+		LU_ASSERT(((m_ImageSpecification.Usage & ImageUsage::Colour) || (m_ImageSpecification.Usage & ImageUsage::DepthStencil)), "[VulkanImage] Tried to create image without specifying if it's a Colour or Depth image.");
+
+		CreateImage(imagePath);
 	}
 
 	void VulkanImage::Init(const RendererID renderer, const ImageSpecification& specs, const VkImage image, const VkImageView imageView) // Note: This exists for swapchain images
@@ -328,6 +346,32 @@ namespace Lunar::Internal
 		m_Sampler = VulkanAllocator::CreateSampler(m_RendererID, FilterModeToVkFilter(m_SamplerSpecification.MagFilter), FilterModeToVkFilter(m_SamplerSpecification.MinFilter), AddressModeToVkSamplerAddressMode(m_SamplerSpecification.Address), MipmapModeToVkSamplerMipmapMode(m_SamplerSpecification.Mipmaps), m_Miplevels);
 
 		Transition(m_ImageSpecification.Layout, desiredLayout);
+	}
+
+	void VulkanImage::CreateImage(const std::filesystem::path& imagePath)
+	{
+		int width, height, texChannels;
+
+		stbi_set_flip_vertically_on_load(1);
+		stbi_uc* pixels = stbi_load(imagePath.string().c_str(), &width, &height, &texChannels, STBI_rgb_alpha);
+
+		LU_ASSERT((pixels != nullptr), std::format("[VkImage] Failed to load image from '{0}'", imagePath.string()));
+
+		m_ImageSpecification.Width = static_cast<uint32_t>(width);
+		m_ImageSpecification.Height = static_cast<uint32_t>(height);
+		if (m_ImageSpecification.MipMaps)
+			m_Miplevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
+
+		m_ImageSpecification.Format = ImageFormat::RGBA;
+		size_t imageSize = m_ImageSpecification.Width * m_ImageSpecification.Height * 4;
+
+		m_Allocation = VulkanAllocator::AllocateImage(m_RendererID, m_ImageSpecification.Width, m_ImageSpecification.Height, m_Miplevels, ImageFormatToVkFormat(m_ImageSpecification.Format), VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | ImageUsageToVkImageUsage(m_ImageSpecification.Usage), VMA_MEMORY_USAGE_GPU_ONLY, m_Image);
+
+		m_ImageView = VulkanAllocator::CreateImageView(m_RendererID, m_Image, ImageFormatToVkFormat(m_ImageSpecification.Format), VK_IMAGE_ASPECT_COLOR_BIT, m_Miplevels);
+		m_Sampler = VulkanAllocator::CreateSampler(m_RendererID, FilterModeToVkFilter(m_SamplerSpecification.MagFilter), FilterModeToVkFilter(m_SamplerSpecification.MinFilter), AddressModeToVkSamplerAddressMode(m_SamplerSpecification.Address), MipmapModeToVkSamplerMipmapMode(m_SamplerSpecification.Mipmaps), m_Miplevels);
+
+		SetData((void*)pixels, imageSize);
+		stbi_image_free((void*)pixels);
 	}
 
 	void VulkanImage::GenerateMipmaps(VkImage& image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels)

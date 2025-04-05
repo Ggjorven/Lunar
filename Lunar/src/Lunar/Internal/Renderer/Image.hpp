@@ -7,6 +7,8 @@
 
 #include "Lunar/Internal/API/Vulkan/VulkanImage.hpp"
 
+#include <filesystem>
+
 namespace Lunar::Internal
 {
 
@@ -28,6 +30,7 @@ namespace Lunar::Internal
     public:
         // Constructor & Destructor
 		inline Image(const RendererID renderer, const ImageSpecification& specs, const SamplerSpecification& samplerSpecs) { m_Image.Init(renderer, specs, samplerSpecs); }
+		inline Image(const RendererID renderer, const ImageSpecification& specs, const SamplerSpecification& samplerSpecs, const std::filesystem::path& imagePath) { m_Image.Init(renderer, specs, samplerSpecs, imagePath); }
 		inline ~Image() { m_Image.Destroy(); }
 
         // Methods

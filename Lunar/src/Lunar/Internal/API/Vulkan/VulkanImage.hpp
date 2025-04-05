@@ -40,6 +40,7 @@ namespace Lunar::Internal
 
 		// Init & Destroy
         void Init(const RendererID renderer, const ImageSpecification& imageSpecs, const SamplerSpecification& samplerSpecs);
+        void Init(const RendererID renderer, const ImageSpecification& imageSpecs, const SamplerSpecification& samplerSpecs, const std::filesystem::path& imagePath);
         void Init(const RendererID renderer, const ImageSpecification& imageSpecs, const VkImage image, const VkImageView imageView); // Note: This exists for swapchain images
         void Destroy();
 
@@ -67,6 +68,7 @@ namespace Lunar::Internal
     private:
         // Private methods
         void CreateImage(uint32_t width, uint32_t height);
+        void CreateImage(const std::filesystem::path& imagePath);
         void GenerateMipmaps(VkImage& image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
         void DestroyImage();
 

@@ -1,4 +1,5 @@
 #include "lupch.h"
+#include "Descriptor.hpp"
 #include "DescriptorSpec.hpp"
 
 #include "Lunar/Internal/IO/Print.hpp"
