@@ -19,7 +19,9 @@
 #include "Lunar/Internal/Memory/Box.hpp"
 #include "Lunar/Internal/Memory/Rc.hpp"
 
+#include "Lunar/Internal/Renderer/Shader.hpp"
 #include "Lunar/Internal/Renderer/Renderer.hpp"
+#include "Lunar/Internal/Renderer/Descriptor.hpp"
 
 #include "Lunar/Internal/Utils/Hash.hpp"
 #include "Lunar/Internal/Utils/Preprocessor.hpp"
@@ -40,6 +42,62 @@ enum class Test : uint8_t
     Hi = 0,
     Hello = 27,
     Hey,
+};
+
+///////////////////////////////////////////////////////////
+// Renderer Test
+///////////////////////////////////////////////////////////
+const char* g_VertexShader = R"glsl(
+#version 450
+
+layout(location = 0) in vec2 inPosition;
+layout(location = 1) in vec2 inUV;
+layout(location = 2) in vec4 inColor;
+
+layout(location = 0) out vec2 fragUV;
+layout(location = 1) out vec4 fragColor;
+
+layout(set = 0, binding = 0) uniform UniformBufferObject {
+    mat4 uViewProjection;
+} ubo;
+
+void main() {
+    fragUV = inUV;
+    fragColor = inColor;
+    gl_Position = ubo.uViewProjection * vec4(inPosition, 0.0, 1.0);
+}
+)glsl";
+
+const char* g_FragmentShader = R"glsl(
+#version 450
+
+layout(location = 0) in vec2 fragUV;
+layout(location = 1) in vec4 fragColor;
+
+layout(location = 0) out vec4 outColor;
+
+void main() {
+    outColor = fragColor;
+}
+)glsl";
+
+struct Vertex 
+{
+public:
+    glm::vec2 Position;
+    glm::vec2 UV;
+    glm::vec4 Colour;
+};
+
+std::vector<Vertex> g_QuadVertices = {
+    {{-0.5f, -0.5f}, {0.0f, 0.0f}, {1, 0, 0, 1}}, // Bottom-left
+    {{ 0.5f, -0.5f}, {1.0f, 0.0f}, {0, 1, 0, 1}}, // Bottom-right
+    {{ 0.5f,  0.5f}, {1.0f, 1.0f}, {0, 0, 1, 1}}, // Top-right
+    {{-0.5f,  0.5f}, {0.0f, 1.0f}, {1, 1, 0, 1}}, // Top-left
+};
+
+std::vector<uint32_t> g_QuadIndices = {
+    0, 1, 2, 2, 3, 0
 };
 
 ///////////////////////////////////////////////////////////
@@ -76,30 +134,80 @@ int main(int argc, char* argv[])
         handler.Handle<Lunar::Internal::WindowCloseEvent>([&](Lunar::Internal::WindowCloseEvent&) { window.Close(); });
     };
 
+	Lunar::Internal::Renderer& renderer = window.GetRenderer();
+    Lunar::Internal::RendererID rendererID = renderer.GetID();
+
 	// Renderer Test
     {
-        Lunar::Internal::CommandBuffer cmdBuf(window.GetRenderer().GetID());
-        Lunar::Internal::Renderpass renderpass(window.GetRenderer().GetID(), Lunar::Internal::RenderpassSpecification({
+        // Buffers
+		Lunar::Internal::VertexBuffer vertexBuffer(rendererID, {
+			.Usage = Lunar::Internal::BufferMemoryUsage::GPU,
+        }, g_QuadVertices.data(), sizeof(Vertex)* g_QuadVertices.size());
+		Lunar::Internal::IndexBuffer indexBuffer(rendererID, {
+			.Usage = Lunar::Internal::BufferMemoryUsage::GPU,
+		}, g_QuadIndices.data(), static_cast<uint32_t>(g_QuadIndices.size()));
+
+        // Uniform Buffer
+		glm::mat4 ubo = glm::mat4(1.0f);
+        Lunar::Internal::UniformBuffer uboBuffer(rendererID, {
+            .Usage = Lunar::Internal::BufferMemoryUsage::CPUToGPU,
+        }, sizeof(ubo));
+		uboBuffer.SetData(&ubo, sizeof(ubo));
+
+        // Descriptors
+        Lunar::Internal::DescriptorSets descriptorSets(rendererID, { Lunar::Internal::DescriptorSetRequest({
+            .Amount = 1,
+            .Layout = Lunar::Internal::DescriptorSetLayout(0, {
+                { Lunar::Internal::DescriptorType::UniformBuffer, 0, "ubo", Lunar::Internal::ShaderStage::Vertex },
+            })
+        }) });
+
+        // Shader
+        Lunar::Internal::ShaderSpecification shaderSpecs = {};
+        shaderSpecs.Shaders[Lunar::Internal::ShaderStage::Vertex] = Lunar::Internal::ShaderCompiler::CompileGLSL(Lunar::Internal::ShaderStage::Vertex, g_VertexShader);
+        shaderSpecs.Shaders[Lunar::Internal::ShaderStage::Fragment] = Lunar::Internal::ShaderCompiler::CompileGLSL(Lunar::Internal::ShaderStage::Fragment, g_FragmentShader);
+		Lunar::Internal::Shader shader(rendererID, shaderSpecs);
+
+        // Renderpass
+        Lunar::Internal::CommandBuffer cmdBuf(rendererID);
+        Lunar::Internal::Renderpass renderpass(rendererID, Lunar::Internal::RenderpassSpecification({
             .Usage = Lunar::Internal::RenderpassUsage::Forward,
 
-            .ColourAttachment = window.GetRenderer().GetSwapChainImages(),
-            .ColourClearColour = { 1.0f, 0.0f, 0.0f, 1.0f }
+            .ColourAttachment = renderer.GetSwapChainImages(),
+            .ColourClearColour = { 0.1f, 0.1f, 0.1f, 1.0f }
         }), &cmdBuf);
+
+        // Pipeline
+        Lunar::Internal::PipelineSpecification pipelineSpecs = {
+            .Bufferlayout = { 
+                { Lunar::Internal::DataType::Float2, 0, "inPosition"},
+				{ Lunar::Internal::DataType::Float2, 1, "inUV" },
+				{ Lunar::Internal::DataType::Float4, 2, "inColor" }
+            }
+        };
+		Lunar::Internal::Pipeline pipeline(rendererID, pipelineSpecs, descriptorSets, shader, renderpass);
 
         while (window.IsOpen())
         {
             window.PollEvents();
-            window.GetRenderer().BeginFrame();
+            renderer.BeginFrame();
 
-            window.GetRenderer().Begin(renderpass);
+            descriptorSets.GetSets(0)[0]->Upload({ { &uboBuffer, descriptorSets.GetLayout(0).GetDescriptorByName("ubo")}});
 
-            // ...
+            renderer.Begin(renderpass);
+            
+            pipeline.Use(cmdBuf);
+			descriptorSets.GetSets(0)[0]->Bind(pipeline, cmdBuf);
+            vertexBuffer.Bind(cmdBuf);
+            indexBuffer.Bind(cmdBuf);
 
-            window.GetRenderer().End(renderpass);
-            window.GetRenderer().Submit(renderpass, Lunar::Internal::ExecutionPolicy::InOrder);
+            renderer.DrawIndexed(cmdBuf, indexBuffer); 
 
-            window.GetRenderer().EndFrame();
-            window.GetRenderer().Present();
+            renderer.End(renderpass);
+            renderer.Submit(renderpass, Lunar::Internal::ExecutionPolicy::InOrder);
+
+            renderer.EndFrame();
+            renderer.Present();
             window.SwapBuffers();
         }
     }

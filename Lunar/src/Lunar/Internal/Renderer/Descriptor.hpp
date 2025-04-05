@@ -58,10 +58,10 @@ namespace Lunar::Internal
 
         // Setters & Getters
         inline void SetAmountOf(uint8_t setID, uint32_t amount) { m_Descriptors.SetAmountOf(setID, amount); }
-        inline uint32_t GetAmountOf(uint8_t setID) const { m_Descriptors.GetAmountOf(setID); }
+        inline uint32_t GetAmountOf(uint8_t setID) const { return m_Descriptors.GetAmountOf(setID); }
         
-        inline const DescriptorSetLayout& GetLayout(uint8_t setID) const { m_Descriptors.GetLayout(setID); }
-        inline std::vector<DescriptorSet*> GetSets(uint8_t setID) { m_Descriptors.GetSets(setID); }
+        inline const DescriptorSetLayout& GetLayout(uint8_t setID) const { return m_Descriptors.GetLayout(setID); }
+        inline std::vector<DescriptorSet*> GetSets(uint8_t setID) { return m_Descriptors.GetSets(setID); }
 
         // Internal
         inline DescriptorSetsType& GetInternalDescriptorSets() { return m_Descriptors; }

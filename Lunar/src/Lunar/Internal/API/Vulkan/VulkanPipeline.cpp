@@ -143,16 +143,16 @@ namespace Lunar::Internal
             fragShaderStageInfo.pName = "main";
         }
 
-        auto bindingDescription = GetBindingDescription();
+        auto bindingDescriptions = GetBindingDescriptions();
         auto attributeDescriptions = GetAttributeDescriptions();
 
         VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
         vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
         if (!m_Specification.Bufferlayout.GetElements().empty())
         {
-            vertexInputInfo.vertexBindingDescriptionCount = 1;
+            vertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(bindingDescriptions.size());
             vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
-            vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
+            vertexInputInfo.pVertexBindingDescriptions = bindingDescriptions.data();
             vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
         }
         else
@@ -686,31 +686,76 @@ namespace Lunar::Internal
         VK_VERIFY(CreateRayTracingPipelinesNV(VulkanContext::GetVulkanDevice().GetVkDevice(), VulkanAllocator::s_PipelineCache, 1, &rayTracingPipelineCreateInfo, nullptr, &m_Pipeline));
     }
 
-    VkVertexInputBindingDescription VulkanPipeline::GetBindingDescription()
+    std::vector<VkVertexInputBindingDescription> VulkanPipeline::GetBindingDescriptions() const
     {
-        VkVertexInputBindingDescription description = {};
-        description.binding = 0;
-        description.stride = static_cast<uint32_t>(m_Specification.Bufferlayout.GetStride());
-        description.inputRate = VertexInputRateToVkVertexInputRate(m_Specification.Bufferlayout.GetVertexInputRate());
+        std::vector<VkVertexInputBindingDescription> descriptions;
+        const auto& layout = m_Specification.Bufferlayout;
+        const auto& elements = layout.GetElements();
 
-        return description;
-    }
+        std::unordered_map<VertexInputRate, uint32_t> rateToBinding = {};
+        uint32_t bindingIndex = 0;
 
-    std::vector<VkVertexInputAttributeDescription> VulkanPipeline::GetAttributeDescriptions()
-    {
-        std::vector<VkVertexInputAttributeDescription> attributeDescriptions = {};
-        attributeDescriptions.resize(m_Specification.Bufferlayout.GetElements().size());
-
-        auto& elements = m_Specification.Bufferlayout.GetElements();
-        for (size_t i = 0; i < elements.size(); i++)
+        for (const auto& element : elements)
         {
-            attributeDescriptions[i].binding = 0;
-            attributeDescriptions[i].location = elements[i].Location;
-            attributeDescriptions[i].format = DataTypeToVkFormat(elements[i].Type);
-            attributeDescriptions[i].offset = static_cast<uint32_t>(elements[i].Offset);
+            if (rateToBinding.find(element.InputRate) == rateToBinding.end())
+            {
+                VkVertexInputBindingDescription desc = {};
+                desc.binding = bindingIndex;
+                desc.stride = static_cast<uint32_t>(layout.GetStride(element.InputRate));
+                desc.inputRate = VertexInputRateToVkVertexInputRate(element.InputRate);
+
+                descriptions.push_back(desc);
+                rateToBinding[element.InputRate] = bindingIndex;
+                bindingIndex++;
+            }
         }
 
-        return attributeDescriptions;
+        return descriptions;
+    }
+
+    std::vector<VkVertexInputAttributeDescription> VulkanPipeline::GetAttributeDescriptions() const
+    {
+        std::vector<VkVertexInputAttributeDescription> descriptions;
+        const auto& layout = m_Specification.Bufferlayout;
+        const auto& elements = layout.GetElements();
+
+        uint32_t location = 0;
+        std::unordered_map<VertexInputRate, uint32_t> rateToBinding;
+        uint32_t bindingIndex = 0;
+
+        // First assign bindings to input rates
+        for (const auto& element : elements)
+        {
+            if (rateToBinding.find(element.InputRate) == rateToBinding.end())
+                rateToBinding[element.InputRate] = bindingIndex++;
+        }
+
+        uint32_t offsetVertex = 0;
+        uint32_t offsetInstance = 0;
+
+        for (const auto& element : elements)
+        {
+            VkVertexInputAttributeDescription attr = {};
+            attr.location = location++;
+            attr.binding = rateToBinding[element.InputRate];
+            attr.format = DataTypeToVkFormat(element.Type);
+
+            // Set offset based on the stride accumulation
+            if (element.InputRate == VertexInputRate::Vertex)
+            {
+                attr.offset = offsetVertex;
+                offsetVertex += static_cast<uint32_t>(DataTypeSize(element.Type));
+            }
+            else
+            {
+                attr.offset = offsetInstance;
+                offsetInstance += static_cast<uint32_t>(DataTypeSize(element.Type));
+            }
+
+            descriptions.push_back(attr);
+        }
+
+        return descriptions;
     }
 
 	////////////////////////////////////////////////////////////////////////////////////

@@ -49,6 +49,9 @@ namespace Lunar::Internal
         // Getters
         inline const PipelineSpecification& GetSpecification() const { return m_Pipeline.GetSpecification(); }
 
+        // Internal
+        inline PipelineType& GetInternalPipeline() { return m_Pipeline; }
+
     private:
         PipelineType m_Pipeline = {};
     };

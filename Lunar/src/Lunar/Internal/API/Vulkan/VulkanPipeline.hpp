@@ -64,8 +64,8 @@ namespace Lunar::Internal
 		void CreateRayTracingPipelineKHR(DescriptorSets& sets, Shader& shader);
 		void CreateRayTracingPipelineNV(DescriptorSets& sets, Shader& shader);
 
-		VkVertexInputBindingDescription GetBindingDescription(); // TODO: Make Instanced support
-		std::vector<VkVertexInputAttributeDescription> GetAttributeDescriptions();
+		std::vector<VkVertexInputBindingDescription> GetBindingDescriptions() const;
+		std::vector<VkVertexInputAttributeDescription> GetAttributeDescriptions() const;
 
 	private:
 		RendererID m_RendererID = 0;

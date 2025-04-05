@@ -48,7 +48,7 @@ namespace Lunar::Internal
     {
     public:
         // Note: Currently the shader code is required to be in the SPIR-V format.
-        std::unordered_map<ShaderStage, const std::vector<char>> Shaders = { };
+        std::unordered_map<ShaderStage, std::vector<char>> Shaders = { };
     };
 
 }

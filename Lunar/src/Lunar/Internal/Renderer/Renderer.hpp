@@ -4,9 +4,10 @@
 
 #include "Lunar/Internal/Utils/Settings.hpp"
 
-#include "Lunar/Internal/Renderer/PipelineSpec.hpp"
-#include "Lunar/Internal/Renderer/CommandBuffer.hpp"
+#include "Lunar/Internal/Renderer/Buffers.hpp"
+#include "Lunar/Internal/Renderer/Pipeline.hpp"
 #include "Lunar/Internal/Renderer/Renderpass.hpp"
+#include "Lunar/Internal/Renderer/CommandBuffer.hpp"
 
 #include "Lunar/Internal/API/Vulkan/VulkanRenderer.hpp"
 
@@ -54,6 +55,10 @@ namespace Lunar::Internal
 		inline void End(Renderpass& renderpass) { m_Renderer.End(renderpass); }
         inline void Submit(CommandBuffer& cmdBuf, ExecutionPolicy policy, Queue queue = Queue::Graphics, PipelineStage waitStage = PipelineStage::ColourAttachmentOutput, const std::vector<CommandBuffer*>& waitOn = {}) { m_Renderer.Submit(cmdBuf, policy, queue, waitStage, waitOn); }
         inline void Submit(Renderpass& renderpass, ExecutionPolicy policy, Queue queue = Queue::Graphics, PipelineStage waitStage = PipelineStage::ColourAttachmentOutput, const std::vector<CommandBuffer*>& waitOn = {}) { m_Renderer.Submit(renderpass, policy, queue, waitStage, waitOn); }
+
+		inline void Draw(CommandBuffer& cmdBuf, uint32_t vertexCount = 3, uint32_t instanceCount = 1) { m_Renderer.Draw(cmdBuf, vertexCount, instanceCount); }
+		inline void DrawIndexed(CommandBuffer& cmdBuf, uint32_t indexCount, uint32_t instanceCount = 1) { m_Renderer.DrawIndexed(cmdBuf, indexCount, instanceCount); }
+		inline void DrawIndexed(CommandBuffer& cmdBuf, IndexBuffer& indexBuffer, uint32_t instanceCount = 1) { m_Renderer.DrawIndexed(cmdBuf, indexBuffer, instanceCount); }
 
         // Internal
         inline void Free(const FreeFn& fn) { m_Renderer.Free(fn); }

@@ -368,6 +368,27 @@ namespace Lunar::Internal
         Submit(renderpass.GetCommandBuffer(), policy, queue, waitStage, waitOn);
     }
 
+    void VulkanRenderer::Draw(CommandBuffer& cmdBuf, uint32_t vertexCount, uint32_t instanceCount)
+    {
+        LU_PROFILE("VkRenderer::Draw");
+        VulkanCommandBuffer& vkCmdBuf = cmdBuf.GetInternalCommandBuffer();
+
+        vkCmdDraw(vkCmdBuf.GetVkCommandBuffer(m_SwapChain.GetCurrentFrame()), vertexCount, instanceCount, 0, 0);
+    }
+
+    void VulkanRenderer::DrawIndexed(CommandBuffer& cmdBuf, uint32_t indexCount, uint32_t instanceCount)
+    {
+        LU_PROFILE("VkRenderer::DrawIndexed");
+        VulkanCommandBuffer& vkCmdBuf = cmdBuf.GetInternalCommandBuffer();
+
+        vkCmdDrawIndexed(vkCmdBuf.GetVkCommandBuffer(m_SwapChain.GetCurrentFrame()), indexCount, instanceCount, 0, 0, 0);
+    }
+
+    void VulkanRenderer::DrawIndexed(CommandBuffer& cmdBuf, IndexBuffer& indexBuffer, uint32_t instanceCount)
+    {
+        DrawIndexed(cmdBuf, indexBuffer.GetCount(), instanceCount);
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////
     // Internal methods
     ////////////////////////////////////////////////////////////////////////////////////

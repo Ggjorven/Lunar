@@ -33,42 +33,46 @@ namespace Lunar::Internal
 		std::string Name;
 		uint32_t Location;
 		DataType Type;
+		VertexInputRate InputRate;
 		size_t Size;
 		size_t Offset;
 
 	public:
+		// Constructors & Destructor
 		BufferElement() = default;
-		BufferElement(DataType type, uint32_t location, const std::string& name);
+		BufferElement(DataType type, uint32_t location, const std::string& name, VertexInputRate inputRate = VertexInputRate::Vertex);
 		~BufferElement() = default;
 
+		// Getter
 		uint32_t GetComponentCount() const;
 	};
 
 	struct BufferLayout
 	{
 	public:
+		// Constructors & Destructor
 		BufferLayout() = default;
-		BufferLayout(const std::initializer_list<BufferElement>& elements);									// VertexInputRate = VertexInputRate::Vertex
-		BufferLayout(const std::initializer_list<BufferElement>& elements, size_t instanceBufferStride);	// VertexInputRate = VertexInputRate::Instance
+		BufferLayout(const std::initializer_list<BufferElement>& elements);
 		~BufferLayout() = default;
 
-		inline size_t GetStride() const { return m_Stride; }
-		inline VertexInputRate GetVertexInputRate() const { return m_VertexInputRate; }
+		// Getters
+		size_t GetStride(VertexInputRate inputRate) const;
 		inline const std::vector<BufferElement>& GetElements() const { return m_Elements; }
 
+		// Iterators
 		inline std::vector<BufferElement>::iterator begin() { return m_Elements.begin(); }
 		inline std::vector<BufferElement>::iterator end() { return m_Elements.end(); }
 		inline std::vector<BufferElement>::const_iterator begin() const { return m_Elements.begin(); }
 		inline std::vector<BufferElement>::const_iterator end() const { return m_Elements.end(); }
 
 	private:
-		void CalculateOffsetsAndStride();
+		void CalculateOffsetsAndStrides();
 
 	private:
 		std::vector<BufferElement> m_Elements = { };
-		size_t m_Stride = 0;
 
-		VertexInputRate m_VertexInputRate = VertexInputRate::Vertex;
+		size_t m_VertexStride = 0;
+		size_t m_InstanceStride = 0;
 	};
 
 	enum class BufferMemoryUsage : uint8_t

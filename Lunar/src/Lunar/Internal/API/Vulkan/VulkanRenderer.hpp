@@ -5,9 +5,10 @@
 #include <mutex>
 
 #include "Lunar/Internal/Renderer/RendererSpec.hpp"
+#include "Lunar/Internal/Renderer/Buffers.hpp"
+#include "Lunar/Internal/Renderer/Pipeline.hpp"
 #include "Lunar/Internal/Renderer/Renderpass.hpp"
 #include "Lunar/Internal/Renderer/CommandBuffer.hpp"
-#include "Lunar/Internal/Renderer/PipelineSpec.hpp" // TODO: Replace with pipeline
 
 #include "Lunar/Internal/API/Vulkan/Vulkan.hpp"
 
@@ -48,6 +49,10 @@ namespace Lunar::Internal
         void End(Renderpass& renderpass);
         void Submit(CommandBuffer& cmdBuf, ExecutionPolicy policy, Queue queue, PipelineStage waitStage, const std::vector<CommandBuffer*>& waitOn);
         void Submit(Renderpass& renderpass, ExecutionPolicy policy, Queue queue, PipelineStage waitStage, const std::vector<CommandBuffer*>& waitOn);
+
+        void Draw(CommandBuffer& cmdBuf, uint32_t vertexCount, uint32_t instanceCount);
+        void DrawIndexed(CommandBuffer& cmdBuf, uint32_t indexCount, uint32_t instanceCount);
+        void DrawIndexed(CommandBuffer& cmdBuf, IndexBuffer& indexBuffer, uint32_t instanceCount);
 
         // Internal
         void Free(const FreeFn& fn);

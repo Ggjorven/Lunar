@@ -6,6 +6,7 @@
 
 #include "Lunar/Internal/Renderer/Renderer.hpp"
 #include "Lunar/Internal/Renderer/Image.hpp"
+#include "Lunar/Internal/Renderer/Buffers.hpp"
 #include "Lunar/Internal/Renderer/Pipeline.hpp"
 #include "Lunar/Internal/Renderer/CommandBuffer.hpp"
 
@@ -40,14 +41,12 @@ namespace Lunar::Internal
     ////////////////////////////////////////////////////////////////////////////////////
     void VulkanDescriptorSet::Bind(Pipeline& pipeline, CommandBuffer& commandBuffer, PipelineBindPoint bindPoint, const std::vector<uint32_t>& dynamicOffsets)
     {
-        // TODO: Uncomment all
-
         LU_PROFILE("VkDescriptorSet::Bind");
         uint32_t currentFrame = VulkanRenderer::GetRenderer(m_RendererID).GetVulkanSwapChain().GetCurrentFrame();
-        //auto vkPipelineLayout = pipeline.GetInternalPipeline().GetVkPipelineLayout();
+        auto vkPipelineLayout = pipeline.GetInternalPipeline().GetVkPipelineLayout();
         auto vkCmdBuf = commandBuffer.GetInternalCommandBuffer().GetVkCommandBuffer(currentFrame);
 
-        //vkCmdBindDescriptorSets(vkCmdBuf, PipelineBindPointToVkPipelineBindPoint(bindPoint), vkPipelineLayout, m_SetID, 1, &m_DescriptorSets[currentFrame], static_cast<uint32_t>(dynamicOffsets.size()), dynamicOffsets.data());
+        vkCmdBindDescriptorSets(vkCmdBuf, PipelineBindPointToVkPipelineBindPoint(bindPoint), vkPipelineLayout, m_SetID, 1, &m_DescriptorSets[currentFrame], static_cast<uint32_t>(dynamicOffsets.size()), dynamicOffsets.data());
     }
 
     void VulkanDescriptorSet::Upload(const std::vector<Uploadable>& elements)
@@ -69,10 +68,9 @@ namespace Lunar::Internal
                 {
                     using T = std::decay_t<decltype(arg)>;
 
-                    // TODO: Uncomment
                     if constexpr (std::is_same_v<T, Image*>)                  UploadImage(writes, imageInfos, arg->GetInternalImage(), descriptor, arrayIndex, currentFrame);
-                    //else if constexpr (std::is_same_v<T, UniformBuffer*>)     UploadUniformBuffer(writes, bufferInfos, arg->GetInternalUniformBuffer(), descriptor, arrayIndex, //currentFrame);
-                    //else if constexpr (std::is_same_v<T, StorageBuffer*>)     UploadStorageBuffer(writes, bufferInfos, arg->GetInternalStorageBuffer(), descriptor, arrayIndex, currentFrame);
+                    else if constexpr (std::is_same_v<T, UniformBuffer*>)     UploadUniformBuffer(writes, bufferInfos, arg->GetInternalUniformBuffer(), descriptor, arrayIndex, currentFrame);
+                    else if constexpr (std::is_same_v<T, StorageBuffer*>)     UploadStorageBuffer(writes, bufferInfos, arg->GetInternalStorageBuffer(), descriptor, arrayIndex, currentFrame);
                 }, uploadable);
         }
 
@@ -104,7 +102,6 @@ namespace Lunar::Internal
 
     void VulkanDescriptorSet::UploadUniformBuffer(std::vector<VkWriteDescriptorSet>& writes, std::vector<VkDescriptorBufferInfo>& bufferInfos, VulkanUniformBuffer& buffer, Descriptor descriptor, uint32_t arrayIndex, uint32_t frame)
     {
-        /* // TODO: Uncomment
         VkDescriptorBufferInfo& bufferInfo = bufferInfos.emplace_back();
         bufferInfo.buffer = buffer.m_Buffers[frame];
         bufferInfo.offset = 0;
@@ -118,12 +115,10 @@ namespace Lunar::Internal
         descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         descriptorWrite.descriptorCount = 1; // descriptor.Count;
         descriptorWrite.pBufferInfo = &bufferInfo;
-        */
     }
 
     void VulkanDescriptorSet::UploadStorageBuffer(std::vector<VkWriteDescriptorSet>& writes, std::vector<VkDescriptorBufferInfo>& bufferInfos, VulkanStorageBuffer& buffer, Descriptor descriptor, uint32_t arrayIndex, uint32_t frame)
     {
-        /* // TODO: Uncomment
         VkDescriptorBufferInfo& bufferInfo = bufferInfos.emplace_back();
         bufferInfo.buffer = buffer.m_Buffers[frame];
         bufferInfo.offset = 0;
@@ -137,7 +132,6 @@ namespace Lunar::Internal
         descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         descriptorWrite.descriptorCount = 1; // descriptor.Count;
         descriptorWrite.pBufferInfo = &bufferInfo;
-        */
     }
 
     ////////////////////////////////////////////////////////////////////////////////////
