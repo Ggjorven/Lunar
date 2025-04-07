@@ -417,6 +417,16 @@ namespace Lunar::Internal
     ////////////////////////////////////////////////////////////////////////////////////
     // Getters
     ////////////////////////////////////////////////////////////////////////////////////
+    ImageFormat VulkanRenderer::GetColourFormat() const
+    {
+        return VkFormatToImageFormat(m_SwapChain.GetColourFormat());
+    }
+
+    ImageFormat VulkanRenderer::GetDepthFormat() const
+    {
+        return VkFormatToImageFormat(VulkanContext::GetVulkanPhysicalDevice().FindDepthFormat());
+    }
+
     std::vector<Image*> VulkanRenderer::GetSwapChainImages()
     {
         std::vector<Image*> images(m_SwapChain.m_Images.size());
@@ -425,11 +435,6 @@ namespace Lunar::Internal
             images[i] = Vk::Cast<Image>(&m_SwapChain.m_Images[i]);
 
         return images;
-    }
-
-    Image* VulkanRenderer::GetDepthImage()
-    {
-        return Vk::Cast<Image>(&m_SwapChain.m_DepthStencil);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////

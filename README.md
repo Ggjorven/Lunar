@@ -33,3 +33,4 @@ Contributions are welcome! Please fork the repository and create a pull request 
 ## Third-Party Libraries
 - [GLFW](https://www.glfw.org/) - Windowing and input handling
 - [glm](https://github.com/g-truc/glm) - Mathematics library for graphics
+- [tracy](https://github.com/wolfpld/tracy) - Realtime sampling profiler

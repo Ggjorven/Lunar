@@ -52,7 +52,6 @@ namespace Lunar::Internal
 
 		for (auto& image : m_Images)
 			image.Destroy();
-		m_DepthStencil.Destroy();
 
 		vkDestroyCommandPool(device.GetVkDevice(), m_CommandPool, nullptr);
 
@@ -249,22 +248,6 @@ namespace Lunar::Internal
 			// since we manually set all the data.
 			m_Images[i].Transition(ImageLayout::Undefined, ImageLayout::PresentSrcKHR);
 		}
-
-		if (m_DepthStencil.GetWidth() == 0 || m_DepthStencil.GetHeight() == 0)
-		{
-			ImageSpecification specs = {
-				.Usage = ImageUsage::DepthStencil | ImageUsage::Sampled,
-				.Layout = ImageLayout::DepthStencil,
-				.Format = VkFormatToImageFormat(VulkanContext::GetVulkanPhysicalDevice().FindDepthFormat()),
-				.Width = width,
-				.Height = height,
-				.MipMaps = false,
-			};
-
-			m_DepthStencil.Init(m_Window->GetRenderer().GetID(), specs, SamplerSpecification());
-		}
-		else
-			m_DepthStencil.Resize(width, height);
 
 		///////////////////////////////////////////////////////////
 		// Synchronization Objects

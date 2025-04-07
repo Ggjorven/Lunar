@@ -8,13 +8,28 @@
 #include "Lunar/Enum/Name.hpp"
 
 #include "Lunar/Internal/IO/Print.hpp"
+#include "Lunar/Internal/Utils/Settings.hpp"
 
 #include "Lunar/Internal/Renderer/RendererSpec.hpp"
 
 #include "Lunar/Internal/Utils/Preprocessor.hpp"
 
+#if defined(LU_COMPILER_GCC)
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 #include <vulkan/vulkan.h>
 #include <vma/vk_mem_alloc.h>
+
+    #pragma GCC diagnostic pop
+#else
+    #pragma warning(push, 0)
+
+#include <vulkan/vulkan.h>
+#include <vma/vk_mem_alloc.h>
+
+    #pragma warning(pop)
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////////
 // Helper

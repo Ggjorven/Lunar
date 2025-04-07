@@ -64,8 +64,9 @@ namespace Lunar::Internal
         inline RendererID GetID() const { return m_ID; }
         inline const RendererSpecification& GetSpecification() const { return m_Specification; }
 
+        ImageFormat GetColourFormat() const;
+        ImageFormat GetDepthFormat() const;
         std::vector<Image*> GetSwapChainImages();
-        Image* GetDepthImage();
 
         // Internal getters
         inline VulkanTaskManager& GetTaskManager() { return m_TaskManager; }

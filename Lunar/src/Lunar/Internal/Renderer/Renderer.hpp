@@ -70,8 +70,9 @@ namespace Lunar::Internal
 		inline RendererID GetID() const { return m_ID; }
 		inline const RendererSpecification& GetSpecification() const { return m_Renderer.GetSpecification(); }
 
+        inline ImageFormat GetColourFormat() const { return m_Renderer.GetColourFormat(); }
+        inline ImageFormat GetDepthFormat() const { return m_Renderer.GetDepthFormat(); }
         inline std::vector<Image*> GetSwapChainImages() { return m_Renderer.GetSwapChainImages(); }
-        inline Image* GetDepthImage() { return m_Renderer.GetDepthImage(); }
 
         // Internal
         // Note: This is an internal function, do not call.

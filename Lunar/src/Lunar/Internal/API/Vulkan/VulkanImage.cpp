@@ -2,6 +2,7 @@
 #include "VulkanImage.hpp"
 
 #include "Lunar/Internal/IO/Print.hpp"
+#include "Lunar/Internal/Utils/Settings.hpp"
 
 #include "Lunar/Internal/Enum/Fuse.hpp"
 
@@ -13,8 +14,22 @@
 
 #define STBI_ASSERT(x) LU_ASSERT(x, std::format("[VkImage:stb_image] '{0}'", #x))
 
+#if defined(LU_COMPILER_GCC)
+	#pragma GCC diagnostic push
+	#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
+
+	#pragma GCC diagnostic pop
+#else
+	#pragma warning(push, 0)
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb/stb_image.h>
+
+	#pragma warning(pop)
+#endif
 
 namespace Lunar::Internal
 {

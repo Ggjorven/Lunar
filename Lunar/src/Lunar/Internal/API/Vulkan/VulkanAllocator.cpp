@@ -2,11 +2,26 @@
 #include "VulkanAllocator.hpp"
 
 #include "Lunar/Internal/IO/Print.hpp"
+#include "Lunar/Internal/Utils/Settings.hpp"
 
 #include "Lunar/Internal/API/Vulkan/VulkanContext.hpp"
 
+#if defined(LU_COMPILER_GCC)
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 #define VMA_IMPLEMENTATION
 #include <vma/vk_mem_alloc.h>
+
+    #pragma GCC diagnostic pop
+#else
+    #pragma warning(push, 0)
+
+#define VMA_IMPLEMENTATION
+#include <vma/vk_mem_alloc.h>
+
+    #pragma warning(pop)
+#endif
 
 namespace Lunar::Internal
 {

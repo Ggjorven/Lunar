@@ -36,7 +36,6 @@ namespace Lunar::Internal
         inline uint32_t GetAquiredImage() const { return m_AcquiredImage; }
 
         inline std::vector<VulkanImage>& GetSwapChainImages() { return m_Images; }
-        inline VulkanImage& GetDepthImage() { return m_DepthStencil; }
 
         inline VkSurfaceKHR GetVkSurface() const { return m_Surface; }
         inline VkCommandPool GetVkCommandPool() const { return m_CommandPool; }
@@ -56,7 +55,6 @@ namespace Lunar::Internal
         VkSurfaceKHR m_Surface = VK_NULL_HANDLE;
 
         std::vector<VulkanImage> m_Images = { };
-        VulkanImage m_DepthStencil = {};
 
         VkCommandPool m_CommandPool = VK_NULL_HANDLE;
 
