@@ -45,8 +45,13 @@ namespace Lunar::Internal
     {
     public:
 		// Constructor & Destructor
-		inline Shader(const RendererID renderer, const ShaderSpecification& specs) { m_Shader.Init(renderer, specs); }
-		inline ~Shader() { m_Shader.Destroy(); }
+		inline Shader() = default;
+		inline Shader(const RendererID renderer, const ShaderSpecification& specs) { Init(renderer, specs); }
+        inline ~Shader() = default;
+
+        // Init & Destroy
+		inline void Init(const RendererID renderer, const ShaderSpecification& specs) { m_Shader.Init(renderer, specs); }
+        inline void Destroy(const RendererID renderer) { m_Shader.Destroy(renderer); }
 
 		// Static methods
         static std::string ReadGLSL(const std::filesystem::path& path);

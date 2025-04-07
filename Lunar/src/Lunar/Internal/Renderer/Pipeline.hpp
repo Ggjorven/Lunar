@@ -31,20 +31,26 @@ namespace Lunar::Internal
     {
     public:
         // Constructor & Destructor
-        inline Pipeline(const RendererID renderer, const PipelineSpecification& specs, DescriptorSets& sets, Shader& shader) { m_Pipeline.Init(renderer, specs, sets, shader); }
-        inline Pipeline(const RendererID renderer, const PipelineSpecification& specs, DescriptorSets& sets, Shader& shader, Renderpass& renderpass) { m_Pipeline.Init(renderer, specs, sets, shader, renderpass); }
-        inline ~Pipeline() { m_Pipeline.Destroy(); }
+        inline Pipeline() = default;
+        inline Pipeline(const RendererID renderer, const PipelineSpecification& specs, DescriptorSets& sets, Shader& shader) { Init(renderer, specs, sets, shader); }
+        inline Pipeline(const RendererID renderer, const PipelineSpecification& specs, DescriptorSets& sets, Shader& shader, Renderpass& renderpass) { Init(renderer, specs, sets, shader, renderpass); }
+        inline ~Pipeline() = default;
+
+        // Init & Destroy
+		inline void Init(const RendererID renderer, const PipelineSpecification& specs, DescriptorSets& sets, Shader& shader) { m_Pipeline.Init(renderer, specs, sets, shader); }
+		inline void Init(const RendererID renderer, const PipelineSpecification& specs, DescriptorSets& sets, Shader& shader, Renderpass& renderpass) { m_Pipeline.Init(renderer, specs, sets, shader, renderpass); }
+		inline void Destroy(const RendererID renderer) { m_Pipeline.Destroy(renderer); }
 
         // Methods
-        inline void Use(CommandBuffer& cmdBuf, PipelineBindPoint bindPoint = PipelineBindPoint::Graphics) { m_Pipeline.Use(cmdBuf, bindPoint); }
+        inline void Use(const RendererID renderer, CommandBuffer& cmdBuf, PipelineBindPoint bindPoint = PipelineBindPoint::Graphics) { m_Pipeline.Use(renderer, cmdBuf, bindPoint); }
 
         // Push entire constant of stage specified in PipelineSpecification.PushConstants
-        inline void PushConstant(CommandBuffer& cmdBuf, ShaderStage stage, void* data) { m_Pipeline.PushConstant(cmdBuf, stage, data); }
+        inline void PushConstant(const RendererID renderer, CommandBuffer& cmdBuf, ShaderStage stage, void* data) { m_Pipeline.PushConstant(renderer, cmdBuf, stage, data); }
         // Push part of a constant manually
-        inline void PushConstant(CommandBuffer& cmdBuf, ShaderStage stage, void* data, size_t offset, size_t size) { m_Pipeline.PushConstant(cmdBuf, stage, data, offset, size); }
+        inline void PushConstant(const RendererID renderer, CommandBuffer& cmdBuf, ShaderStage stage, void* data, size_t offset, size_t size) { m_Pipeline.PushConstant(renderer, cmdBuf, stage, data, offset, size); }
 
         // Make sure a compute shader is present in the current pipeline and that the pipeline is bound.
-        inline void DispatchCompute(CommandBuffer& cmdBuf, uint32_t width, uint32_t height, uint32_t depth) { m_Pipeline.DispatchCompute(cmdBuf, width, height, depth); }
+        inline void DispatchCompute(const RendererID renderer, CommandBuffer& cmdBuf, uint32_t width, uint32_t height, uint32_t depth) { m_Pipeline.DispatchCompute(renderer, cmdBuf, width, height, depth); }
 
         // Getters
         inline const PipelineSpecification& GetSpecification() const { return m_Pipeline.GetSpecification(); }

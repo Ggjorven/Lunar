@@ -34,19 +34,17 @@ namespace Lunar::Internal
 
 		// Init & Destroy
 		void Init(const RendererID renderer, const BufferSpecification& specs, void* data, size_t size);
-		void Destroy();
+		void Destroy(const RendererID renderer);
 
 		// Methods
-		void Bind(CommandBuffer& cmdBuf) const;
+		void Bind(const RendererID renderer, CommandBuffer& cmdBuf) const;
 
-		void SetData(void* data, size_t size, size_t offset);
+		void SetData(const RendererID renderer, void* data, size_t size, size_t offset);
 
 		// Static methods
 		static void Bind(const RendererID renderer, CommandBuffer& cmdBuf, const std::vector<VertexBuffer*>& buffers);
 
 	private:
-		RendererID m_RendererID = 0;
-
 		VkBuffer m_Buffer = VK_NULL_HANDLE;
 		VmaAllocation m_Allocation = VK_NULL_HANDLE;
 
@@ -69,25 +67,23 @@ namespace Lunar::Internal
 		void Init(const RendererID renderer, const BufferSpecification& specs, uint8_t* indices, uint32_t count);
 		void Init(const RendererID renderer, const BufferSpecification& specs, uint16_t* indices, uint32_t count);
 		void Init(const RendererID renderer, const BufferSpecification& specs, uint32_t* indices, uint32_t count);
-		void Destroy();
+		void Destroy(const RendererID renderer);
 
 		// Methods
-		void Bind(CommandBuffer& cmdBuf) const;
+		void Bind(const RendererID renderer, CommandBuffer& cmdBuf) const;
 
-		void SetData(uint8_t* indices, uint32_t count, size_t countOffset);
-		void SetData(uint16_t* indices, uint32_t count, size_t countOffset);
-		void SetData(uint32_t* indices, uint32_t count, size_t countOffset);
+		void SetData(const RendererID renderer, uint8_t* indices, uint32_t count, size_t countOffset);
+		void SetData(const RendererID renderer, uint16_t* indices, uint32_t count, size_t countOffset);
+		void SetData(const RendererID renderer, uint32_t* indices, uint32_t count, size_t countOffset);
 
 		// Getters
 		inline uint32_t GetCount() const { return m_Count; }
 
 	private:
 		// Private methods
-		void SetData(void* indices, size_t size, size_t offset);
+		void SetData(const RendererID renderer, void* indices, size_t size, size_t offset);
 
 	private:
-		RendererID m_RendererID = 0;
-
 		VkBuffer m_Buffer = VK_NULL_HANDLE;
 		VmaAllocation m_Allocation = VK_NULL_HANDLE;
 
@@ -107,21 +103,19 @@ namespace Lunar::Internal
 
 		// Init & Destroy
 		void Init(const RendererID renderer, const BufferSpecification& specs, size_t dataSize);
-		void Destroy();
+		void Destroy(const RendererID renderer);
 
 		// Methods
-		void SetData(void* data, size_t size, size_t offset);
+		void SetData(const RendererID renderer, void* data, size_t size, size_t offset);
 
 		// Getters
 		inline size_t GetSize() const { return m_Size; }
 
 	private:
-		RendererID m_RendererID = 0;
-
 		std::vector<VkBuffer> m_Buffers = { };
 		std::vector<VmaAllocation> m_Allocations = { };
 
-		size_t m_Size;
+		size_t m_Size = 0;
 
 		friend class VulkanDescriptorSet;
 	};
@@ -173,17 +167,15 @@ namespace Lunar::Internal
 
 		// Init & Destroy
 		void Init(const RendererID renderer, const BufferSpecification& specs, size_t dataSize);
-		void Destroy();
+		void Destroy(const RendererID renderer);
 
 		// Methods
-		void SetData(void* data, size_t size, size_t offset);
+		void SetData(const RendererID renderer, void* data, size_t size, size_t offset);
 
 		// Getters
 		inline size_t GetSize() const { return m_Size; }
 
 	private:
-		RendererID m_RendererID = 0;
-
 		std::vector<VkBuffer> m_Buffers = { };
 		std::vector<VmaAllocation> m_Allocations = { };
 

@@ -42,17 +42,16 @@ namespace Lunar::Internal
         void Init(const RendererID renderer, const ImageSpecification& imageSpecs, const SamplerSpecification& samplerSpecs);
         void Init(const RendererID renderer, const ImageSpecification& imageSpecs, const SamplerSpecification& samplerSpecs, const std::filesystem::path& imagePath);
         void Init(const RendererID renderer, const ImageSpecification& imageSpecs, const VkImage image, const VkImageView imageView); // Note: This exists for swapchain images
-        void Destroy();
+        void Destroy(const RendererID renderer);
 
         // Methods
-        void SetData(void* data, size_t size);
+        void SetData(const RendererID renderer, void* data, size_t size);
 
-        void Resize(uint32_t width, uint32_t height);
+        void Resize(const RendererID renderer, uint32_t width, uint32_t height);
 
-        void Transition(ImageLayout initial, ImageLayout final);
+        void Transition(const RendererID renderer, ImageLayout initial, ImageLayout final);
 
         // Getters
-		inline RendererID GetRendererID() const { return m_RendererID; }
         inline const ImageSpecification& GetSpecification() const { return m_ImageSpecification; }
 		inline const SamplerSpecification& GetSamplerSpecification() const { return m_SamplerSpecification; }
 
@@ -67,13 +66,12 @@ namespace Lunar::Internal
 
     private:
         // Private methods
-        void CreateImage(uint32_t width, uint32_t height);
-        void CreateImage(const std::filesystem::path& imagePath);
-        void GenerateMipmaps(VkImage& image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
-        void DestroyImage();
+        void CreateImage(const RendererID renderer, uint32_t width, uint32_t height);
+        void CreateImage(const RendererID renderer, const std::filesystem::path& imagePath);
+        void GenerateMipmaps(const RendererID renderer, VkImage& image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
+        void DestroyImage(const RendererID renderer);
 
     private:
-        RendererID m_RendererID = {};
         ImageSpecification m_ImageSpecification = {};
         SamplerSpecification m_SamplerSpecification = {};
 

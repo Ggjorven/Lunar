@@ -24,32 +24,31 @@ namespace Lunar::Internal
     ////////////////////////////////////////////////////////////////////////////////////
     // Init & Destroy
     ////////////////////////////////////////////////////////////////////////////////////
-    void VulkanDescriptorSet::Init(const RendererID renderer, uint8_t setID, const std::vector<VkDescriptorSet>& sets)
+    void VulkanDescriptorSet::Init(const RendererID, uint8_t setID, const std::vector<VkDescriptorSet>& sets)
     {
-        m_RendererID = renderer;
         m_SetID = setID;
 
         m_DescriptorSets = sets;
     }
 
-    void VulkanDescriptorSet::Destroy()
+    void VulkanDescriptorSet::Destroy(const RendererID)
     {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////
     // Methods
     ////////////////////////////////////////////////////////////////////////////////////
-    void VulkanDescriptorSet::Bind(Pipeline& pipeline, CommandBuffer& commandBuffer, PipelineBindPoint bindPoint, const std::vector<uint32_t>& dynamicOffsets)
+    void VulkanDescriptorSet::Bind(const RendererID renderer, Pipeline& pipeline, CommandBuffer& commandBuffer, PipelineBindPoint bindPoint, const std::vector<uint32_t>& dynamicOffsets)
     {
         LU_PROFILE("VkDescriptorSet::Bind()");
-        uint32_t currentFrame = VulkanRenderer::GetRenderer(m_RendererID).GetVulkanSwapChain().GetCurrentFrame();
+        uint32_t currentFrame = VulkanRenderer::GetRenderer(renderer).GetVulkanSwapChain().GetCurrentFrame();
         auto vkPipelineLayout = pipeline.GetInternalPipeline().GetVkPipelineLayout();
         auto vkCmdBuf = commandBuffer.GetInternalCommandBuffer().GetVkCommandBuffer(currentFrame);
 
         vkCmdBindDescriptorSets(vkCmdBuf, PipelineBindPointToVkPipelineBindPoint(bindPoint), vkPipelineLayout, m_SetID, 1, &m_DescriptorSets[currentFrame], static_cast<uint32_t>(dynamicOffsets.size()), dynamicOffsets.data());
     }
 
-    void VulkanDescriptorSet::Upload(const std::vector<Uploadable>& elements)
+    void VulkanDescriptorSet::Upload(const RendererID renderer, const std::vector<Uploadable>& elements)
     {
         LU_PROFILE("VkDescriptorSet::Upload()");
         std::vector<VkWriteDescriptorSet> writes;
@@ -60,7 +59,7 @@ namespace Lunar::Internal
         std::vector<VkDescriptorBufferInfo> bufferInfos;
         bufferInfos.reserve(elements.size());
 
-        uint32_t currentFrame = VulkanRenderer::GetRenderer(m_RendererID).GetVulkanSwapChain().GetCurrentFrame();
+        uint32_t currentFrame = VulkanRenderer::GetRenderer(renderer).GetVulkanSwapChain().GetCurrentFrame();
 
         for (const auto& [uploadable, descriptor, arrayIndex] : elements)
         {
@@ -142,8 +141,6 @@ namespace Lunar::Internal
     ////////////////////////////////////////////////////////////////////////////////////
     void VulkanDescriptorSets::Init(const RendererID renderer, const std::initializer_list<DescriptorSetRequest>& sets)
     {
-        m_RendererID = renderer;
-
         size_t maxSetID = 0;
         for (auto& group : sets)
             maxSetID = (group.Layout.SetID > maxSetID ? group.Layout.SetID : maxSetID);
@@ -157,15 +154,15 @@ namespace Lunar::Internal
         {
             m_OriginalLayouts[group.Layout.SetID] = group.Layout;
 
-            CreateDescriptorSetLayout(group.Layout.SetID);
-            CreateDescriptorPool(group.Layout.SetID, group.Amount);
-            CreateDescriptorSets(group.Layout.SetID, group.Amount);
+            CreateDescriptorSetLayout(renderer, group.Layout.SetID);
+            CreateDescriptorPool(renderer, group.Layout.SetID, group.Amount);
+            CreateDescriptorSets(renderer, group.Layout.SetID, group.Amount);
         }
     }
 
-    void VulkanDescriptorSets::Destroy()
+    void VulkanDescriptorSets::Destroy(const RendererID renderer)
     {
-        Renderer::GetRenderer(m_RendererID).Free([descriptorPools = m_DescriptorPools, descriptorLayouts = m_DescriptorLayouts]()
+        Renderer::GetRenderer(renderer).Free([descriptorPools = m_DescriptorPools, descriptorLayouts = m_DescriptorLayouts]()
         {
             auto device = VulkanContext::GetVulkanDevice().GetVkDevice();
 
@@ -180,12 +177,12 @@ namespace Lunar::Internal
     ////////////////////////////////////////////////////////////////////////////////////
     // Setters & Getters
     ////////////////////////////////////////////////////////////////////////////////////
-    void VulkanDescriptorSets::SetAmountOf(uint8_t setID, uint32_t amount)
+    void VulkanDescriptorSets::SetAmountOf(const RendererID renderer, uint8_t setID, uint32_t amount)
     {
         vkDestroyDescriptorPool(VulkanContext::GetVulkanDevice().GetVkDevice(), m_DescriptorPools[setID], nullptr);
 
-        CreateDescriptorPool(setID, amount);
-        CreateDescriptorSets(setID, amount);
+        CreateDescriptorPool(renderer, setID, amount);
+        CreateDescriptorSets(renderer, setID, amount);
     }
 
     uint32_t VulkanDescriptorSets::GetAmountOf(uint8_t setID) const
@@ -214,7 +211,7 @@ namespace Lunar::Internal
     ////////////////////////////////////////////////////////////////////////////////////
     // Private methods
     ////////////////////////////////////////////////////////////////////////////////////
-    void VulkanDescriptorSets::CreateDescriptorSetLayout(uint8_t setID)
+    void VulkanDescriptorSets::CreateDescriptorSetLayout(const RendererID, uint8_t setID)
     {
         std::vector<VkDescriptorSetLayoutBinding> layouts;
         layouts.reserve(m_OriginalLayouts[setID].Descriptors.size());
@@ -260,13 +257,13 @@ namespace Lunar::Internal
         VK_VERIFY(vkCreateDescriptorSetLayout(VulkanContext::GetVulkanDevice().GetVkDevice(), &layoutInfo, nullptr, &m_DescriptorLayouts[setID]));
     }
 
-    void VulkanDescriptorSets::CreateDescriptorPool(uint8_t setID, uint32_t amount)
+    void VulkanDescriptorSets::CreateDescriptorPool(const RendererID renderer, uint8_t setID, uint32_t amount)
     {
         // Note: Just for myself, the poolSizes is just the amount of elements of a certain type to able to allocate per pool
         std::vector<VkDescriptorPoolSize> poolSizes;
         poolSizes.reserve(m_OriginalLayouts[setID].UniqueTypes().size());
 
-        const uint32_t framesInFlight = static_cast<uint32_t>(Renderer::GetRenderer(m_RendererID).GetSpecification().Buffers);
+        const uint32_t framesInFlight = static_cast<uint32_t>(Renderer::GetRenderer(renderer).GetSpecification().Buffers);
         for (const auto& type : m_OriginalLayouts[setID].UniqueTypes())
         {
             VkDescriptorPoolSize& poolSize = poolSizes.emplace_back();
@@ -285,9 +282,9 @@ namespace Lunar::Internal
         VK_VERIFY(vkCreateDescriptorPool(VulkanContext::GetVulkanDevice().GetVkDevice(), &poolInfo, nullptr, &m_DescriptorPools[setID]));
     }
 
-    void VulkanDescriptorSets::CreateDescriptorSets(uint8_t setID, uint32_t amount)
+    void VulkanDescriptorSets::CreateDescriptorSets(const RendererID renderer, uint8_t setID, uint32_t amount)
     {
-        const uint32_t framesInFlight = static_cast<uint32_t>(Renderer::GetRenderer(m_RendererID).GetSpecification().Buffers);
+        const uint32_t framesInFlight = static_cast<uint32_t>(Renderer::GetRenderer(renderer).GetSpecification().Buffers);
 
         std::vector<VkDescriptorSet> descriptorSets;
         descriptorSets.resize(static_cast<size_t>(framesInFlight) * amount);
@@ -327,14 +324,14 @@ namespace Lunar::Internal
         }
 
         VK_VERIFY(vkAllocateDescriptorSets(VulkanContext::GetVulkanDevice().GetVkDevice(), &allocInfo, descriptorSets.data()));
-        ConvertToVulkanDescriptorSets(setID, amount, descriptorSets);
+        ConvertToVulkanDescriptorSets(renderer, setID, amount, descriptorSets);
     }
 
-    void VulkanDescriptorSets::ConvertToVulkanDescriptorSets(uint8_t setID, uint32_t amount, std::vector<VkDescriptorSet>& sets)
+    void VulkanDescriptorSets::ConvertToVulkanDescriptorSets(const RendererID renderer, uint8_t setID, uint32_t amount, std::vector<VkDescriptorSet>& sets)
     {
         m_DescriptorSets[setID].resize(static_cast<size_t>(amount));
 
-        const uint32_t framesInFlight = static_cast<uint32_t>(Renderer::GetRenderer(m_RendererID).GetSpecification().Buffers);
+        const uint32_t framesInFlight = static_cast<uint32_t>(Renderer::GetRenderer(renderer).GetSpecification().Buffers);
 
         size_t index = 0;
         for (uint32_t i = 0; i < amount; i++)
@@ -344,7 +341,7 @@ namespace Lunar::Internal
             for (uint32_t j = 0; j < framesInFlight; j++)
                 setCombo.push_back(sets[index + j]);
 
-            m_DescriptorSets[setID][i].Init(m_RendererID, setID, setCombo);
+            m_DescriptorSets[setID][i].Init(renderer, setID, setCombo);
             index += framesInFlight;
         }
     }

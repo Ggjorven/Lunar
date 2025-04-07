@@ -30,13 +30,18 @@ namespace Lunar::Internal
     {
     public:
         // Constructor & Destructor
-        Renderpass(const RendererID renderer, const RenderpassSpecification& specs, CommandBuffer* cmdBuf = nullptr) { m_Renderpass.Init(renderer, specs, cmdBuf); }
-		~Renderpass() { m_Renderpass.Destroy(); }
+        inline Renderpass() = default;
+        inline Renderpass(const RendererID renderer, const RenderpassSpecification& specs, CommandBuffer* cmdBuf) { Init(renderer, specs, cmdBuf); }
+        inline ~Renderpass() = default;
+
+        // Init & Destroy
+		inline void Init(const RendererID renderer, const RenderpassSpecification& specs, CommandBuffer* cmdBuf) { m_Renderpass.Init(renderer, specs, cmdBuf); }
+		inline void Destroy(const RendererID renderer) { m_Renderpass.Destroy(renderer); }
 
         // The Begin, End & Submit function are in the Renderer
 
         // Methods
-        inline void Resize(uint32_t width, uint32_t height) { return m_Renderpass.Resize(width, height); }
+        inline void Resize(const RendererID renderer, uint32_t width, uint32_t height) { return m_Renderpass.Resize(renderer, width, height); }
 
         // Getters
         inline Vec2<uint32_t> GetSize() const { return m_Renderpass.GetSize(); }

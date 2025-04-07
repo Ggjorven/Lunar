@@ -31,7 +31,7 @@ namespace Lunar::Internal
 		m_Specification = specs;
         m_TaskManager.Init(m_ID, static_cast<uint32_t>(specs.Buffers));
 
-        m_SwapChain.Init(specs.WindowRef);
+        m_SwapChain.Init(m_ID, specs.WindowRef);
     }
 
     void VulkanRenderer::Destroy()

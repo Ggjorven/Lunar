@@ -35,8 +35,8 @@ namespace Lunar
 
 	public:
 		// Constructor & Destructor
-		//BatchResources2D();
-		//~BatchResources2D();
+		BatchResources2D();
+		~BatchResources2D();
 
 	private:
 		struct

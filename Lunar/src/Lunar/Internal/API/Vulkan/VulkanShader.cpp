@@ -85,19 +85,17 @@ namespace Lunar::Internal
     ////////////////////////////////////////////////////////////////////////////////////
     // Init & Destroy
     ////////////////////////////////////////////////////////////////////////////////////
-    void VulkanShader::Init(const RendererID renderer, const ShaderSpecification& specs)
+    void VulkanShader::Init(const RendererID, const ShaderSpecification& specs)
     {
-        m_RendererID = renderer;
-
         for (const auto& [stage, code] : specs.Shaders)
             m_Shaders[stage] = CreateShaderModule(code);
     }
 
-    void VulkanShader::Destroy()
+    void VulkanShader::Destroy(const RendererID renderer)
     {
         // Note: This might be redundant since shaders are only usefuls when a pipeline needs to be created.
         // But better safe than sorry.
-        Renderer::GetRenderer(m_RendererID).Free([shaders = m_Shaders]()
+        Renderer::GetRenderer(renderer).Free([shaders = m_Shaders]()
         {
             auto device = VulkanContext::GetVulkanDevice().GetVkDevice();
 

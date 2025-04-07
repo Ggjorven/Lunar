@@ -30,12 +30,12 @@ namespace Lunar::Internal
 
 		// Init & Destroy
 		void Init(const RendererID renderer, const RenderpassSpecification& specs, CommandBuffer* cmdBuf);
-		void Destroy();
+		void Destroy(const RendererID renderer);
 
 		// The Begin, End & Submit methods are in the Renderer
 
 		// Methods
-		void Resize(uint32_t width, uint32_t height);
+		void Resize(const RendererID renderer, uint32_t width, uint32_t height);
 
 		// Getters
 		Vec2<uint32_t> GetSize() const;
@@ -49,14 +49,13 @@ namespace Lunar::Internal
 
 	private:
 		// Private methods
-		void CreateRenderpass();
-		void CreateFramebuffers(uint32_t width, uint32_t height);
-		void DestroyRenderpass();
+		void CreateRenderpass(const RendererID renderer);
+		void CreateFramebuffers(const RendererID renderer, uint32_t width, uint32_t height);
+		void DestroyRenderpass(const RendererID renderer);
 
 		std::vector<VkSubpassDependency> GetDependencies(RenderpassUsage usage);
 
 	private:
-		RendererID m_RendererID = 0;
 		RenderpassSpecification m_Specification = {};
 
 		CommandBuffer* m_CommandBuffer = nullptr;

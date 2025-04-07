@@ -40,15 +40,15 @@ namespace Lunar::Internal
 		// Init & Destroy
 		void Init(const RendererID renderer, const PipelineSpecification& specs, DescriptorSets& sets, Shader& shader);
 		void Init(const RendererID renderer, const PipelineSpecification& specs, DescriptorSets& sets, Shader& shader, Renderpass& renderpass);
-		void Destroy();
+		void Destroy(const RendererID renderer);
 
 		// Methods
-		void Use(CommandBuffer& cmdBuf, PipelineBindPoint bindPoint);
+		void Use(const RendererID renderer, CommandBuffer& cmdBuf, PipelineBindPoint bindPoint);
 
-		void PushConstant(CommandBuffer& cmdBuf, ShaderStage stage, void* data);
-		void PushConstant(CommandBuffer& cmdBuf, ShaderStage stage, void* data, size_t offset, size_t size);
+		void PushConstant(const RendererID renderer, CommandBuffer& cmdBuf, ShaderStage stage, void* data);
+		void PushConstant(const RendererID renderer, CommandBuffer& cmdBuf, ShaderStage stage, void* data, size_t offset, size_t size);
 
-		void DispatchCompute(CommandBuffer& cmdBuf, uint32_t width, uint32_t height, uint32_t depth);
+		void DispatchCompute(const RendererID renderer, CommandBuffer& cmdBuf, uint32_t width, uint32_t height, uint32_t depth);
 
 		// Getters
 		inline const PipelineSpecification& GetSpecification() const { return m_Specification; };
@@ -68,7 +68,6 @@ namespace Lunar::Internal
 		std::vector<VkVertexInputAttributeDescription> GetAttributeDescriptions() const;
 
 	private:
-		RendererID m_RendererID = 0;
 		PipelineSpecification m_Specification = {};
 
 		VkPipeline m_Pipeline = VK_NULL_HANDLE;

@@ -40,12 +40,12 @@ namespace Lunar::Internal
 
 		// Init & Destroy
 		void Init(const RendererID renderer, uint8_t setID, const std::vector<VkDescriptorSet>& sets);
-		void Destroy();
+		void Destroy(const RendererID renderer);
 
 		// Methods
-		void Bind(Pipeline& pipeline, CommandBuffer& commandBuffer, PipelineBindPoint bindPoint, const std::vector<uint32_t>& dynamicOffsets);
+		void Bind(const RendererID renderer, Pipeline& pipeline, CommandBuffer& commandBuffer, PipelineBindPoint bindPoint, const std::vector<uint32_t>& dynamicOffsets);
 
-		void Upload(const std::vector<Uploadable>& elements);
+		void Upload(const RendererID renderer, const std::vector<Uploadable>& elements);
 		
 		// Getters
 		inline uint8_t GetSetID() const { return m_SetID; }
@@ -60,7 +60,6 @@ namespace Lunar::Internal
 		void UploadStorageBuffer(std::vector<VkWriteDescriptorSet>& writes, std::vector<VkDescriptorBufferInfo>& bufferInfos, VulkanStorageBuffer& buffer, Descriptor descriptor, uint32_t arrayIndex, uint32_t frame);
 
 	private:
-		RendererID m_RendererID = 0;
 		uint8_t m_SetID = 0;
 
 		// Note: One for every frame in flight
@@ -76,10 +75,10 @@ namespace Lunar::Internal
 
 		// Init & Destroy
 		void Init(const RendererID renderer, const std::initializer_list<DescriptorSetRequest>& specs);
-		void Destroy();
+		void Destroy(const RendererID renderer);
 
 		// Setters & Getters
-		void SetAmountOf(uint8_t setID, uint32_t amount);
+		void SetAmountOf(const RendererID renderer, uint8_t setID, uint32_t amount);
 		uint32_t GetAmountOf(uint8_t setID) const;
 
 		const DescriptorSetLayout& GetLayout(uint8_t setID) const;
@@ -87,14 +86,12 @@ namespace Lunar::Internal
 
 	private:
 		// Private methods
-		void CreateDescriptorSetLayout(uint8_t setID);
-		void CreateDescriptorPool(uint8_t setID, uint32_t amount);
-		void CreateDescriptorSets(uint8_t setID, uint32_t amount);
-		void ConvertToVulkanDescriptorSets(uint8_t setID, uint32_t amount, std::vector<VkDescriptorSet>& sets);
+		void CreateDescriptorSetLayout(const RendererID renderer, uint8_t setID);
+		void CreateDescriptorPool(const RendererID renderer, uint8_t setID, uint32_t amount);
+		void CreateDescriptorSets(const RendererID renderer, uint8_t setID, uint32_t amount);
+		void ConvertToVulkanDescriptorSets(const RendererID renderer, uint8_t setID, uint32_t amount, std::vector<VkDescriptorSet>& sets);
 
 	private:
-		RendererID m_RendererID = 0;
-
 		std::vector<DescriptorSetLayout> m_OriginalLayouts = { };
 		std::vector<std::vector<VulkanDescriptorSet>> m_DescriptorSets = { };
 

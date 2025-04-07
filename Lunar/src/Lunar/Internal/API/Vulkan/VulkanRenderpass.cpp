@@ -19,7 +19,6 @@ namespace Lunar::Internal
     ////////////////////////////////////////////////////////////////////////////////////
     void VulkanRenderpass::Init(const RendererID renderer, const RenderpassSpecification& specs, CommandBuffer* commandBuffer)
     {
-		m_RendererID = renderer;
 		m_Specification = specs;
 		m_CommandBuffer = commandBuffer;
 
@@ -27,21 +26,21 @@ namespace Lunar::Internal
 
         Vec2<uint32_t> size = GetSize();
 
-        CreateRenderpass();
-        CreateFramebuffers(size.x, size.y);
+        CreateRenderpass(renderer);
+        CreateFramebuffers(renderer, size.x, size.y);
     }
 
-    void VulkanRenderpass::Destroy()
+    void VulkanRenderpass::Destroy(const RendererID renderer)
     {
-        DestroyRenderpass();
+        DestroyRenderpass(renderer);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////
     // Methods
     ////////////////////////////////////////////////////////////////////////////////////
-    void VulkanRenderpass::Resize(uint32_t width, uint32_t height)
+    void VulkanRenderpass::Resize(const RendererID renderer, uint32_t width, uint32_t height)
     {
-        Renderer::GetRenderer(m_RendererID).Free([frameBuffers = m_Framebuffers]()
+        Renderer::GetRenderer(renderer).Free([frameBuffers = m_Framebuffers]()
         {
             auto device = VulkanContext::GetVulkanDevice().GetVkDevice();
 
@@ -49,7 +48,7 @@ namespace Lunar::Internal
                 vkDestroyFramebuffer(device, framebuffer, nullptr);
         });
 
-        CreateFramebuffers(width, height);
+        CreateFramebuffers(renderer, width, height);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////
@@ -76,7 +75,7 @@ namespace Lunar::Internal
     ////////////////////////////////////////////////////////////////////////////////////
     // Private methods
     ////////////////////////////////////////////////////////////////////////////////////
-    void VulkanRenderpass::CreateRenderpass()
+    void VulkanRenderpass::CreateRenderpass(const RendererID)
     {
         std::vector<VkAttachmentDescription> attachments = { };
         std::vector<VkAttachmentReference> attachmentRefs = { };
@@ -150,10 +149,10 @@ namespace Lunar::Internal
         VK_VERIFY(vkCreateRenderPass(VulkanContext::GetVulkanDevice().GetVkDevice(), &renderPassInfo, nullptr, &m_RenderPass));
     }
 
-    void VulkanRenderpass::CreateFramebuffers(uint32_t width, uint32_t height)
+    void VulkanRenderpass::CreateFramebuffers(const RendererID renderer, uint32_t width, uint32_t height)
     {
         // Framebuffer creation
-        m_Framebuffers.resize(VulkanRenderer::GetRenderer(m_RendererID).GetVulkanSwapChain().GetSwapChainImages().size());
+        m_Framebuffers.resize(VulkanRenderer::GetRenderer(renderer).GetVulkanSwapChain().GetSwapChainImages().size());
         for (size_t i = 0; i < m_Framebuffers.size(); i++)
         {
             std::vector<VkImageView> attachments = { };
@@ -189,9 +188,9 @@ namespace Lunar::Internal
         }
     }
 
-    void VulkanRenderpass::DestroyRenderpass()
+    void VulkanRenderpass::DestroyRenderpass(const RendererID renderer)
     {
-        Renderer::GetRenderer(m_RendererID).Free([frameBuffers = m_Framebuffers, renderpass = m_RenderPass]()
+        Renderer::GetRenderer(renderer).Free([frameBuffers = m_Framebuffers, renderpass = m_RenderPass]()
         {
             auto device = VulkanContext::GetVulkanDevice().GetVkDevice();
 

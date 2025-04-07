@@ -14,7 +14,7 @@ namespace Lunar::Internal
     ////////////////////////////////////////////////////////////////////////////////////
     // Constructor & Destructor
     ////////////////////////////////////////////////////////////////////////////////////
-    void VulkanTaskManager::Init(RendererID rendererID, uint32_t frameCount) 
+    void VulkanTaskManager::Init(const RendererID rendererID, uint32_t frameCount) 
     {
 		m_RendererID = rendererID;
 

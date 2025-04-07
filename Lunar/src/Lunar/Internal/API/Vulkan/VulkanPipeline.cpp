@@ -48,9 +48,8 @@ namespace Lunar::Internal
     ////////////////////////////////////////////////////////////////////////////////////
     // Init & Destroy
     ////////////////////////////////////////////////////////////////////////////////////
-    void VulkanPipeline::Init(const RendererID renderer, const PipelineSpecification& specs, DescriptorSets& sets, Shader& shader)
+    void VulkanPipeline::Init(const RendererID, const PipelineSpecification& specs, DescriptorSets& sets, Shader& shader)
     {
-        m_RendererID = renderer;
         m_Specification = specs;
 
         switch (specs.Usage)
@@ -74,18 +73,17 @@ namespace Lunar::Internal
         }
     }
 
-    void VulkanPipeline::Init(const RendererID renderer, const PipelineSpecification& specs, DescriptorSets& sets, Shader& shader, Renderpass& renderpass)
+    void VulkanPipeline::Init(const RendererID, const PipelineSpecification& specs, DescriptorSets& sets, Shader& shader, Renderpass& renderpass)
     {
-        m_RendererID = renderer;
         m_Specification = specs;
 
         LU_ASSERT((specs.Usage == PipelineUsage::Graphics), "[VkPipeline] Used pipeline graphics constructor but Type != PipelineType::Graphics");
         CreateGraphicsPipeline(sets, shader, &renderpass);
     }
 
-    void VulkanPipeline::Destroy()
+    void VulkanPipeline::Destroy(const RendererID renderer)
     {
-        Renderer::GetRenderer(m_RendererID).Free([pipeline = m_Pipeline, pipelineLayout = m_PipelineLayout]()
+        Renderer::GetRenderer(renderer).Free([pipeline = m_Pipeline, pipelineLayout = m_PipelineLayout]()
         {
             auto device = VulkanContext::GetVulkanDevice().GetVkDevice();
 
@@ -94,32 +92,32 @@ namespace Lunar::Internal
         });
     }
 
-    void VulkanPipeline::Use(CommandBuffer& cmdBuf, PipelineBindPoint bindPoint)
+    void VulkanPipeline::Use(const RendererID renderer, CommandBuffer& cmdBuf, PipelineBindPoint bindPoint)
     {
         LU_PROFILE("VkPipeline::Use()");
         VulkanCommandBuffer& vkCmdBuf = cmdBuf.GetInternalCommandBuffer();
 
-        vkCmdBindPipeline(vkCmdBuf.GetVkCommandBuffer(VulkanRenderer::GetRenderer(m_RendererID).GetVulkanSwapChain().GetCurrentFrame()), PipelineBindPointToVkPipelineBindPoint(bindPoint), m_Pipeline);
+        vkCmdBindPipeline(vkCmdBuf.GetVkCommandBuffer(VulkanRenderer::GetRenderer(renderer).GetVulkanSwapChain().GetCurrentFrame()), PipelineBindPointToVkPipelineBindPoint(bindPoint), m_Pipeline);
     }
 
-    void VulkanPipeline::PushConstant(CommandBuffer& cmdBuf, ShaderStage stage, void* data)
+    void VulkanPipeline::PushConstant(const RendererID renderer, CommandBuffer& cmdBuf, ShaderStage stage, void* data)
     {
-        PushConstant(cmdBuf, stage, data, m_Specification.PushConstants[stage].Offset, m_Specification.PushConstants[stage].Size);
+        PushConstant(renderer, cmdBuf, stage, data, m_Specification.PushConstants[stage].Offset, m_Specification.PushConstants[stage].Size);
     }
 
-    void VulkanPipeline::PushConstant(CommandBuffer& cmdBuf, ShaderStage stage, void* data, size_t offset, size_t size)
+    void VulkanPipeline::PushConstant(const RendererID renderer, CommandBuffer& cmdBuf, ShaderStage stage, void* data, size_t offset, size_t size)
     {
         LU_ASSERT((!m_Specification.PushConstants.empty()), "[VkPipeline] No push constant range(s) defined on pipeline creation.");
 
         VulkanCommandBuffer& vkCmdBuf = cmdBuf.GetInternalCommandBuffer();
-        vkCmdPushConstants(vkCmdBuf.GetVkCommandBuffer(VulkanRenderer::GetRenderer(m_RendererID).GetVulkanSwapChain().GetCurrentFrame()), m_PipelineLayout, ShaderStageToVkShaderStageFlags(stage), static_cast<uint32_t>(offset), static_cast<uint32_t>(size), data);
+        vkCmdPushConstants(vkCmdBuf.GetVkCommandBuffer(VulkanRenderer::GetRenderer(renderer).GetVulkanSwapChain().GetCurrentFrame()), m_PipelineLayout, ShaderStageToVkShaderStageFlags(stage), static_cast<uint32_t>(offset), static_cast<uint32_t>(size), data);
     }
 
-    void VulkanPipeline::DispatchCompute(CommandBuffer& cmdBuf, uint32_t width, uint32_t height, uint32_t depth)
+    void VulkanPipeline::DispatchCompute(const RendererID renderer, CommandBuffer& cmdBuf, uint32_t width, uint32_t height, uint32_t depth)
     {
         VulkanCommandBuffer& vkCmdBuf = cmdBuf.GetInternalCommandBuffer();
 
-        vkCmdDispatch(vkCmdBuf.GetVkCommandBuffer(VulkanRenderer::GetRenderer(m_RendererID).GetVulkanSwapChain().GetCurrentFrame()), width, height, depth);
+        vkCmdDispatch(vkCmdBuf.GetVkCommandBuffer(VulkanRenderer::GetRenderer(renderer).GetVulkanSwapChain().GetCurrentFrame()), width, height, depth);
     }
 
     void VulkanPipeline::CreateGraphicsPipeline(DescriptorSets& sets, Shader& shader, Renderpass* renderpass) // Renderpass may be nullptr

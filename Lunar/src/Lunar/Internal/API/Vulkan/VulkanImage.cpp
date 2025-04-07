@@ -44,80 +44,77 @@ namespace Lunar::Internal
 	////////////////////////////////////////////////////////////////////////////////////
 	void VulkanImage::Init(const RendererID renderer, const ImageSpecification& imageSpecs, const SamplerSpecification& samplerSpecs)
 	{
-		m_RendererID = renderer;
 		m_ImageSpecification = imageSpecs;
 		m_SamplerSpecification = samplerSpecs;
 
 		LU_ASSERT(((m_ImageSpecification.Usage & ImageUsage::Colour) || (m_ImageSpecification.Usage & ImageUsage::DepthStencil)), "[VulkanImage] Tried to create image without specifying if it's a Colour or Depth image.");
 
-		CreateImage(m_ImageSpecification.Width, m_ImageSpecification.Height);
+		CreateImage(renderer, m_ImageSpecification.Width, m_ImageSpecification.Height);
 	}
 
 	void VulkanImage::Init(const RendererID renderer, const ImageSpecification& imageSpecs, const SamplerSpecification& samplerSpecs, const std::filesystem::path& imagePath)
 	{
-		m_RendererID = renderer;
 		m_ImageSpecification = imageSpecs;
 		m_SamplerSpecification = samplerSpecs;
 
 		LU_ASSERT(((m_ImageSpecification.Usage & ImageUsage::Colour) || (m_ImageSpecification.Usage & ImageUsage::DepthStencil)), "[VulkanImage] Tried to create image without specifying if it's a Colour or Depth image.");
 
-		CreateImage(imagePath);
+		CreateImage(renderer, imagePath);
 	}
 
-	void VulkanImage::Init(const RendererID renderer, const ImageSpecification& specs, const VkImage image, const VkImageView imageView) // Note: This exists for swapchain images
+	void VulkanImage::Init(const RendererID, const ImageSpecification& specs, const VkImage image, const VkImageView imageView) // Note: This exists for swapchain images
 	{
-		m_RendererID = renderer;
 		m_ImageSpecification = specs;
 		m_SamplerSpecification = {};
 		m_Image = image;
 		m_ImageView = imageView;
 	}
 
-	void VulkanImage::Destroy()
+	void VulkanImage::Destroy(const RendererID renderer)
 	{
-		DestroyImage();
+		DestroyImage(renderer);
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////
 	// Methods
 	////////////////////////////////////////////////////////////////////////////////////
-	void VulkanImage::SetData(void* data, size_t size)
+	void VulkanImage::SetData(const RendererID renderer, void* data, size_t size)
 	{
 		ImageLayout desiredLayout = m_ImageSpecification.Layout;
 
 		VkBuffer stagingBuffer = VK_NULL_HANDLE;
-		VmaAllocation stagingBufferAllocation = VulkanAllocator::AllocateBuffer(m_RendererID, size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_ONLY, stagingBuffer);
+		VmaAllocation stagingBufferAllocation = VulkanAllocator::AllocateBuffer(renderer, size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_ONLY, stagingBuffer);
 
 		VulkanAllocator::SetData(stagingBufferAllocation, data, size);
 
-		Transition(ImageLayout::Undefined, ImageLayout::TransferDst);
-		VulkanAllocator::CopyBufferToImage(m_RendererID, stagingBuffer, m_Image, m_ImageSpecification.Width, m_ImageSpecification.Height);
+		Transition(renderer, ImageLayout::Undefined, ImageLayout::TransferDst);
+		VulkanAllocator::CopyBufferToImage(renderer, stagingBuffer, m_Image, m_ImageSpecification.Width, m_ImageSpecification.Height);
 
 		if (m_ImageSpecification.MipMaps)
 		{
-			GenerateMipmaps(m_Image, (VkFormat)m_ImageSpecification.Format, m_ImageSpecification.Width, m_ImageSpecification.Height, m_Miplevels);
-			Transition(ImageLayout::ShaderRead, desiredLayout);
+			GenerateMipmaps(renderer, m_Image, (VkFormat)m_ImageSpecification.Format, m_ImageSpecification.Width, m_ImageSpecification.Height, m_Miplevels);
+			Transition(renderer, ImageLayout::ShaderRead, desiredLayout);
 		}
 		else
 		{
-			Transition(ImageLayout::TransferDst, desiredLayout);
+			Transition(renderer, ImageLayout::TransferDst, desiredLayout);
 		}
 
-		VulkanAllocator::DestroyBuffer(m_RendererID, stagingBuffer, stagingBufferAllocation);
+		VulkanAllocator::DestroyBuffer(renderer, stagingBuffer, stagingBufferAllocation);
 	}
 
-	void VulkanImage::Resize(uint32_t width, uint32_t height)
+	void VulkanImage::Resize(const RendererID renderer, uint32_t width, uint32_t height)
 	{
-		Destroy();
-		CreateImage(width, height);
+		Destroy(renderer);
+		CreateImage(renderer, width, height);
 	}
 
-	void VulkanImage::Transition(ImageLayout initial, ImageLayout final)
+	void VulkanImage::Transition(const RendererID renderer, ImageLayout initial, ImageLayout final)
 	{
 		if (initial == final)
 			return;
 
-		VulkanCommand command(m_RendererID, true);
+		VulkanCommand command(renderer, true);
 
 		VkImageMemoryBarrier barrier = {};
 		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -346,7 +343,7 @@ namespace Lunar::Internal
 	////////////////////////////////////////////////////////////////////////////////////
 	// Private methods
 	////////////////////////////////////////////////////////////////////////////////////
-	void VulkanImage::CreateImage(uint32_t width, uint32_t height)
+	void VulkanImage::CreateImage(const RendererID renderer, uint32_t width, uint32_t height)
 	{
 		ImageLayout desiredLayout = m_ImageSpecification.Layout;
 
@@ -355,15 +352,15 @@ namespace Lunar::Internal
 		if (m_ImageSpecification.MipMaps)
 			m_Miplevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
 
-		m_Allocation = VulkanAllocator::AllocateImage(m_RendererID, width, height, m_Miplevels, ImageFormatToVkFormat(m_ImageSpecification.Format), VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | ImageUsageToVkImageUsage(m_ImageSpecification.Usage), VMA_MEMORY_USAGE_GPU_ONLY, m_Image);
+		m_Allocation = VulkanAllocator::AllocateImage(renderer, width, height, m_Miplevels, ImageFormatToVkFormat(m_ImageSpecification.Format), VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | ImageUsageToVkImageUsage(m_ImageSpecification.Usage), VMA_MEMORY_USAGE_GPU_ONLY, m_Image);
 
-		m_ImageView = VulkanAllocator::CreateImageView(m_RendererID, m_Image, ImageFormatToVkFormat(m_ImageSpecification.Format), GetVulkanImageAspectFromImageUsage(ImageUsageToVkImageUsage(m_ImageSpecification.Usage)), m_Miplevels);
-		m_Sampler = VulkanAllocator::CreateSampler(m_RendererID, FilterModeToVkFilter(m_SamplerSpecification.MagFilter), FilterModeToVkFilter(m_SamplerSpecification.MinFilter), AddressModeToVkSamplerAddressMode(m_SamplerSpecification.Address), MipmapModeToVkSamplerMipmapMode(m_SamplerSpecification.Mipmaps), m_Miplevels);
+		m_ImageView = VulkanAllocator::CreateImageView(renderer, m_Image, ImageFormatToVkFormat(m_ImageSpecification.Format), GetVulkanImageAspectFromImageUsage(ImageUsageToVkImageUsage(m_ImageSpecification.Usage)), m_Miplevels);
+		m_Sampler = VulkanAllocator::CreateSampler(renderer, FilterModeToVkFilter(m_SamplerSpecification.MagFilter), FilterModeToVkFilter(m_SamplerSpecification.MinFilter), AddressModeToVkSamplerAddressMode(m_SamplerSpecification.Address), MipmapModeToVkSamplerMipmapMode(m_SamplerSpecification.Mipmaps), m_Miplevels);
 
-		Transition(m_ImageSpecification.Layout, desiredLayout);
+		Transition(renderer, m_ImageSpecification.Layout, desiredLayout);
 	}
 
-	void VulkanImage::CreateImage(const std::filesystem::path& imagePath)
+	void VulkanImage::CreateImage(const RendererID renderer, const std::filesystem::path& imagePath)
 	{
 		int width, height, texChannels;
 
@@ -380,22 +377,22 @@ namespace Lunar::Internal
 		m_ImageSpecification.Format = ImageFormat::RGBA;
 		size_t imageSize = m_ImageSpecification.Width * m_ImageSpecification.Height * 4;
 
-		m_Allocation = VulkanAllocator::AllocateImage(m_RendererID, m_ImageSpecification.Width, m_ImageSpecification.Height, m_Miplevels, ImageFormatToVkFormat(m_ImageSpecification.Format), VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | ImageUsageToVkImageUsage(m_ImageSpecification.Usage), VMA_MEMORY_USAGE_GPU_ONLY, m_Image);
+		m_Allocation = VulkanAllocator::AllocateImage(renderer, m_ImageSpecification.Width, m_ImageSpecification.Height, m_Miplevels, ImageFormatToVkFormat(m_ImageSpecification.Format), VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | ImageUsageToVkImageUsage(m_ImageSpecification.Usage), VMA_MEMORY_USAGE_GPU_ONLY, m_Image);
 
-		m_ImageView = VulkanAllocator::CreateImageView(m_RendererID, m_Image, ImageFormatToVkFormat(m_ImageSpecification.Format), VK_IMAGE_ASPECT_COLOR_BIT, m_Miplevels);
-		m_Sampler = VulkanAllocator::CreateSampler(m_RendererID, FilterModeToVkFilter(m_SamplerSpecification.MagFilter), FilterModeToVkFilter(m_SamplerSpecification.MinFilter), AddressModeToVkSamplerAddressMode(m_SamplerSpecification.Address), MipmapModeToVkSamplerMipmapMode(m_SamplerSpecification.Mipmaps), m_Miplevels);
+		m_ImageView = VulkanAllocator::CreateImageView(renderer, m_Image, ImageFormatToVkFormat(m_ImageSpecification.Format), VK_IMAGE_ASPECT_COLOR_BIT, m_Miplevels);
+		m_Sampler = VulkanAllocator::CreateSampler(renderer, FilterModeToVkFilter(m_SamplerSpecification.MagFilter), FilterModeToVkFilter(m_SamplerSpecification.MinFilter), AddressModeToVkSamplerAddressMode(m_SamplerSpecification.Address), MipmapModeToVkSamplerMipmapMode(m_SamplerSpecification.Mipmaps), m_Miplevels);
 
-		SetData((void*)pixels, imageSize);
+		SetData(renderer, (void*)pixels, imageSize);
 		stbi_image_free((void*)pixels);
 	}
 
-	void VulkanImage::GenerateMipmaps(VkImage& image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels)
+	void VulkanImage::GenerateMipmaps(const RendererID renderer, VkImage& image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels)
 	{
 		// Check if there a no mipmaps
 		if (mipLevels == 1 || mipLevels == 0)
 		{
 			// We transition, since we expect the the ImageLayout to ShaderRead at the end of this call.
-			Transition(m_ImageSpecification.Layout, ImageLayout::ShaderRead);
+			Transition(renderer, m_ImageSpecification.Layout, ImageLayout::ShaderRead);
 			return;
 		}
 
@@ -405,7 +402,7 @@ namespace Lunar::Internal
 
 		LU_VERIFY((formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT), "[VulkanImage] Texture image format does not support linear blitting!");
 
-		VulkanCommand command = VulkanCommand(m_RendererID, true);
+		VulkanCommand command = VulkanCommand(renderer, true);
 
 		VkImageMemoryBarrier barrier = {};
 		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -473,21 +470,20 @@ namespace Lunar::Internal
 		m_ImageSpecification.Layout = ImageLayout::ShaderRead;
 	}
 
-	void VulkanImage::DestroyImage()
+	void VulkanImage::DestroyImage(const RendererID renderer)
 	{
-		VulkanRenderer::GetRenderer(m_RendererID)
-			.Free([renderer = m_RendererID, sampler = m_Sampler, imageView = m_ImageView, image = m_Image, allocation = m_Allocation]()
-			{
-				auto device = VulkanContext::GetVulkanDevice().GetVkDevice();
+		VulkanRenderer::GetRenderer(renderer).Free([renderer = renderer, sampler = m_Sampler, imageView = m_ImageView, image = m_Image, allocation = m_Allocation]()
+		{
+			auto device = VulkanContext::GetVulkanDevice().GetVkDevice();
 
-				if (sampler)
-					vkDestroySampler(device, sampler, nullptr);
-				if (imageView)
-					vkDestroyImageView(device, imageView, nullptr);
+			if (sampler)
+				vkDestroySampler(device, sampler, nullptr);
+			if (imageView)
+				vkDestroyImageView(device, imageView, nullptr);
 
-				if (image != VK_NULL_HANDLE && allocation != VK_NULL_HANDLE)
-					VulkanAllocator::DestroyImage(renderer, image, allocation);
-			});
+			if (image != VK_NULL_HANDLE && allocation != VK_NULL_HANDLE)
+				VulkanAllocator::DestroyImage(renderer, image, allocation);
+		});
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////

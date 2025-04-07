@@ -23,7 +23,7 @@ namespace Lunar::Internal
         ~VulkanTaskManager() = default;
 
 		// Init & Destroy
-		void Init(RendererID rendererID, uint32_t frameCount);
+		void Init(const RendererID rendererID, uint32_t frameCount);
 		void Destroy();
 
         // Add methods
@@ -50,7 +50,7 @@ namespace Lunar::Internal
         std::vector<VkSemaphore>& GetSemaphores();
 
     private:
-        RendererID m_RendererID = {};
+        RendererID m_RendererID = 0;
         std::mutex m_ThreadSafety = {};
 
         // The first vector index is the frame, the pair is first = semaphores to wait on by other cmdBufs, second = semaphores to only wait on by frame

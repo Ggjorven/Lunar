@@ -13,17 +13,15 @@ namespace Lunar::Internal
     ////////////////////////////////////////////////////////////////////////////////////
     // Init & Destroy
     ////////////////////////////////////////////////////////////////////////////////////
-    void VulkanCommandBuffer::Init(RendererID rendererID) 
+    void VulkanCommandBuffer::Init(const RendererID renderer)
     {
-        m_RendererID = rendererID;
-
         VkDevice device = VulkanContext::GetVulkanDevice().GetVkDevice();
-        const uint32_t framesInFlight = static_cast<uint32_t>(Renderer::GetRenderer(m_RendererID).GetSpecification().Buffers);
+        const uint32_t framesInFlight = static_cast<uint32_t>(Renderer::GetRenderer(renderer).GetSpecification().Buffers);
         m_CommandBuffers.resize(framesInFlight);
 
         VkCommandBufferAllocateInfo allocInfo = {};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        allocInfo.commandPool = VulkanRenderer::GetRenderer(m_RendererID).GetVulkanSwapChain().GetVkCommandPool();
+        allocInfo.commandPool = VulkanRenderer::GetRenderer(renderer).GetVulkanSwapChain().GetVkCommandPool();
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
         allocInfo.commandBufferCount = static_cast<uint32_t>(m_CommandBuffers.size());
 
@@ -46,9 +44,9 @@ namespace Lunar::Internal
         }
     }
 
-    void VulkanCommandBuffer::Destroy()
+    void VulkanCommandBuffer::Destroy(const RendererID renderer)
     {
-        Renderer::GetRenderer(m_RendererID).Free([rendererID = m_RendererID, commandBuffers = m_CommandBuffers, renderFinishedSemaphores = m_RenderFinishedSemaphores, inFlightFences = m_InFlightFences]() 
+        Renderer::GetRenderer(renderer).Free([rendererID = renderer, commandBuffers = m_CommandBuffers, renderFinishedSemaphores = m_RenderFinishedSemaphores, inFlightFences = m_InFlightFences]()
         {
             VkDevice device = VulkanContext::GetVulkanDevice().GetVkDevice();
 

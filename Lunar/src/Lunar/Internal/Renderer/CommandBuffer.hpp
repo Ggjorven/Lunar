@@ -24,14 +24,16 @@ namespace Lunar::Internal
     {
     public:
         // Constructor & Destructor
-		inline CommandBuffer(const RendererID rendererID) { m_CommandBuffer.Init(rendererID); }
-        inline ~CommandBuffer() { m_CommandBuffer.Destroy(); }
+		inline CommandBuffer() = default;
+		inline CommandBuffer(const RendererID renderer) { Init(renderer); }
+		inline ~CommandBuffer() = default;
+
+        // Init & Destroy
+		inline void Init(const RendererID renderer) { m_CommandBuffer.Init(renderer); }
+        inline void Destroy(const RendererID renderer) { m_CommandBuffer.Destroy(renderer); }
 
         // The Begin, End & Submit methods are in the Renderer class.
         
-		// Getters
-		inline RendererID GetRendererID() const { return m_CommandBuffer.GetRendererID(); }
-
         // Internal methods
 		inline CommandBufferType& GetInternalCommandBuffer() { return m_CommandBuffer; }
 

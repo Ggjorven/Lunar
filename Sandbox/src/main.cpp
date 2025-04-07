@@ -151,7 +151,7 @@ int main(int argc, char* argv[])
         Lunar::Internal::UniformBuffer uboBuffer(rendererID, {
             .Usage = Lunar::Internal::BufferMemoryUsage::CPUToGPU,
         }, sizeof(ubo));
-		uboBuffer.SetData(&ubo, sizeof(ubo));
+		uboBuffer.SetData(rendererID, &ubo, sizeof(ubo));
         Lunar::Internal::Descriptor uboDescriptor = { Lunar::Internal::DescriptorType::UniformBuffer, 0, "ubo", Lunar::Internal::ShaderStage::Vertex };
 
         // Image
@@ -162,7 +162,7 @@ int main(int argc, char* argv[])
 			.Height = 1,
         }, {});
 		size_t colour = 0xFF00FF00;
-        image.SetData(&colour, sizeof(colour));
+        image.SetData(rendererID, &colour, sizeof(colour));
 		Lunar::Internal::Descriptor imageDescriptor = { Lunar::Internal::DescriptorType::CombinedImageSampler, 1, "uTexture", Lunar::Internal::ShaderStage::Fragment };
 
         // Descriptors
@@ -199,6 +199,8 @@ int main(int argc, char* argv[])
             }
         }, descriptorSets, shader, renderpass);
 
+        shader.Destroy(rendererID);
+
 		auto set0s = descriptorSets.GetSets(0);
         auto set0 = set0s[0];
 
@@ -207,14 +209,14 @@ int main(int argc, char* argv[])
             window.PollEvents();
             renderer.BeginFrame();
 
-            set0->Upload({ { &uboBuffer, uboDescriptor }, { &image, imageDescriptor } });
+            set0->Upload(rendererID, { { &uboBuffer, uboDescriptor }, { &image, imageDescriptor } });
 
             renderer.Begin(renderpass);
             
-            pipeline.Use(cmdBuf);
-            set0->Bind(pipeline, cmdBuf);
-            vertexBuffer.Bind(cmdBuf);
-            indexBuffer.Bind(cmdBuf);
+            pipeline.Use(rendererID, cmdBuf);
+            set0->Bind(rendererID, pipeline, cmdBuf);
+            vertexBuffer.Bind(rendererID, cmdBuf);
+            indexBuffer.Bind(rendererID, cmdBuf);
 
             renderer.DrawIndexed(cmdBuf, indexBuffer); 
 
@@ -225,6 +227,15 @@ int main(int argc, char* argv[])
             renderer.Present();
             window.SwapBuffers();
         }
+
+		vertexBuffer.Destroy(rendererID);
+		indexBuffer.Destroy(rendererID);
+		uboBuffer.Destroy(rendererID);
+        image.Destroy(rendererID);
+        descriptorSets.Destroy(rendererID);
+		cmdBuf.Destroy(rendererID);
+        renderpass.Destroy(rendererID);
+        pipeline.Destroy(rendererID);
     }
 
     return 0;

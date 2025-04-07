@@ -34,7 +34,7 @@ namespace Lunar::Internal
 
 		// Init & Destroy
 		void Init(const RendererID renderer, const ShaderSpecification& specs);
-		void Destroy();
+		void Destroy(const RendererID renderer);
 
 		// Internal
 		inline VkShaderModule GetShader(ShaderStage stage) { return m_Shaders[stage]; }
@@ -45,7 +45,6 @@ namespace Lunar::Internal
 		static VkShaderModule CreateShaderModule(const std::vector<char>& code);
 
 	private:
-		RendererID m_RendererID = {};
 		std::unordered_map<ShaderStage, VkShaderModule> m_Shaders = {};
 	};
 

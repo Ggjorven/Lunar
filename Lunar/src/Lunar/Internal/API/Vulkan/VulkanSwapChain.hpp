@@ -2,8 +2,9 @@
 
 #include <cstdint>
 
-#include "Lunar/Internal/API/Vulkan/Vulkan.hpp"
+#include "Lunar/Internal/Renderer/RendererSpec.hpp"
 
+#include "Lunar/Internal/API/Vulkan/Vulkan.hpp"
 #include "Lunar/Internal/API/Vulkan/VulkanImage.hpp"
 
 namespace Lunar::Internal
@@ -23,7 +24,7 @@ namespace Lunar::Internal
         ~VulkanSwapChain() = default;
 
         // Init & Destroy
-		void Init(Window* window);
+		void Init(const RendererID renderer, Window* window);
 		void Destroy();
 
         // Methods
@@ -49,6 +50,7 @@ namespace Lunar::Internal
         void FindImageFormatAndColorSpace();
 
     private:
+		RendererID m_RendererID = 0;
         Window* m_Window = nullptr;
 
         VkSwapchainKHR m_SwapChain = VK_NULL_HANDLE;

@@ -29,19 +29,24 @@ namespace Lunar::Internal
     {
     public:
         // Constructor & Destructor
-		inline Image(const RendererID renderer, const ImageSpecification& specs, const SamplerSpecification& samplerSpecs) { m_Image.Init(renderer, specs, samplerSpecs); }
-		inline Image(const RendererID renderer, const ImageSpecification& specs, const SamplerSpecification& samplerSpecs, const std::filesystem::path& imagePath) { m_Image.Init(renderer, specs, samplerSpecs, imagePath); }
-		inline ~Image() { m_Image.Destroy(); }
+        inline Image() = default;
+		inline Image(const RendererID renderer, const ImageSpecification& specs, const SamplerSpecification& samplerSpecs) { Init(renderer, specs, samplerSpecs); }
+		inline Image(const RendererID renderer, const ImageSpecification& specs, const SamplerSpecification& samplerSpecs, const std::filesystem::path& imagePath) { Init(renderer, specs, samplerSpecs, imagePath); }
+        inline ~Image() = default;
+
+        // Init & Destroy
+		inline void Init(const RendererID renderer, const ImageSpecification& specs, const SamplerSpecification& samplerSpecs) { m_Image.Init(renderer, specs, samplerSpecs); }
+		inline void Init(const RendererID renderer, const ImageSpecification& specs, const SamplerSpecification& samplerSpecs, const std::filesystem::path& imagePath) { m_Image.Init(renderer, specs, samplerSpecs, imagePath); }
+		inline void Destroy(const RendererID renderer) { m_Image.Destroy(renderer); }
 
         // Methods
-		inline void SetData(void* data, size_t size) { m_Image.SetData(data, size); }
+		inline void SetData(const RendererID renderer, void* data, size_t size) { m_Image.SetData(renderer, data, size); }
 
-		inline void Resize(uint32_t width, uint32_t height) { m_Image.Resize(width, height); }
+		inline void Resize(const RendererID renderer, uint32_t width, uint32_t height) { m_Image.Resize(renderer, width, height); }
 
-		inline void Transition(ImageLayout initial, ImageLayout final) { m_Image.Transition(initial, final); }
+		inline void Transition(const RendererID renderer, ImageLayout initial, ImageLayout final) { m_Image.Transition(renderer, initial, final); }
 
         // Getters
-        inline RendererID GetRendererID() const { return m_Image.GetRendererID(); }
         inline const ImageSpecification& GetSpecification() const { return m_Image.GetSpecification(); }
         inline const SamplerSpecification& GetSamplerSpecification() const { return m_Image.GetSamplerSpecification(); }
 

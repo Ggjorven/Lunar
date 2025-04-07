@@ -18,19 +18,18 @@ namespace Lunar::Internal
 	////////////////////////////////////////////////////////////////////////////////////
 	void VulkanVertexBuffer::Init(const RendererID renderer, const BufferSpecification& specs, void* data, size_t size)
 	{
-		m_RendererID = renderer;
 		m_BufferSize = size;
 
-		m_Allocation = VulkanAllocator::AllocateBuffer(m_RendererID, m_BufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, (VmaMemoryUsage)specs.Usage, m_Buffer);
+		m_Allocation = VulkanAllocator::AllocateBuffer(renderer, m_BufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, (VmaMemoryUsage)specs.Usage, m_Buffer);
 
 		// Only set data, if the data is valid
 		if (data != nullptr)
-			SetData(data, size, 0);
+			SetData(renderer, data, size, 0);
 	}
 
-	void VulkanVertexBuffer::Destroy()
+	void VulkanVertexBuffer::Destroy(const RendererID renderer)
 	{
-		Renderer::GetRenderer(m_RendererID).Free([rendererID = m_RendererID, buffer = m_Buffer, allocation = m_Allocation]()
+		Renderer::GetRenderer(renderer).Free([rendererID = renderer, buffer = m_Buffer, allocation = m_Allocation]()
 		{
 			if (buffer != VK_NULL_HANDLE)
 				VulkanAllocator::DestroyBuffer(rendererID, buffer, allocation);
@@ -40,23 +39,23 @@ namespace Lunar::Internal
 	////////////////////////////////////////////////////////////////////////////////////
 	// Methods
 	////////////////////////////////////////////////////////////////////////////////////
-	void VulkanVertexBuffer::Bind(CommandBuffer& cmdBuf) const
+	void VulkanVertexBuffer::Bind(const RendererID renderer, CommandBuffer& cmdBuf) const
 	{
 		LU_PROFILE("VkVertexBuffer::Bind()");
 		VulkanCommandBuffer& vkCmdBuf = cmdBuf.GetInternalCommandBuffer();
 
 		VkDeviceSize offsets[] = { 0 };
-		vkCmdBindVertexBuffers(vkCmdBuf.GetVkCommandBuffer(VulkanRenderer::GetRenderer(m_RendererID).GetVulkanSwapChain().GetCurrentFrame()), 0, 1, &m_Buffer, offsets);
+		vkCmdBindVertexBuffers(vkCmdBuf.GetVkCommandBuffer(VulkanRenderer::GetRenderer(renderer).GetVulkanSwapChain().GetCurrentFrame()), 0, 1, &m_Buffer, offsets);
 	}
 
-	void VulkanVertexBuffer::SetData(void* data, size_t size, size_t offset)
+	void VulkanVertexBuffer::SetData(const RendererID renderer, void* data, size_t size, size_t offset)
 	{
 		// Ensure that the size + offset doesn't exceed bounds
 		LU_VERIFY((size + offset <= m_BufferSize), "[VkVertexBuffer] Size and offset exceeds the buffer's bounds");
 
 		VkBuffer stagingBuffer = VK_NULL_HANDLE;
 		VmaAllocation stagingBufferAllocation = VK_NULL_HANDLE;
-		stagingBufferAllocation = VulkanAllocator::AllocateBuffer(m_RendererID, size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_ONLY, stagingBuffer);
+		stagingBufferAllocation = VulkanAllocator::AllocateBuffer(renderer, size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_ONLY, stagingBuffer);
 
 		void* mappedData = nullptr;
 		VulkanAllocator::MapMemory(stagingBufferAllocation, mappedData);
@@ -64,8 +63,8 @@ namespace Lunar::Internal
 		VulkanAllocator::UnMapMemory(stagingBufferAllocation);
 
 		// Copy data from the staging buffer to the vertex buffer at the specified offset
-		VulkanAllocator::CopyBuffer(m_RendererID, stagingBuffer, m_Buffer, size, offset);
-		VulkanAllocator::DestroyBuffer(m_RendererID, stagingBuffer, stagingBufferAllocation);
+		VulkanAllocator::CopyBuffer(renderer, stagingBuffer, m_Buffer, size, offset);
+		VulkanAllocator::DestroyBuffer(renderer, stagingBuffer, stagingBufferAllocation);
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////
@@ -95,43 +94,40 @@ namespace Lunar::Internal
 	////////////////////////////////////////////////////////////////////////////////////
 	void VulkanIndexBuffer::Init(const RendererID renderer, const BufferSpecification& specs, uint8_t* indices, uint32_t count)
 	{
-		m_RendererID = renderer;
 		m_Count = count;
 		m_Type = Type::UInt8;
 
 		VkDeviceSize bufferSize = sizeof(uint32_t) * count;
-		m_Allocation = VulkanAllocator::AllocateBuffer(m_RendererID, bufferSize, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, (VmaMemoryUsage)specs.Usage, m_Buffer);
+		m_Allocation = VulkanAllocator::AllocateBuffer(renderer, bufferSize, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, (VmaMemoryUsage)specs.Usage, m_Buffer);
 
-		SetData(indices, count, 0);
+		SetData(renderer, indices, count, 0);
 	}
 
 	void VulkanIndexBuffer::Init(const RendererID renderer, const BufferSpecification& specs, uint16_t* indices, uint32_t count)
 	{
-		m_RendererID = renderer;
 		m_Count = count;
 		m_Type = Type::UInt16;
 
 		VkDeviceSize bufferSize = sizeof(uint32_t) * count;
-		m_Allocation = VulkanAllocator::AllocateBuffer(m_RendererID, bufferSize, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, (VmaMemoryUsage)specs.Usage, m_Buffer);
+		m_Allocation = VulkanAllocator::AllocateBuffer(renderer, bufferSize, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, (VmaMemoryUsage)specs.Usage, m_Buffer);
 
-		SetData(indices, count, 0);
+		SetData(renderer, indices, count, 0);
 	}
 
 	void VulkanIndexBuffer::Init(const RendererID renderer, const BufferSpecification& specs, uint32_t* indices, uint32_t count)
 	{
-		m_RendererID = renderer;
 		m_Count = count;
 		m_Type = Type::UInt32;
 
 		VkDeviceSize bufferSize = sizeof(uint32_t) * count;
-		m_Allocation = VulkanAllocator::AllocateBuffer(m_RendererID, bufferSize, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, (VmaMemoryUsage)specs.Usage, m_Buffer);
+		m_Allocation = VulkanAllocator::AllocateBuffer(renderer, bufferSize, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, (VmaMemoryUsage)specs.Usage, m_Buffer);
 
-		SetData(indices, count, 0);
+		SetData(renderer, indices, count, 0);
 	}
 
-	void VulkanIndexBuffer::Destroy()
+	void VulkanIndexBuffer::Destroy(const RendererID renderer)
 	{
-		Renderer::GetRenderer(m_RendererID).Free([renderer = m_RendererID, buffer = m_Buffer, allocation = m_Allocation]()
+		Renderer::GetRenderer(renderer).Free([renderer = renderer, buffer = m_Buffer, allocation = m_Allocation]()
 		{
 			if (buffer != VK_NULL_HANDLE)
 				VulkanAllocator::DestroyBuffer(renderer, buffer, allocation);
@@ -141,44 +137,44 @@ namespace Lunar::Internal
 	////////////////////////////////////////////////////////////////////////////////////
 	// Methods
 	////////////////////////////////////////////////////////////////////////////////////
-	void VulkanIndexBuffer::Bind(CommandBuffer& cmdBuf) const
+	void VulkanIndexBuffer::Bind(const RendererID renderer, CommandBuffer& cmdBuf) const
 	{
 		LU_PROFILE("VkIndexBuffer::Bind()");
 		VulkanCommandBuffer& vkCmdBuf = cmdBuf.GetInternalCommandBuffer();
 
 		auto indexType = (m_Type == Type::UInt8) ? VK_INDEX_TYPE_UINT8 : (m_Type == Type::UInt16) ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_UINT32;
-		vkCmdBindIndexBuffer(vkCmdBuf.GetVkCommandBuffer(VulkanRenderer::GetRenderer(m_RendererID).GetVulkanSwapChain().GetCurrentFrame()), m_Buffer, 0, indexType);
+		vkCmdBindIndexBuffer(vkCmdBuf.GetVkCommandBuffer(VulkanRenderer::GetRenderer(renderer).GetVulkanSwapChain().GetCurrentFrame()), m_Buffer, 0, indexType);
 	}
 
-	void VulkanIndexBuffer::SetData(uint8_t* indices, uint32_t count, size_t countOffset)
+	void VulkanIndexBuffer::SetData(const RendererID renderer, uint8_t* indices, uint32_t count, size_t countOffset)
 	{
 		// Ensure that the size + offset doesn't exceed bounds
 		LU_VERIFY((count + countOffset <= m_Count), "[VkIndexBuffer] Count and countOffset exceeds the buffer's bounds");
-		SetData(static_cast<void*>(indices), static_cast<size_t>((sizeof(uint8_t) * count)), static_cast<size_t>((sizeof(uint8_t) * countOffset)));
+		SetData(renderer, static_cast<void*>(indices), static_cast<size_t>((sizeof(uint8_t) * count)), static_cast<size_t>((sizeof(uint8_t) * countOffset)));
 	}
 
-	void VulkanIndexBuffer::SetData(uint16_t* indices, uint32_t count, size_t countOffset)
+	void VulkanIndexBuffer::SetData(const RendererID renderer, uint16_t* indices, uint32_t count, size_t countOffset)
 	{
 		// Ensure that the size + offset doesn't exceed bounds
 		LU_VERIFY((count + countOffset <= m_Count), "[VkIndexBuffer] Count and countOffset exceeds the buffer's bounds");
-		SetData(static_cast<void*>(indices), static_cast<size_t>((sizeof(uint16_t) * count)), static_cast<size_t>((sizeof(uint16_t) * countOffset)));
+		SetData(renderer, static_cast<void*>(indices), static_cast<size_t>((sizeof(uint16_t) * count)), static_cast<size_t>((sizeof(uint16_t) * countOffset)));
 	}
 
-	void VulkanIndexBuffer::SetData(uint32_t* indices, uint32_t count, size_t countOffset)
+	void VulkanIndexBuffer::SetData(const RendererID renderer, uint32_t* indices, uint32_t count, size_t countOffset)
 	{
 		// Ensure that the size + offset doesn't exceed bounds
 		LU_VERIFY((count + countOffset <= m_Count), "[VkIndexBuffer] Count and countOffset exceeds the buffer's bounds");
-		SetData(static_cast<void*>(indices), static_cast<size_t>((sizeof(uint32_t) * count)), static_cast<size_t>((sizeof(uint32_t) * countOffset)));
+		SetData(renderer, static_cast<void*>(indices), static_cast<size_t>((sizeof(uint32_t) * count)), static_cast<size_t>((sizeof(uint32_t) * countOffset)));
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////
 	// Private methods
 	////////////////////////////////////////////////////////////////////////////////////
-	void VulkanIndexBuffer::SetData(void* indices, size_t size, size_t offset)
+	void VulkanIndexBuffer::SetData(const RendererID renderer, void* indices, size_t size, size_t offset)
 	{
 		VkBuffer stagingBuffer = VK_NULL_HANDLE;
 		VmaAllocation stagingBufferAllocation = VK_NULL_HANDLE;
-		stagingBufferAllocation = VulkanAllocator::AllocateBuffer(m_RendererID, size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_ONLY, stagingBuffer);
+		stagingBufferAllocation = VulkanAllocator::AllocateBuffer(renderer, size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_ONLY, stagingBuffer);
 
 		void* mappedData = nullptr;
 		VulkanAllocator::MapMemory(stagingBufferAllocation, mappedData);
@@ -186,8 +182,8 @@ namespace Lunar::Internal
 		VulkanAllocator::UnMapMemory(stagingBufferAllocation);
 
 		// Copy data from the staging buffer to the vertex buffer at the specified offset
-		VulkanAllocator::CopyBuffer(m_RendererID, stagingBuffer, m_Buffer, size, offset);
-		VulkanAllocator::DestroyBuffer(m_RendererID, stagingBuffer, stagingBufferAllocation);
+		VulkanAllocator::CopyBuffer(renderer, stagingBuffer, m_Buffer, size, offset);
+		VulkanAllocator::DestroyBuffer(renderer, stagingBuffer, stagingBufferAllocation);
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////
@@ -195,7 +191,6 @@ namespace Lunar::Internal
 	////////////////////////////////////////////////////////////////////////////////////
 	void VulkanUniformBuffer::Init(const RendererID renderer, const BufferSpecification& specs, size_t dataSize)
 	{
-		m_RendererID = renderer;
 		m_Size = dataSize;
 
 		#if defined(LU_CONFIG_DEBUG)
@@ -205,17 +200,17 @@ namespace Lunar::Internal
 			}
 		#endif
 
-		const size_t framesInFlight = static_cast<size_t>(Renderer::GetRenderer(m_RendererID).GetSpecification().Buffers);
+		const size_t framesInFlight = static_cast<size_t>(Renderer::GetRenderer(renderer).GetSpecification().Buffers);
 		m_Buffers.resize(framesInFlight);
 		m_Allocations.resize(framesInFlight);
 
 		for (size_t i = 0; i < framesInFlight; i++)
-			m_Allocations[i] = VulkanAllocator::AllocateBuffer(m_RendererID, (VkDeviceSize)dataSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, (VmaMemoryUsage)specs.Usage, m_Buffers[i], VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+			m_Allocations[i] = VulkanAllocator::AllocateBuffer(renderer, (VkDeviceSize)dataSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, (VmaMemoryUsage)specs.Usage, m_Buffers[i], VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
 	}
 
-	void VulkanUniformBuffer::Destroy()
+	void VulkanUniformBuffer::Destroy(const RendererID renderer)
 	{
-		Renderer::GetRenderer(m_RendererID).Free([renderer = m_RendererID, buffers = m_Buffers, allocations = m_Allocations]()
+		Renderer::GetRenderer(renderer).Free([renderer = renderer, buffers = m_Buffers, allocations = m_Allocations]()
 		{
 			for (size_t i = 0; i < buffers.size(); i++)
 			{
@@ -228,11 +223,11 @@ namespace Lunar::Internal
 	////////////////////////////////////////////////////////////////////////////////////
 	// Methods
 	////////////////////////////////////////////////////////////////////////////////////
-	void VulkanUniformBuffer::SetData(void* data, size_t size, size_t offset)
+	void VulkanUniformBuffer::SetData(const RendererID renderer, void* data, size_t size, size_t offset)
 	{
 		LU_ASSERT((size + offset <= m_Size), "[VkUniformBuffer] Data exceeds buffer size.");
 
-		const size_t framesInFlight = static_cast<size_t>(Renderer::GetRenderer(m_RendererID).GetSpecification().Buffers);
+		const size_t framesInFlight = static_cast<size_t>(Renderer::GetRenderer(renderer).GetSpecification().Buffers);
 		for (size_t i = 0; i < framesInFlight; i++)
 		{
 			void* mappedMemory = nullptr;
@@ -247,7 +242,6 @@ namespace Lunar::Internal
 	////////////////////////////////////////////////////////////////////////////////////
 	void VulkanStorageBuffer::Init(const RendererID renderer, const BufferSpecification& specs, size_t dataSize)
 	{
-		m_RendererID = renderer;
 		m_Size = dataSize;
 
 		#if defined(LU_CONFIG_DEBUG)
@@ -257,7 +251,7 @@ namespace Lunar::Internal
 			}
 		#endif
 
-		const size_t framesInFlight = static_cast<size_t>(Renderer::GetRenderer(m_RendererID).GetSpecification().Buffers);
+		const size_t framesInFlight = static_cast<size_t>(Renderer::GetRenderer(renderer).GetSpecification().Buffers);
 		m_Buffers.resize(framesInFlight);
 		m_Allocations.resize(framesInFlight);
 
@@ -265,9 +259,9 @@ namespace Lunar::Internal
 			m_Allocations[i] = VulkanAllocator::AllocateBuffer(renderer, (VkDeviceSize)dataSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, (VmaMemoryUsage)specs.Usage, m_Buffers[i], VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT);
 	}
 
-	void VulkanStorageBuffer::Destroy()
+	void VulkanStorageBuffer::Destroy(const RendererID renderer)
 	{
-		Renderer::GetRenderer(m_RendererID).Free([renderer = m_RendererID, buffers = m_Buffers, allocations = m_Allocations]()
+		Renderer::GetRenderer(renderer).Free([renderer = renderer, buffers = m_Buffers, allocations = m_Allocations]()
 		{
 			for (size_t i = 0; i < buffers.size(); i++)
 			{
@@ -280,11 +274,11 @@ namespace Lunar::Internal
 	////////////////////////////////////////////////////////////////////////////////////
 	// Methods
 	////////////////////////////////////////////////////////////////////////////////////
-	void VulkanStorageBuffer::SetData(void* data, size_t size, size_t offset)
+	void VulkanStorageBuffer::SetData(const RendererID renderer, void* data, size_t size, size_t offset)
 	{
 		LU_ASSERT((size + offset <= m_Size), "[VkStorageBuffer] Data exceeds buffer size.");
 
-		const size_t framesInFlight = static_cast<size_t>(Renderer::GetRenderer(m_RendererID).GetSpecification().Buffers);
+		const size_t framesInFlight = static_cast<size_t>(Renderer::GetRenderer(renderer).GetSpecification().Buffers);
 		for (size_t i = 0; i < framesInFlight; i++)
 		{
 			void* mappedMemory = nullptr;

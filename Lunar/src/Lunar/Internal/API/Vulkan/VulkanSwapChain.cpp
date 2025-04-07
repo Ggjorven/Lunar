@@ -20,8 +20,9 @@ namespace Lunar::Internal
     ////////////////////////////////////////////////////////////////////////////////////
 	// Init & Destroy
     ////////////////////////////////////////////////////////////////////////////////////
-    void VulkanSwapChain::Init(Window* window) 
+    void VulkanSwapChain::Init(const RendererID renderer, Window* window) 
 	{
+		m_RendererID = renderer;
 		m_Window = window;
 
 		#if defined(LU_PLATFORM_DESKTOP)
@@ -51,7 +52,7 @@ namespace Lunar::Internal
             vkDestroySwapchainKHR(device.GetVkDevice(), m_SwapChain, nullptr);
 
 		for (auto& image : m_Images)
-			image.Destroy();
+			image.Destroy(m_RendererID);
 
 		vkDestroyCommandPool(device.GetVkDevice(), m_CommandPool, nullptr);
 
@@ -246,7 +247,7 @@ namespace Lunar::Internal
 
 			// We transition manually since, the layout set in the specification doesn't get used
 			// since we manually set all the data.
-			m_Images[i].Transition(ImageLayout::Undefined, ImageLayout::PresentSrcKHR);
+			m_Images[i].Transition(m_RendererID, ImageLayout::Undefined, ImageLayout::PresentSrcKHR);
 		}
 
 		///////////////////////////////////////////////////////////

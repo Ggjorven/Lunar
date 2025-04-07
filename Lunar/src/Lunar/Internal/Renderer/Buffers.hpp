@@ -48,16 +48,21 @@ namespace Lunar::Internal
 	{
 	public:
 		// Constructor & Destructor
-		inline VertexBuffer(const RendererID renderer, const BufferSpecification& specs, void* data, size_t size) { m_VertexBuffer.Init(renderer, specs, data, size); }
-		inline ~VertexBuffer() { m_VertexBuffer.Destroy(); }
+		inline VertexBuffer() = default;
+		inline VertexBuffer(const RendererID renderer, const BufferSpecification& specs, void* data, size_t size) { Init(renderer, specs, data, size); }
+		inline ~VertexBuffer() = default;
+
+		// Init & Destroy
+		inline void Init(const RendererID renderer, const BufferSpecification& specs, void* data, size_t size) { m_VertexBuffer.Init(renderer, specs, data, size); }
+		inline void Destroy(const RendererID renderer) { m_VertexBuffer.Destroy(renderer); }
 
 		// Methods
-		inline void Bind(CommandBuffer& cmdBuf) const { m_VertexBuffer.Bind(cmdBuf); }
+		inline void Bind(const RendererID renderer, CommandBuffer& cmdBuf) const { m_VertexBuffer.Bind(renderer, cmdBuf); }
 
-		inline void SetData(void* data, size_t size, size_t offset = 0) { m_VertexBuffer.SetData(data, size, offset); }
+		inline void SetData(const RendererID renderer, void* data, size_t size, size_t offset = 0) { m_VertexBuffer.SetData(renderer, data, size, offset); }
 		
 		// Static methods
-		inline static void Bind(const RendererID renderer, CommandBuffer& cmdBuf, const std::vector<VertexBuffer*>& buffers) { VertexBufferType::Bind(renderer,cmdBuf, buffers); }
+		inline static void Bind(const RendererID renderer, CommandBuffer& cmdBuf, const std::vector<VertexBuffer*>& buffers) { VertexBufferType::Bind(renderer, cmdBuf, buffers); }
 
 		// Internal
 		inline VertexBufferType& GetInternalVertexBuffer() { return m_VertexBuffer; }
@@ -73,18 +78,25 @@ namespace Lunar::Internal
 	{
 	public:
 		// Constructor & Destructor
-		inline IndexBuffer(const RendererID renderer, const BufferSpecification& specs, uint8_t* indices, uint32_t count) { m_IndexBuffer.Init(renderer, specs, indices, count); }
-		inline IndexBuffer(const RendererID renderer, const BufferSpecification& specs, uint16_t* indices, uint32_t count) { m_IndexBuffer.Init(renderer, specs, indices, count); }
-		inline IndexBuffer(const RendererID renderer, const BufferSpecification& specs, uint32_t* indices, uint32_t count) { m_IndexBuffer.Init(renderer, specs, indices, count); }
-		inline ~IndexBuffer() { m_IndexBuffer.Destroy(); }
+		inline IndexBuffer() = default;
+		inline IndexBuffer(const RendererID renderer, const BufferSpecification& specs, uint8_t* indices, uint32_t count) { Init(renderer, specs, indices, count); }
+		inline IndexBuffer(const RendererID renderer, const BufferSpecification& specs, uint16_t* indices, uint32_t count) { Init(renderer, specs, indices, count); }
+		inline IndexBuffer(const RendererID renderer, const BufferSpecification& specs, uint32_t* indices, uint32_t count) { Init(renderer, specs, indices, count); }
+		inline ~IndexBuffer() = default;
+
+		// Init & Destroy
+		inline void Init(const RendererID renderer, const BufferSpecification& specs, uint8_t* indices, uint32_t count) { m_IndexBuffer.Init(renderer, specs, indices, count); }
+		inline void Init(const RendererID renderer, const BufferSpecification& specs, uint16_t* indices, uint32_t count) { m_IndexBuffer.Init(renderer, specs, indices, count); }
+		inline void Init(const RendererID renderer, const BufferSpecification& specs, uint32_t* indices, uint32_t count) { m_IndexBuffer.Init(renderer, specs, indices, count); }
+		inline void Destroy(const RendererID renderer) { m_IndexBuffer.Destroy(renderer); }
 
 		// Methods
-		inline void Bind(CommandBuffer& cmdBuf) const { m_IndexBuffer.Bind(cmdBuf); }
+		inline void Bind(const RendererID renderer, CommandBuffer& cmdBuf) const { m_IndexBuffer.Bind(renderer, cmdBuf); }
 
 		// The offset is in count, so 1,2,3,4,5 instead of size(uint32_t)
-		inline void SetData(uint8_t* indices, uint32_t count, size_t countOffset = 0) { m_IndexBuffer.SetData(indices, count, countOffset); }
-		inline void SetData(uint16_t* indices, uint32_t count, size_t countOffset = 0) { m_IndexBuffer.SetData(indices, count, countOffset); }
-		inline void SetData(uint32_t* indices, uint32_t count, size_t countOffset = 0) { m_IndexBuffer.SetData(indices, count, countOffset); }
+		inline void SetData(const RendererID renderer, uint8_t* indices, uint32_t count, size_t countOffset = 0) { m_IndexBuffer.SetData(renderer, indices, count, countOffset); }
+		inline void SetData(const RendererID renderer, uint16_t* indices, uint32_t count, size_t countOffset = 0) { m_IndexBuffer.SetData(renderer, indices, count, countOffset); }
+		inline void SetData(const RendererID renderer, uint32_t* indices, uint32_t count, size_t countOffset = 0) { m_IndexBuffer.SetData(renderer, indices, count, countOffset); }
 
 		// Getters
 		inline uint32_t GetCount() const { return m_IndexBuffer.GetCount(); }
@@ -104,11 +116,16 @@ namespace Lunar::Internal
 	{
 	public:
 		// Constructor & Destructor
-		inline UniformBuffer(const RendererID renderer, const BufferSpecification& specs, size_t dataSize) { m_UniformBuffer.Init(renderer, specs, dataSize); }
-		inline ~UniformBuffer() { m_UniformBuffer.Destroy(); }
+		inline UniformBuffer() = default;
+		inline UniformBuffer(const RendererID renderer, const BufferSpecification& specs, size_t dataSize) { Init(renderer, specs, dataSize); }
+		inline ~UniformBuffer() = default;
+
+		// Init & Destroy
+		inline void Init(const RendererID renderer, const BufferSpecification& specs, size_t dataSize) { m_UniformBuffer.Init(renderer, specs, dataSize); }
+		inline void Destroy(const RendererID renderer) { m_UniformBuffer.Destroy(renderer); }
 
 		// Methods
-		inline void SetData(void* data, size_t size, size_t offset = 0) { m_UniformBuffer.SetData(data, size, offset); }
+		inline void SetData(const RendererID renderer, void* data, size_t size, size_t offset = 0) { m_UniformBuffer.SetData(renderer, data, size, offset); }
 
 		// Getters
 		virtual size_t GetSize() const { return m_UniformBuffer.GetSize(); }
@@ -154,12 +171,17 @@ namespace Lunar::Internal
 	class StorageBuffer
 	{
 	public:
-		// Constructor & Destructor
-		inline StorageBuffer(const RendererID renderer, const BufferSpecification& specs, size_t dataSize) { m_StorageBuffer.Init(renderer, specs, dataSize); }
-		inline ~StorageBuffer() { m_StorageBuffer.Destroy(); }
+		// Constructors & Destructor
+		inline StorageBuffer() = default;
+		inline StorageBuffer(const RendererID renderer, const BufferSpecification& specs, size_t dataSize) { Init(renderer, specs, dataSize); }
+		inline ~StorageBuffer() = default;
+
+		// Init & Destroy
+		inline void Init(const RendererID renderer, const BufferSpecification& specs, size_t dataSize) { m_StorageBuffer.Init(renderer, specs, dataSize); }
+		inline void Destroy(const RendererID renderer) { m_StorageBuffer.Destroy(renderer); }
 
 		// Methods
-		inline void SetData(void* data, size_t size, size_t offset = 0) { m_StorageBuffer.SetData(data, size, offset); }
+		inline void SetData(const RendererID renderer, void* data, size_t size, size_t offset = 0) { m_StorageBuffer.SetData(renderer, data, size, offset); }
 
 		// Getters
 		virtual size_t GetSize() const { return m_StorageBuffer.GetSize(); }
