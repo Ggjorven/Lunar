@@ -54,8 +54,8 @@ namespace Lunar::Internal
     {
         std::unordered_set<DescriptorType> unique = { };
 
-        for (const auto& e : Descriptors)
-            unique.insert(e.second.Type);
+        for (const auto& [name, descriptor] : Descriptors)
+            unique.insert(descriptor.Type);
 
         return unique;
     }
@@ -64,10 +64,23 @@ namespace Lunar::Internal
     {
         uint32_t count = 0;
 
-        for (const auto& e : Descriptors)
+        for (const auto& [name, descriptor] : Descriptors)
         {
-            if (e.second.Type == type)
+            if (descriptor.Type == type)
                 count++;
+        }
+
+        return count;
+    }
+
+    uint32_t DescriptorSetLayout::CountOf(DescriptorType type) const
+    {
+        uint32_t count = 0;
+
+        for (const auto& [name, descriptor] : Descriptors)
+        {
+            if (descriptor.Type == type)
+				count += descriptor.Count;
         }
 
         return count;

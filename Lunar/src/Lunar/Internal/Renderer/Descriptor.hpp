@@ -57,7 +57,7 @@ namespace Lunar::Internal
     class DescriptorSets
     {
     public:
-        // Constructor & Destructor
+        // Constructors & Destructor
 		inline DescriptorSets() = default;
         inline DescriptorSets(const RendererID renderer, const std::initializer_list<DescriptorSetRequest>& sets) { Init(renderer, sets); }
         inline ~DescriptorSets() = default;

@@ -44,7 +44,7 @@ namespace Lunar::Internal
     class Shader
     {
     public:
-		// Constructor & Destructor
+		// Constructors & Destructor
 		inline Shader() = default;
 		inline Shader(const RendererID renderer, const ShaderSpecification& specs) { Init(renderer, specs); }
         inline ~Shader() = default;

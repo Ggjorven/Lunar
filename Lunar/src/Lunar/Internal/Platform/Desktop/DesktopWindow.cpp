@@ -221,6 +221,14 @@ namespace Lunar::Internal
         m_Specification.VSync = vsync;
         m_Renderer.Recreate(m_Specification.Width, m_Specification.Height, vsync);
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////
+    // Additional getters
+    ////////////////////////////////////////////////////////////////////////////////////
+    double DesktopWindow::GetTime() const
+    {
+        return glfwGetTime();
+    }
 #endif
 
 }

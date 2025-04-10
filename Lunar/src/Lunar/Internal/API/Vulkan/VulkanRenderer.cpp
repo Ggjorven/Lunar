@@ -18,6 +18,7 @@
 
 #include <array>
 #include <numeric>
+#include <algorithm>
 
 namespace Lunar::Internal
 {
@@ -95,7 +96,31 @@ namespace Lunar::Internal
         if (m_Specification.WindowRef->IsMinimized())
             return;
 
-        auto& semaphores = m_TaskManager.GetSemaphores();
+
+        #if !defined(LU_CONFIG_DIST)
+        std::vector<VkSemaphore> semaphores = m_TaskManager.GetSemaphores();
+        
+        auto pos = std::find(semaphores.begin(), semaphores.end(), m_SwapChain.GetCurrentImageAvailableSemaphore());
+        
+        if (pos != semaphores.end())
+		{
+			LU_LOG_ERROR("[VkRenderer] PresentQueue is waiting on acquire image semaphore. This is undefined behaviour. To solve this start some form of renderpass. (Or just render soemthing).");
+
+            uint64_t waitValue = 0;
+			VkSemaphore waitSemaphore = m_SwapChain.GetCurrentImageAvailableSemaphore();
+
+			VkSemaphoreWaitInfo waitInfo = {};
+			waitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO;
+			waitInfo.semaphoreCount = 1;
+			waitInfo.pSemaphores = &waitSemaphore;
+			waitInfo.pValues = &waitValue;
+
+			vkWaitSemaphores(VulkanContext::GetVulkanDevice().GetVkDevice(), &waitInfo, std::numeric_limits<uint64_t>::max());
+            semaphores.erase(std::remove(semaphores.begin(), semaphores.end(), waitSemaphore), semaphores.end());
+		}
+        #else
+		std::vector<VkSemaphore>& semaphores = m_TaskManager.GetSemaphores();
+        #endif
 
         VkPresentInfoKHR presentInfo = {};
         presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -104,7 +129,7 @@ namespace Lunar::Internal
         presentInfo.swapchainCount = 1;
         presentInfo.pSwapchains = &m_SwapChain.m_SwapChain;
         presentInfo.pImageIndices = &m_SwapChain.m_AcquiredImage;
-        presentInfo.pResults = nullptr; // Optional
+        presentInfo.pResults = nullptr;
 
         VkResult result = VK_SUCCESS;
         {

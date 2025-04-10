@@ -97,7 +97,8 @@ namespace Lunar::Internal
 
         Descriptor GetDescriptorByName(const std::string& name) const;
         std::unordered_set<DescriptorType> UniqueTypes() const;
-        uint32_t AmountOf(DescriptorType type) const;
+        uint32_t AmountOf(DescriptorType type) const; // Element count
+		uint32_t CountOf(DescriptorType type) const; // Elements * count, count
     };
 
     struct DescriptorSetRequest

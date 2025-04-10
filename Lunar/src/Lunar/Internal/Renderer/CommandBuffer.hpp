@@ -23,7 +23,7 @@ namespace Lunar::Internal
     class CommandBuffer
     {
     public:
-        // Constructor & Destructor
+        // Constructors & Destructor
 		inline CommandBuffer() = default;
 		inline CommandBuffer(const RendererID renderer) { Init(renderer); }
 		inline ~CommandBuffer() = default;

@@ -6,7 +6,9 @@
 #include "Lunar/Internal/Utils/Preprocessor.hpp"
 #include "Lunar/Internal/Renderer/Renderer.hpp"
 
-#include <GLFW/glfw3.h>
+#if defined(LU_PLATFORM_WINDOWS)
+	#include <GLFW/glfw3.h>
+#endif
 
 namespace Lunar::Internal
 {
@@ -45,6 +47,7 @@ namespace Lunar::Internal
 		void SetVSync(bool vsync);
 
 		// Additional getters
+		double GetTime() const;
 		inline bool IsVSync() const { return m_Specification.VSync; }
 		inline bool IsOpen() const { return !m_Closed; }
 		inline bool IsMinimized() const { return ((m_Specification.Width == 0) || (m_Specification.Height == 0)); }
@@ -55,10 +58,11 @@ namespace Lunar::Internal
 
 	private:
 		WindowSpecification m_Specification;
-		bool m_Closed = false;
-
+		
 		GLFWwindow* m_Window = nullptr;
-
+		
+		bool m_Closed = false;
+		
 		Renderer m_Renderer = {};
 	};
 #endif

@@ -4,6 +4,7 @@
 #include "Lunar/Internal/Renderer/Buffers.hpp"
 #include "Lunar/Internal/Renderer/Renderer.hpp"
 #include "Lunar/Internal/Renderer/Pipeline.hpp"
+#include "Lunar/Internal/Renderer/Descriptor.hpp"
 #include "Lunar/Internal/Renderer/Renderpass.hpp"
 #include "Lunar/Internal/Renderer/CommandBuffer.hpp"
 
@@ -22,6 +23,8 @@ namespace Lunar
 	class BatchResources2D
 	{
 	public:
+
+	public:
 		struct Vertex
 		{
 		public:
@@ -35,30 +38,47 @@ namespace Lunar
 
 	public:
 		// Constructor & Destructor
-		BatchResources2D();
-		~BatchResources2D();
+		BatchResources2D() = default;
+		~BatchResources2D() = default;
+
+		// Init & Destroy
+		void Init(const Internal::RendererID renderer, uint32_t width, uint32_t height);
+		void Destroy();
+
+		// Methods
+		void Resize(uint32_t width, uint32_t height);
 
 	private:
-		struct
-		{
-			Lunar::Internal::Image WhiteTexture;
-			Lunar::Internal::UniformBuffer CameraBuffer;
-		} Global;
+		// Global
+		Lunar::Internal::Image m_WhiteTexture;
+		Lunar::Internal::UniformBuffer m_CameraBuffer;
 
+		// Renderer
 		struct
 		{
-			uint32_t a;
+			Internal::Image DepthImage = {};
+
+			Internal::Pipeline Pipeline = {};
+			Internal::DescriptorSets DescriptorSets = {};
+
+			Internal::CommandBuffer CommandBuffer = {};
+			Internal::Renderpass Renderpass = {};
+
+			Internal::VertexBuffer VertexBuffer = {};
+			Internal::IndexBuffer IndexBuffer = {};
 		} Renderer;
 
-		struct
-		{
-			uint32_t b;
-		} State;
+		// State
+		Internal::RendererID m_RendererID;
+		std::vector<Vertex> m_CPUBuffer = { };
+		
+		uint32_t m_CurrentTextureIndex = 0;
+		std::unordered_map<Internal::Image*, uint32_t> m_TextureIndices = { };
 
 	private:
 		// Private methods
 		void InitGlobal();
-		void InitRenderer();
+		void InitRenderer(uint32_t width, uint32_t height);
 
 		friend class BatchRenderer2D;
 	};
@@ -69,11 +89,36 @@ namespace Lunar
 	class BatchRenderer2D
 	{
 	public:
-		//BatchRenderer2D();
-		//~BatchRenderer2D();
+		constexpr static const uint32_t MaxQuads = 10000u;
+		constexpr static const uint32_t MaxTextures = 1024u;
+	public:
+		// Constructor & Destructor
+		BatchRenderer2D() = default;
+		~BatchRenderer2D() = default;
+
+		// Init & Destroy
+		void Init(const Internal::RendererID renderer, uint32_t width, uint32_t height);
+		void Destroy();
+
+		// Methods
+		void Begin();
+		void End();
+		void Flush();
+
+		void SetCamera(const Mat4& view, const Mat4& projection);
+
+		// Note: We multiply the Z-axis by -1, so the depth is from 0 to 1
+		void AddQuad(const Vec3<float>& position, const Vec2<float>& size, const Vec4<float>& colour);
+		void AddQuad(const Vec3<float>& position, const Vec2<float>& size, Internal::Image* texture, const Vec4<float>& colour);
+
+		// Internal
+		void Resize(uint32_t width, uint32_t height);
 
 	private:
-		BatchResources2D m_Resources;
+		uint32_t GetTextureID(Internal::Image* image);
+
+	private:
+		BatchResources2D m_Resources = {};
 	};
 
 }

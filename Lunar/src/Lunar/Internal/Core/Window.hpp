@@ -2,6 +2,7 @@
 
 #include "Lunar/Internal/Utils/Settings.hpp"
 #include "Lunar/Internal/Platform/Desktop/DesktopWindow.hpp"
+#include "Window.hpp"
 
 namespace Lunar::Internal
 {
@@ -25,8 +26,12 @@ namespace Lunar::Internal
 	{
 	public:
 		// Constructors & Destructor
-		inline Window(const WindowSpecification& specs) { m_Window.Init(specs, this); }
+		inline Window() = default;
+		inline Window(const WindowSpecification& specs) { Init(specs); }
 		inline ~Window() { m_Window.Destroy(); }
+
+		// Init
+		inline void Init(const WindowSpecification& specs) { m_Window.Init(specs, this); }
 
 		// Methods
 		inline void PollEvents() { m_Window.PollEvents(); }
@@ -37,6 +42,7 @@ namespace Lunar::Internal
 		inline void Close() { m_Window.Close(); }
 
 		// Getters
+		inline double GetTime() const { return m_Window.GetTime(); }
 		inline Vec2<uint32_t> GetSize() const { return m_Window.GetSize(); }
 		inline Vec2<float> GetPosition() const { return m_Window.GetPosition(); }
 

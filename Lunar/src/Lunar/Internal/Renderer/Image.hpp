@@ -28,7 +28,7 @@ namespace Lunar::Internal
     class Image
     {
     public:
-        // Constructor & Destructor
+        // Constructors & Destructor
         inline Image() = default;
 		inline Image(const RendererID renderer, const ImageSpecification& specs, const SamplerSpecification& samplerSpecs) { Init(renderer, specs, samplerSpecs); }
 		inline Image(const RendererID renderer, const ImageSpecification& specs, const SamplerSpecification& samplerSpecs, const std::filesystem::path& imagePath) { Init(renderer, specs, samplerSpecs, imagePath); }

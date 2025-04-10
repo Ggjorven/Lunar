@@ -268,7 +268,7 @@ namespace Lunar::Internal
         {
             VkDescriptorPoolSize& poolSize = poolSizes.emplace_back();
             poolSize.type = DescriptorTypeToVkDescriptorType(type);
-            poolSize.descriptorCount = m_OriginalLayouts[setID].AmountOf(type) * framesInFlight * amount;
+            poolSize.descriptorCount = m_OriginalLayouts[setID].CountOf(type) * framesInFlight * amount;
         }
 
         VkDescriptorPoolCreateInfo poolInfo = {};

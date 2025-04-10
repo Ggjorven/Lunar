@@ -29,7 +29,7 @@ namespace Lunar::Internal
     class Renderpass
     {
     public:
-        // Constructor & Destructor
+        // Constructors & Destructor
         inline Renderpass() = default;
         inline Renderpass(const RendererID renderer, const RenderpassSpecification& specs, CommandBuffer* cmdBuf) { Init(renderer, specs, cmdBuf); }
         inline ~Renderpass() = default;

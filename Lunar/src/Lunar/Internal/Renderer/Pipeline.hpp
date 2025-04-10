@@ -30,7 +30,7 @@ namespace Lunar::Internal
     class Pipeline // Note: Pipeline does not keep the shader/descriptorsets/renderpass alive/in scope
     {
     public:
-        // Constructor & Destructor
+        // Constructors & Destructor
         inline Pipeline() = default;
         inline Pipeline(const RendererID renderer, const PipelineSpecification& specs, DescriptorSets& sets, Shader& shader) { Init(renderer, specs, sets, shader); }
         inline Pipeline(const RendererID renderer, const PipelineSpecification& specs, DescriptorSets& sets, Shader& shader, Renderpass& renderpass) { Init(renderer, specs, sets, shader, renderpass); }
