@@ -6,6 +6,8 @@ project "Sandbox"
 	cppdialect "C++23"
 	staticruntime "On"
 
+	debugdir ("%{prj.location}")
+
 	architecture "x86_64"
 
 	warnings "Extra"

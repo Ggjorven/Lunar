@@ -7,8 +7,6 @@
 #include "Lunar/Internal/Enum/Name.hpp"
 #include "Lunar/Internal/Enum/Utilities.hpp"
 
-#include "Lunar/Internal/Maths/Logarithm.hpp"
-
 #include "Lunar/Internal/Utils/Hash.hpp"
 #include "Lunar/Internal/Utils/Types.hpp"
 

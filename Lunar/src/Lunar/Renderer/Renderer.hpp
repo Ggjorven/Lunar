@@ -6,8 +6,6 @@
 #include "Lunar/Renderer/Texture.hpp"
 #include "Lunar/Renderer/Batch/BatchRenderer2D.hpp"
 
-#include <variant>
-
 namespace Lunar
 {
 

@@ -12,7 +12,7 @@
 
 #include <filesystem>
 
-#define STBI_ASSERT(x) LU_ASSERT(x, std::format("[VkImage:stb_image] '{0}'", #x))
+//#define STBI_ASSERT(x) LU_ASSERT(x, std::format("[VkImage:stb_image] '{0}'", #x))
 
 #if defined(LU_COMPILER_GCC)
 	#pragma GCC diagnostic push
@@ -92,7 +92,7 @@ namespace Lunar::Internal
 
 		if (m_ImageSpecification.MipMaps)
 		{
-			GenerateMipmaps(renderer, m_Image, (VkFormat)m_ImageSpecification.Format, m_ImageSpecification.Width, m_ImageSpecification.Height, m_Miplevels);
+			GenerateMipmaps(renderer, m_Image, ImageFormatToVkFormat(m_ImageSpecification.Format), m_ImageSpecification.Width, m_ImageSpecification.Height, m_Miplevels);
 			Transition(renderer, ImageLayout::ShaderRead, desiredLayout);
 		}
 		else
@@ -365,7 +365,7 @@ namespace Lunar::Internal
 		int width, height, texChannels;
 
 		stbi_set_flip_vertically_on_load(1);
-		stbi_uc* pixels = stbi_load(imagePath.string().c_str(), &width, &height, &texChannels, STBI_rgb_alpha);
+		stbi_uc* pixels = stbi_load(imagePath.string().c_str(), &width, &height, &texChannels, STBI_rgb_alpha); // STBI_default, STBI_rgb_alpha
 
 		LU_ASSERT((pixels != nullptr), std::format("[VkImage] Failed to load image from '{0}'", imagePath.string()));
 

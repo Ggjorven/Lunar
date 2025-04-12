@@ -17,9 +17,8 @@ int main(int argc, char* argv[])
 	Renderer& renderer = window.GetRenderer();
 
 	{
-		Texture texture(renderer.GetID(), 1, 1);
-		size_t colour = 0xFF00FF00;
-		texture.SetData(&colour, sizeof(size_t));
+		Texture texture(renderer.GetID(), "Resources/Images/texture.jpg");
+		//Texture texture(renderer.GetID(), "Resources/Images/Mario.png");
 
 		{
 			double currentTime = window.GetTime();
@@ -31,7 +30,9 @@ int main(int argc, char* argv[])
 			float aspectRatio = Maths::AspectRatio(window.GetSize().x, window.GetSize().y);
 
 			Mat4 view = Mat4(1.0f);
+			//Mat4 projection = Mat4(1.0f);
 			Mat4 projection = Maths::Perspective(Maths::Radians(45.0f), aspectRatio, 0.1f, 100.0f);
+			projection[1][1] *= -1.0f;
 
 			while (window.IsOpen())
 			{
@@ -41,10 +42,8 @@ int main(int argc, char* argv[])
 				// Rotating camera position
 				float angle = static_cast<float>(currentTime) * cameraSpeed;
 				Vec3<float> cameraPos = Vec3<float>(Maths::Sin(angle) * cameraDistance, 1.5f, Maths::Cos(angle) * cameraDistance);
-				Vec3<float> target = Vec3<float>(0.0f, 0.0f, 0.0f);
-				Vec3<float> up = Vec3<float>(0.0f, 1.0f, 0.0f);
 
-				Mat4 view = Maths::LookAt(cameraPos, target, up);
+				view = Maths::LookAt(cameraPos, { 0.0f, 0.0f, 0.0f });
 
 				renderer.Set2DCamera(view, projection);
 				renderer.DrawQuad({ 0.0f, 0.0f, 0.0f }, { 0.5f, 0.5f }, texture);

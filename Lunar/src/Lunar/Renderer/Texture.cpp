@@ -48,12 +48,12 @@ namespace Lunar
 
 			.Width = 0, .Height = 0,
 
-			.MipMaps = true,
+			.MipMaps = false,
 		}, {
-			.MagFilter = Internal::FilterMode::Linear,
-			.MinFilter = Internal::FilterMode::Linear,
+			.MagFilter = Internal::FilterMode::Nearest,
+			.MinFilter = Internal::FilterMode::Nearest,
 			.Address = Internal::AddressMode::Repeat,
-			.Mipmaps = Internal::MipmapMode::Linear,
+			.Mipmaps = Internal::MipmapMode::Nearest,
 		}, path);
 	}
 
