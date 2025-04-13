@@ -9,20 +9,14 @@
 namespace Lunar
 {
 
+	class Window;
+
 	////////////////////////////////////////////////////////////////////////////////////
 	// Renderer
 	////////////////////////////////////////////////////////////////////////////////////
 	class Renderer
 	{
 	public:
-		// Constructor & Destructor
-		Renderer() = default;
-		~Renderer() = default;
-
-		// Init & Destroy
-		void Init(const Internal::RendererID renderer);
-		void Destroy();
-
 		// Main methods
 		void BeginFrame();
 		void EndFrame();
@@ -37,9 +31,23 @@ namespace Lunar
 		inline RendererID GetID() const { return static_cast<RendererID>(m_Renderer->GetID()); }
 
 	private:
+		// Constructor & Destructor
+		Renderer() = default;
+		~Renderer() = default;
+
+		// Init & Destroy
+		void Init(const Internal::RendererID renderer);
+		void Destroy();
+
+		// Private methods
+		void Resize(uint32_t width, uint32_t height);
+
+	private:
 		Internal::Renderer* m_Renderer = nullptr;
 
 		BatchRenderer2D m_Renderer2D = {};
+
+		friend class Window;
 	};
 
 }

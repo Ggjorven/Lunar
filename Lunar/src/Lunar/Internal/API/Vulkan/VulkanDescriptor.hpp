@@ -51,7 +51,7 @@ namespace Lunar::Internal
 		inline uint8_t GetSetID() const { return m_SetID; }
 
 		// Internal
-		inline const VkDescriptorSet GetVkDescriptorSet(uint8_t index) const { return m_DescriptorSets[index]; }
+		inline VkDescriptorSet GetVkDescriptorSet(uint8_t index) const { return m_DescriptorSets[index]; }
 
 	private:
 		// Private methods

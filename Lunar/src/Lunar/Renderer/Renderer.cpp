@@ -7,23 +7,7 @@ namespace Lunar
 {
 
 	////////////////////////////////////////////////////////////////////////////////////
-	// Constructor & Destructor
-	////////////////////////////////////////////////////////////////////////////////////
-	void Renderer::Init(const Internal::RendererID renderer)
-	{
-		m_Renderer = &Internal::Renderer::GetRenderer(renderer);
-
-		auto image = m_Renderer->GetSwapChainImages()[0];
-		m_Renderer2D.Init(renderer, image->GetWidth(), image->GetHeight());
-	}
-
-	void Renderer::Destroy()
-	{
-		m_Renderer2D.Destroy();
-	}
-
-	////////////////////////////////////////////////////////////////////////////////////
-	// Methods
+	// Main methods
 	////////////////////////////////////////////////////////////////////////////////////
 	void Renderer::BeginFrame()
 	{
@@ -61,6 +45,30 @@ namespace Lunar
 	void Renderer::Set2DCamera(const Mat4& view, const Mat4& projection)
 	{
 		m_Renderer2D.SetCamera(view, projection);
+	}
+
+	////////////////////////////////////////////////////////////////////////////////////
+	// Constructor & Destructor
+	////////////////////////////////////////////////////////////////////////////////////
+	void Renderer::Init(const Internal::RendererID renderer)
+	{
+		m_Renderer = &Internal::Renderer::GetRenderer(renderer);
+
+		auto image = m_Renderer->GetSwapChainImages()[0];
+		m_Renderer2D.Init(renderer, image->GetWidth(), image->GetHeight());
+	}
+
+	void Renderer::Destroy()
+	{
+		m_Renderer2D.Destroy();
+	}
+
+	////////////////////////////////////////////////////////////////////////////////////
+	// Private methods
+	////////////////////////////////////////////////////////////////////////////////////
+	void Renderer::Resize(uint32_t width, uint32_t height)
+	{
+		m_Renderer2D.Resize(width, height);
 	}
 	
 }

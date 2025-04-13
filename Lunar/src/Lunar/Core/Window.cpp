@@ -57,8 +57,15 @@ namespace Lunar
 	void Window::OnEvent(Internal::Event& e)
 	{
 		Internal::EventHandler handler(e);
-		handler.Handle<Internal::WindowResizeEvent>([this](Internal::WindowResizeEvent& wre) { m_Window.Resize(wre.GetWidth(), wre.GetHeight()); });
-		handler.Handle<Internal::WindowCloseEvent>([this](Internal::WindowCloseEvent&) { m_Window.Close(); });
+		handler.Handle<Internal::WindowResizeEvent>([this](Internal::WindowResizeEvent& wre) 
+			{ 
+				m_Window.Resize(wre.GetWidth(), wre.GetHeight());
+				m_Renderer.Resize(wre.GetWidth(), wre.GetHeight());
+			});
+		handler.Handle<Internal::WindowCloseEvent>([this](Internal::WindowCloseEvent&) 
+			{ 
+				m_Window.Close(); 
+			});
 	}
 
 }

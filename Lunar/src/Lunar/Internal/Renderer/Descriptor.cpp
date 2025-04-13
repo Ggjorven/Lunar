@@ -11,7 +11,7 @@ namespace Lunar::Internal
 	// Descriptor Spec
 	////////////////////////////////////////////////////////////////////////////////////
     Descriptor::Descriptor(DescriptorType type, uint32_t binding, const std::string& name, ShaderStage stage, uint32_t count, DescriptorBindingFlags bindingFlags)
-        : Type(type), Binding(binding), Name(name), Stage(stage), Count(count), BindingFlags(bindingFlags)
+        : Name(name), Binding(binding), Type(type), Stage(stage), Count(count), BindingFlags(bindingFlags)
     {
     }
 

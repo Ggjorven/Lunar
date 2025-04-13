@@ -5,6 +5,8 @@
 #include "Lunar/Internal/Renderer/RendererSpec.hpp"
 #include "Lunar/Internal/Renderer/ImageSpec.hpp"
 
+#include <filesystem>
+
 namespace Lunar::Internal
 {
 
