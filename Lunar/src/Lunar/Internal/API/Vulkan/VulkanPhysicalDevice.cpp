@@ -61,7 +61,7 @@ namespace Lunar::Internal
 
 		if (formatCount != 0)
 		{
-			details.Formats.resize((size_t)formatCount);
+			details.Formats.resize(static_cast<size_t>(formatCount));
 			vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, details.Formats.data());
 		}
 
@@ -71,7 +71,7 @@ namespace Lunar::Internal
 
 		if (presentModeCount != 0)
 		{
-			details.PresentModes.resize((size_t)presentModeCount);
+			details.PresentModes.resize(static_cast<size_t>(presentModeCount));
 			vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, details.PresentModes.data());
 		}
 
@@ -150,12 +150,17 @@ namespace Lunar::Internal
 			swapChainAdequate = !swapChainSupport.Formats.empty() && !swapChainSupport.PresentModes.empty();
 		}
 
-		VkPhysicalDeviceFeatures supportedFeatures;
+        VkPhysicalDeviceFeatures supportedFeatures = {};
 		vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
 
 		// Index features
-		VkPhysicalDeviceDescriptorIndexingFeatures indexFeatures = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT, nullptr };
-		VkPhysicalDeviceFeatures2 deviceFeatures = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2, &indexFeatures };
+        VkPhysicalDeviceDescriptorIndexingFeatures indexFeatures = {};
+		indexFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES;
+		indexFeatures.pNext = nullptr;
+
+        VkPhysicalDeviceFeatures2 deviceFeatures = {};
+		deviceFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+		deviceFeatures.pNext = &indexFeatures;
 
 		vkGetPhysicalDeviceFeatures2(device, &deviceFeatures);
 

@@ -24,16 +24,16 @@ namespace Lunar::Internal
 
     public:
         // Buffers
-        static VmaAllocation AllocateBuffer(RendererID rendererID, VkDeviceSize size, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage, VkBuffer& dstBuffer, VkMemoryPropertyFlags requiredFlags = 0);
-        static void CopyBuffer(RendererID rendererID, VkBuffer& srcBuffer, VkBuffer& dstBuffer, VkDeviceSize size, VkDeviceSize offset = 0);
-        static void DestroyBuffer(RendererID rendererID, VkBuffer buffer, VmaAllocation allocation);
+        static VmaAllocation AllocateBuffer(const RendererID rendererID, VkDeviceSize size, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage, VkBuffer& dstBuffer, VkMemoryPropertyFlags requiredFlags = 0);
+        static void CopyBuffer(const RendererID rendererID, VkBuffer& srcBuffer, VkBuffer& dstBuffer, VkDeviceSize size, VkDeviceSize offset = 0);
+        static void DestroyBuffer(const RendererID rendererID, VkBuffer buffer, VmaAllocation allocation);
 
         // Image
-        static VmaAllocation AllocateImage(RendererID rendererID, uint32_t width, uint32_t height, uint32_t mipLevels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VmaMemoryUsage memUsage, VkImage& image, VkMemoryPropertyFlags requiredFlags = {});
-        static void CopyBufferToImage(RendererID rendererID, VkBuffer& buffer, VkImage& image, uint32_t width, uint32_t height);
-        static VkImageView CreateImageView(RendererID rendererID, VkImage& image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels);
-        static VkSampler CreateSampler(RendererID rendererID, VkFilter magFilter, VkFilter minFilter, VkSamplerAddressMode addressmode, VkSamplerMipmapMode mipmapMode, uint32_t mipLevels);
-        static void DestroyImage(RendererID rendererID, VkImage image, VmaAllocation allocation);
+        static VmaAllocation AllocateImage(const RendererID rendererID, uint32_t width, uint32_t height, uint32_t mipLevels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VmaMemoryUsage memUsage, VkImage& image, VkMemoryPropertyFlags requiredFlags = {});
+        static void CopyBufferToImage(const RendererID rendererID, VkBuffer& buffer, VkImage& image, uint32_t width, uint32_t height);
+        static VkImageView CreateImageView(const RendererID rendererID, VkImage& image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels);
+        static VkSampler CreateSampler(const RendererID rendererID, VkFilter magFilter, VkFilter minFilter, VkSamplerAddressMode addressmode, VkSamplerMipmapMode mipmapMode, uint32_t mipLevels);
+        static void DestroyImage(const RendererID rendererID, VkImage image, VmaAllocation allocation);
 
         // Utils
         static void MapMemory(VmaAllocation& allocation, void*& mapData);

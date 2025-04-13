@@ -260,10 +260,6 @@ namespace Lunar::Internal
 			VkSemaphoreCreateInfo semaphoreInfo = {};
 			semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
-			VkFenceCreateInfo fenceInfo = {};
-			fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-			fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-
 			for (size_t i = 0; i < (size_t)framesInFlight; i++)
 			{
 				VK_VERIFY(vkCreateSemaphore(device, &semaphoreInfo, nullptr, &m_ImageAvailableSemaphores[i]));
@@ -276,7 +272,7 @@ namespace Lunar::Internal
     ////////////////////////////////////////////////////////////////////////////////////
     uint32_t VulkanSwapChain::AcquireNextImage()
 	{
-		LU_PROFILE("VkSwapChain::AcquireImage");
+		LU_PROFILE("VkSwapChain::AcquireImage()");
 		uint32_t imageIndex = 0;
 
 		VkResult result = vkAcquireNextImageKHR(VulkanContext::GetVulkanDevice().GetVkDevice(), m_SwapChain, std::numeric_limits<uint64_t>::max(), m_ImageAvailableSemaphores[m_CurrentFrame], VK_NULL_HANDLE, &imageIndex);

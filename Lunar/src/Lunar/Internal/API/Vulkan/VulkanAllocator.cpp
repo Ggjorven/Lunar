@@ -8,7 +8,10 @@
 
 #if defined(LU_COMPILER_GCC)
     #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wunused-variable"
+    #pragma GCC diagnostic ignored "-Wunused-parameter"
     #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+    #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 
 #define VMA_IMPLEMENTATION
 #include <vma/vk_mem_alloc.h>
@@ -85,7 +88,7 @@ namespace Lunar::Internal
     ////////////////////////////////////////////////////////////////////////////////////
     // Buffers
     ////////////////////////////////////////////////////////////////////////////////////
-    VmaAllocation VulkanAllocator::AllocateBuffer(RendererID, VkDeviceSize size, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage, VkBuffer& dstBuffer, VkMemoryPropertyFlags requiredFlags)
+    VmaAllocation VulkanAllocator::AllocateBuffer(const RendererID, VkDeviceSize size, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage, VkBuffer& dstBuffer, VkMemoryPropertyFlags requiredFlags)
     {
         VkBufferCreateInfo bufferInfo = {};
         bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -103,7 +106,7 @@ namespace Lunar::Internal
         return allocation;
     }
 
-    void VulkanAllocator::CopyBuffer(RendererID rendererID, VkBuffer& srcBuffer, VkBuffer& dstBuffer, VkDeviceSize size, VkDeviceSize offset)
+    void VulkanAllocator::CopyBuffer(const RendererID rendererID, VkBuffer& srcBuffer, VkBuffer& dstBuffer, VkDeviceSize size, VkDeviceSize offset)
     {
         VulkanCommand command = VulkanCommand(rendererID, true);
 
@@ -115,7 +118,7 @@ namespace Lunar::Internal
         command.EndAndSubmit();
     }
 
-    void VulkanAllocator::DestroyBuffer(RendererID, VkBuffer buffer, VmaAllocation allocation)
+    void VulkanAllocator::DestroyBuffer(const RendererID, VkBuffer buffer, VmaAllocation allocation)
     {
         vmaDestroyBuffer(s_Allocator, buffer, allocation);
     }
@@ -123,7 +126,7 @@ namespace Lunar::Internal
     ////////////////////////////////////////////////////////////////////////////////////
     // Image
     ////////////////////////////////////////////////////////////////////////////////////
-    VmaAllocation VulkanAllocator::AllocateImage(RendererID, uint32_t width, uint32_t height, uint32_t mipLevels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VmaMemoryUsage memUsage, VkImage& image, VkMemoryPropertyFlags requiredFlags)
+    VmaAllocation VulkanAllocator::AllocateImage(const RendererID, uint32_t width, uint32_t height, uint32_t mipLevels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VmaMemoryUsage memUsage, VkImage& image, VkMemoryPropertyFlags requiredFlags)
     {
         VkImageCreateInfo imageInfo = {};
         imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -150,7 +153,7 @@ namespace Lunar::Internal
         return allocation;
     }
 
-    void VulkanAllocator::CopyBufferToImage(RendererID rendererID, VkBuffer& buffer, VkImage& image, uint32_t width, uint32_t height)
+    void VulkanAllocator::CopyBufferToImage(const RendererID rendererID, VkBuffer& buffer, VkImage& image, uint32_t width, uint32_t height)
     {
         VulkanCommand command = VulkanCommand(rendererID, true);
 
@@ -172,7 +175,7 @@ namespace Lunar::Internal
         command.EndAndSubmit();
     }
 
-    VkImageView VulkanAllocator::CreateImageView(RendererID, VkImage& image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels)
+    VkImageView VulkanAllocator::CreateImageView(const RendererID, VkImage& image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels)
     {
         VkImageViewCreateInfo viewInfo = {};
         viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -191,7 +194,7 @@ namespace Lunar::Internal
         return imageView;
     }
 
-    VkSampler VulkanAllocator::CreateSampler(RendererID, VkFilter magFilter, VkFilter minFilter, VkSamplerAddressMode addressmode, VkSamplerMipmapMode mipmapMode, uint32_t mipLevels)
+    VkSampler VulkanAllocator::CreateSampler(const RendererID, VkFilter magFilter, VkFilter minFilter, VkSamplerAddressMode addressmode, VkSamplerMipmapMode mipmapMode, uint32_t mipLevels)
     {
         VkSamplerCreateInfo samplerInfo = {};
         samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -223,7 +226,7 @@ namespace Lunar::Internal
         return sampler;
     }
 
-    void VulkanAllocator::DestroyImage(RendererID, VkImage image, VmaAllocation allocation)
+    void VulkanAllocator::DestroyImage(const RendererID, VkImage image, VmaAllocation allocation)
     {
         vmaDestroyImage(s_Allocator, image, allocation);
     }
