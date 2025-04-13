@@ -3,6 +3,7 @@
 
 #include "Lunar/Internal/IO/Print.hpp"
 #include "Lunar/Internal/Utils/Profiler.hpp"
+#include "Lunar/Internal/Utils/Settings.hpp"
 
 #include "Lunar/Internal/Renderer/Buffers.hpp"
 #include "Lunar/Internal/Renderer/Renderer.hpp"
@@ -96,11 +97,27 @@ namespace Lunar::Internal
 	{
 		m_Count = count;
 		m_Type = Type::UInt8;
+		VkDeviceSize bufferSize = sizeof(uint8_t) * count;
 
-		VkDeviceSize bufferSize = sizeof(uint32_t) * count;
+		#if defined(LU_PLATFORM_APPLE)
+		LU_LOG_WARN("[VkIndexBuffer] Index buffer of type UInt8 is not supported on apple. Converting to UInt16.");
+
+		m_Type = Type::UInt16;
+
+		std::vector<uint16_t> convertedIndices(static_cast<size_t>(count));
+		for (size_t i = 0; i < count; ++i)
+			convertedIndices[i] = static_cast<uint16_t>(indices[i]);
+		
+		bufferSize = sizeof(uint16_t) * count;
+		#endif
+
 		m_Allocation = VulkanAllocator::AllocateBuffer(renderer, bufferSize, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, (VmaMemoryUsage)specs.Usage, m_Buffer);
 
+		#if defined(LU_PLATFORM_APPLE)
+		SetData(renderer, convertedIndices.data(), count, 0);
+		#else
 		SetData(renderer, indices, count, 0);
+		#endif
 	}
 
 	void VulkanIndexBuffer::Init(const RendererID renderer, const BufferSpecification& specs, uint16_t* indices, uint32_t count)
@@ -108,7 +125,7 @@ namespace Lunar::Internal
 		m_Count = count;
 		m_Type = Type::UInt16;
 
-		VkDeviceSize bufferSize = sizeof(uint32_t) * count;
+		VkDeviceSize bufferSize = sizeof(uint16_t) * count;
 		m_Allocation = VulkanAllocator::AllocateBuffer(renderer, bufferSize, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, (VmaMemoryUsage)specs.Usage, m_Buffer);
 
 		SetData(renderer, indices, count, 0);
@@ -142,7 +159,11 @@ namespace Lunar::Internal
 		LU_PROFILE("VkIndexBuffer::Bind()");
 		VulkanCommandBuffer& vkCmdBuf = cmdBuf.GetInternalCommandBuffer();
 
+		#if defined(LU_PLATFORM_APPLE)
+		auto indexType = (m_Type == Type::UInt8) ? VK_INDEX_TYPE_UINT16 : (m_Type == Type::UInt16) ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_UINT32;
+		#else
 		auto indexType = (m_Type == Type::UInt8) ? VK_INDEX_TYPE_UINT8 : (m_Type == Type::UInt16) ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_UINT32;
+		#endif
 		vkCmdBindIndexBuffer(vkCmdBuf.GetVkCommandBuffer(VulkanRenderer::GetRenderer(renderer).GetVulkanSwapChain().GetCurrentFrame()), m_Buffer, 0, indexType);
 	}
 

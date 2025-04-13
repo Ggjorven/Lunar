@@ -260,7 +260,11 @@ namespace Lunar::Internal
     {
         switch (loadOp)
         {
+        #if !defined(LU_PLATFORM_APPLE)
 		case VK_ATTACHMENT_LOAD_OP_NONE:            return LoadOperation::None;
+        #else 
+		case VK_ATTACHMENT_LOAD_OP_NONE:            return LoadOperation::DontCare;
+        #endif
 		case VK_ATTACHMENT_LOAD_OP_LOAD:            return LoadOperation::Load;
 		case VK_ATTACHMENT_LOAD_OP_CLEAR:           return LoadOperation::Clear;
 		case VK_ATTACHMENT_LOAD_OP_DONT_CARE:       return LoadOperation::DontCare;
@@ -277,7 +281,11 @@ namespace Lunar::Internal
     {
         switch (loadOp)
         {
+        #if !defined(LU_PLATFORM_APPLE)
         case LoadOperation::None:                   return VK_ATTACHMENT_LOAD_OP_NONE;
+        #else
+		case LoadOperation::None:                   return VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        #endif
         case LoadOperation::Load:                   return VK_ATTACHMENT_LOAD_OP_LOAD;
         case LoadOperation::Clear:                  return VK_ATTACHMENT_LOAD_OP_CLEAR;
         case LoadOperation::DontCare:               return VK_ATTACHMENT_LOAD_OP_DONT_CARE;
@@ -287,7 +295,11 @@ namespace Lunar::Internal
             break;
         }
 
+        #if !defined(LU_PLATFORM_APPLE)
         return VK_ATTACHMENT_LOAD_OP_NONE;
+        #else
+		return VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        #endif
     }
 
     StoreOperation VkAttachmentStoreOpToStoreOperation(VkAttachmentStoreOp storeOp)

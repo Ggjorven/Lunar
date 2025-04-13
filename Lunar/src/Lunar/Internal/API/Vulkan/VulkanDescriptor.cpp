@@ -63,7 +63,7 @@ namespace Lunar::Internal
 
         for (const auto& [uploadable, descriptor, arrayIndex] : elements)
         {
-            std::visit([&, descriptor, arrayIndex](auto&& arg)
+            std::visit([&](auto&& arg)
                 {
                     using T = std::decay_t<decltype(arg)>;
 

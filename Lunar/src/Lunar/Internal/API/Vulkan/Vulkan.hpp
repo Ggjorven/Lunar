@@ -22,7 +22,7 @@
 #include <vma/vk_mem_alloc.h>
 
     #pragma GCC diagnostic pop
-#else
+#elif !defined(LU_PLATFORM_APPLE)
     #pragma warning(push, 0)
 
 #include <vulkan/vulkan.h>

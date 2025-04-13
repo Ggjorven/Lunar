@@ -8,6 +8,8 @@
 #include "Lunar/Internal/Renderer/Renderpass.hpp"
 #include "Lunar/Internal/Renderer/CommandBuffer.hpp"
 
+#include "Lunar/Internal/Utils/Settings.hpp"	
+
 #include "Lunar/Maths/Structs.hpp"
 
 #include <cstdint>
@@ -34,6 +36,13 @@ namespace Lunar
 
 			// Note: 0 is the white texure
 			uint32_t TextureID = 0; 
+
+		public:
+			// Constructors & Destructor
+			Vertex() = default;
+			Vertex(const Vec3<float>& position, const Vec2<float>& uv, const Vec4<float>& colour, uint32_t textureID)
+				: Position(position), UV(uv), Colour(colour), TextureID(textureID) {}
+			~Vertex() = default;
 		};
 
 	public:
@@ -90,7 +99,12 @@ namespace Lunar
 	{
 	public:
 		constexpr static const uint32_t MaxQuads = 10000u;
+
+		#if !defined(LU_PLATFORM_APPLE)
 		constexpr static const uint32_t MaxTextures = 1024u;
+		#else // Note: Apple devices have a very small limit of textures, to support most devices we stick with 16. The higher end devices support up to 128 (still low)
+		constexpr static const uint32_t MaxTextures = 16u;
+		#endif
 	public:
 		// Constructor & Destructor
 		BatchRenderer2D() = default;

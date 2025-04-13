@@ -239,6 +239,9 @@ namespace Lunar
 	////////////////////////////////////////////////////////////////////////////////////
 	void BatchRenderer2D::Init(const Internal::RendererID renderer, uint32_t width, uint32_t height)
 	{
+		#if defined(LU_PLATFORM_APPLE)
+		LU_LOG_WARN("[BatchRenderer2D] BatchRenderer2D only supports {0} simultaneous textures on apple devices. Should be used with care.", MaxTextures);
+		#endif
 		m_Resources.Init(renderer, width, height);
 	}
 
@@ -329,15 +332,15 @@ namespace Lunar
 	void BatchRenderer2D::AddQuad(const Vec3<float>& position, const Vec2<float>& size, Internal::Image* texture, const Vec4<float>& colour)
 	{
 		LU_PROFILE("BatchRenderer2D::AddQuad()");
-		constexpr const glm::vec2 uv0(1.0f, 0.0f);
-		constexpr const glm::vec2 uv1(0.0f, 0.0f);
-		constexpr const glm::vec2 uv2(0.0f, 1.0f);
-		constexpr const glm::vec2 uv3(1.0f, 1.0f);
+		constexpr const Vec2<float> uv0(1.0f, 0.0f);
+		constexpr const Vec2<float> uv1(0.0f, 0.0f);
+		constexpr const Vec2<float> uv2(0.0f, 1.0f);
+		constexpr const Vec2<float> uv3(1.0f, 1.0f);
 
 		#if !defined(LU_CONFIG_DIST)
 		if ((m_Resources.m_CPUBuffer.size() / 4u) >= BatchRenderer2D::MaxQuads) [[unlikely]]
 		{
-			LU_LOG_WARN("Reached max amount of quads ({0}), to support more either manually change BatchRenderer2D::MaxQuads or contact the developer.", BatchRenderer2D::MaxQuads);
+			LU_LOG_WARN("[BatchRenderer2D] Reached max amount of quads ({0}), to support more either manually change BatchRenderer2D::MaxQuads or contact the developer.", BatchRenderer2D::MaxQuads);
 			return;
 		}
 		#endif
@@ -370,7 +373,17 @@ namespace Lunar
 
 		// Check if texture is has not been cached
 		if (m_Resources.m_TextureIndices.find(image) == m_Resources.m_TextureIndices.end())
+		{
+			#if !defined(LU_CONFIG_DIST)
+			if (m_Resources.m_CurrentTextureIndex >= (BatchRenderer2D::MaxTextures - 1)) [[unlikely]]
+			{
+				LU_LOG_WARN("[BatchRenderer2D] Reached max amount of textures ({0}), to support more either manually change BatchRenderer2D::MaxTextures or contact the developer. Be aware that apple devices have a very low hardware-set limit.", BatchRenderer2D::MaxTextures);
+				return 0;
+			}
+			#endif
+
 			m_Resources.m_TextureIndices[image] = m_Resources.m_CurrentTextureIndex++;
+		}
 
 		return m_Resources.m_TextureIndices[image];
 	}

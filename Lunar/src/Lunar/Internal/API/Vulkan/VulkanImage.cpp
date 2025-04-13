@@ -22,7 +22,7 @@
 #include <stb/stb_image.h>
 
 	#pragma GCC diagnostic pop
-#else
+#elif !defined(LU_PLATFORM_APPLE)
 	#pragma warning(push, 0)
 
 #define STB_IMAGE_IMPLEMENTATION

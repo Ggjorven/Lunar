@@ -24,8 +24,14 @@ namespace Lunar::Internal
         case 0:             return shaderc_env_version_vulkan_1_0;
         case 1:             return shaderc_env_version_vulkan_1_1;
         case 2:             return shaderc_env_version_vulkan_1_2;
+        
+        #if !defined(LU_PLATFORM_APPLE)
         case 3:             return shaderc_env_version_vulkan_1_3;
         case 4:             return shaderc_env_version_vulkan_1_4;
+        #else // Note: Apple doesn't fully support compiling Vulkan 1.3 shaders yet.
+        case 3:             return shaderc_env_version_vulkan_1_2;
+        case 4:             return shaderc_env_version_vulkan_1_2;
+        #endif
 
         default:            return shaderc_env_version_vulkan_1_3;
         }

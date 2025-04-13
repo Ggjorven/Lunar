@@ -161,7 +161,7 @@ namespace Lunar::Internal
         colourAttachment.imageLayout = (state.ColourAttachment ? ImageLayoutToVkImageLayout(state.ColourAttachment->GetSpecification().Layout) : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
         colourAttachment.loadOp = LoadOperationToVkAttachmentLoadOp(state.ColourLoadOp);
         colourAttachment.storeOp = StoreOperationToVkAttachmentStoreOp(state.ColourStoreOp);
-        colourAttachment.clearValue = { state.ColourClearValue.r, state.ColourClearValue.g, state.ColourClearValue.b, state.ColourClearValue.a };
+        colourAttachment.clearValue.color = { state.ColourClearValue.r, state.ColourClearValue.g, state.ColourClearValue.b, state.ColourClearValue.a };
 
         VkRenderingAttachmentInfo depthAttachment = {};
         depthAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
@@ -169,7 +169,7 @@ namespace Lunar::Internal
         depthAttachment.imageLayout = (state.DepthAttachment ? ImageLayoutToVkImageLayout(state.DepthAttachment->GetSpecification().Layout) : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
         depthAttachment.loadOp = LoadOperationToVkAttachmentLoadOp(state.DepthLoadOp);
         depthAttachment.storeOp = StoreOperationToVkAttachmentStoreOp(state.DepthStoreOp);
-        depthAttachment.clearValue = { state.DepthClearValue };
+        depthAttachment.clearValue.depthStencil = { state.DepthClearValue };
 
         uint32_t width = 0, height = 0;
         if (state.ColourAttachment)
@@ -184,7 +184,7 @@ namespace Lunar::Internal
         }
         else
         {
-            LU_ASSERT(false, "[VulkanRenderer] No Colour or Depth attachment passed in to BeginDynamic(..., state)");
+            LU_ASSERT(false, "[VulkanRenderer] No Colour or Depth attachment passed in to BeginDynamic()");
         }
 
         VkRenderingInfo renderingInfo = {};

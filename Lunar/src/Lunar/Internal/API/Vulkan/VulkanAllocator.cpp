@@ -17,7 +17,7 @@
 #include <vma/vk_mem_alloc.h>
 
     #pragma GCC diagnostic pop
-#else
+#elif !defined(LU_PLATFORM_APPLE)
     #pragma warning(push, 0)
 
 #define VMA_IMPLEMENTATION
@@ -217,7 +217,7 @@ namespace Lunar::Internal
 
         samplerInfo.mipmapMode = mipmapMode;
         samplerInfo.minLod = 0.0f;
-        samplerInfo.maxLod = (float)mipLevels;
+        samplerInfo.maxLod = static_cast<float>(mipLevels);
         samplerInfo.mipLodBias = 0.0f; // Optional
 
         VkSampler sampler = VK_NULL_HANDLE;
