@@ -54,8 +54,8 @@ namespace Lunar::Internal
 		inline const PipelineSpecification& GetSpecification() const { return m_Specification; };
 
 		// Internal
-		inline const VkPipeline GetVkPipeline() const { return m_Pipeline; }
-		inline const VkPipelineLayout GetVkPipelineLayout() const { return m_PipelineLayout; }
+		inline VkPipeline GetVkPipeline() const { return m_Pipeline; }
+		inline VkPipelineLayout GetVkPipelineLayout() const { return m_PipelineLayout; }
 
 	private:
 		// Static methods

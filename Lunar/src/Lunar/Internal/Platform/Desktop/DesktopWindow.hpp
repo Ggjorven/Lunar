@@ -6,7 +6,7 @@
 #include "Lunar/Internal/Utils/Preprocessor.hpp"
 #include "Lunar/Internal/Renderer/Renderer.hpp"
 
-#if defined(LU_PLATFORM_WINDOWS)
+#if defined(LU_PLATFORM_DESKTOP)
 	#include <GLFW/glfw3.h>
 #endif
 
