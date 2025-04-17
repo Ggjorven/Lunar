@@ -24,6 +24,9 @@
 #include <vma/vk_mem_alloc.h>
 
     #pragma warning(pop)
+#else
+#define VMA_IMPLEMENTATION
+#include <vma/vk_mem_alloc.h>
 #endif
 
 namespace Lunar::Internal

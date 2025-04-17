@@ -262,8 +262,6 @@ namespace Lunar::Internal
         {
         #if !defined(LU_PLATFORM_APPLE)
 		case VK_ATTACHMENT_LOAD_OP_NONE:            return LoadOperation::None;
-        #else 
-		case VK_ATTACHMENT_LOAD_OP_NONE:            return LoadOperation::DontCare;
         #endif
 		case VK_ATTACHMENT_LOAD_OP_LOAD:            return LoadOperation::Load;
 		case VK_ATTACHMENT_LOAD_OP_CLEAR:           return LoadOperation::Clear;

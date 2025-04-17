@@ -4,7 +4,13 @@
 
 #include "Lunar/Internal/Maths/Structs.hpp"
 
+#include "Lunar/Core/Events.hpp"
+
 #include "Lunar/Renderer/Renderer.hpp"
+
+#include <cstdint>
+#include <functional>
+#include <string_view>
 
 namespace Lunar
 {
@@ -20,6 +26,8 @@ namespace Lunar
 
 		bool VSync = false;
 	};
+
+	using EventCallbackFn = std::function<void(Event event)>;
 
 	////////////////////////////////////////////////////////////////////////////////////
 	// Window
@@ -39,6 +47,9 @@ namespace Lunar
 		void PollEvents();
 		void SwapBuffers();
 
+		// Setters
+		inline void SetEventCallback(const EventCallbackFn& callback) { m_EventCallback = callback; }
+
 		// Getters
 		inline double GetTime() const { return m_Window.GetTime(); }
 		inline bool IsOpen() const { return m_Window.IsOpen(); }
@@ -52,6 +63,7 @@ namespace Lunar
 
 	private:
 		Internal::Window m_Window = {};
+		EventCallbackFn m_EventCallback = {};
 
 		Renderer m_Renderer = {};
 	};

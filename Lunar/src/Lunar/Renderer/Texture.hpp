@@ -11,6 +11,7 @@ namespace Lunar
 {
 
 	class Renderer;
+	class Renderpass2D;
 
 	////////////////////////////////////////////////////////////////////////////////////
 	// Texture
@@ -38,6 +39,7 @@ namespace Lunar
 		Internal::Image m_Image = {};
 
 		friend class Renderer;
+		friend class Renderpass2D;
 	};
 
 }

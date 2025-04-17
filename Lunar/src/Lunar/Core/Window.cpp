@@ -66,6 +66,9 @@ namespace Lunar
 			{ 
 				m_Window.Close(); 
 			});
+
+		if (static_cast<bool>(m_EventCallback)) [[likely]]
+			m_EventCallback(e);
 	}
 
 }

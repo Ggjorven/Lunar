@@ -84,18 +84,18 @@ namespace
 
 }
 
-namespace Lunar
+namespace Lunar::Internal
 {
 
 	////////////////////////////////////////////////////////////////////////////////////
 	// Init & Destroy
 	////////////////////////////////////////////////////////////////////////////////////
-	void BatchResources2D::Init(const Internal::RendererID renderer, uint32_t width, uint32_t height)
+	void BatchResources2D::Init(const RendererID renderer, const std::vector<Image*>& images, LoadOperation loadOperation)
 	{
 		m_RendererID = renderer;
 
 		InitGlobal();
-		InitRenderer(width, height);
+		InitRenderer(images, loadOperation);
 	}
 
 	void BatchResources2D::Destroy()
@@ -120,6 +120,14 @@ namespace Lunar
 	////////////////////////////////////////////////////////////////////////////////////
 	void BatchResources2D::Resize(uint32_t width, uint32_t height)
 	{
+		// TODO: Improve this system
+		auto swapChainImages = Renderer::GetRenderer(m_RendererID).GetSwapChainImages();
+		for (size_t i = 0; i < Renderer.Images.size(); i++)
+		{
+			if (!(swapChainImages[i] == Renderer.Images[i]))
+				Renderer.Images[i]->Resize(m_RendererID, width, height);
+		}
+
 		Renderer.DepthImage.Resize(m_RendererID, width, height);
 		Renderer.Renderpass.Resize(m_RendererID, width, height);
 	}
@@ -130,9 +138,9 @@ namespace Lunar
 	void BatchResources2D::InitGlobal()
 	{
 		m_WhiteTexture.Init(m_RendererID, { 
-			.Usage = Internal::ImageUsage::Colour | Internal::ImageUsage::Sampled,
-			.Layout = Internal::ImageLayout::ShaderRead,
-			.Format = Internal::ImageFormat::RGBA,
+			.Usage = ImageUsage::Colour | ImageUsage::Sampled,
+			.Layout = ImageLayout::ShaderRead,
+			.Format = ImageFormat::RGBA,
 
 			.Width = 1, .Height = 1,
 
@@ -143,16 +151,20 @@ namespace Lunar
 		m_WhiteTexture.SetData(m_RendererID, &white, sizeof(uint32_t));
 
 		m_CameraBuffer.Init(m_RendererID, { 
-			.Usage = Internal::BufferMemoryUsage::CPUToGPU 
+			.Usage = BufferMemoryUsage::CPUToGPU 
 		}, (sizeof(Mat4) * 2)); // For View & Projection
 
 		std::array<Mat4, 2> cameraData = { Mat4(1.0f), Mat4(1.0f) };
 		m_CameraBuffer.SetData(m_RendererID, cameraData.data(), sizeof(cameraData));
 	}
 
-	void BatchResources2D::InitRenderer(uint32_t width, uint32_t height)
+	void BatchResources2D::InitRenderer(const std::vector<Image*>& images, LoadOperation loadOperation)
 	{
-		Internal::Renderer& renderer = Internal::Renderer::GetRenderer(m_RendererID);
+		LU_ASSERT(!images.empty(), "[BatchResources2D] No images passed in to render to.");
+
+		Renderer.Images = images;
+
+		Internal::Renderer& renderer = Renderer::GetRenderer(m_RendererID);
 
 		std::vector<uint32_t> indices;
 		indices.reserve(static_cast<size_t>(BatchRenderer2D::MaxQuads) * 6);
@@ -170,11 +182,11 @@ namespace Lunar
 
 		// Depth image
 		Renderer.DepthImage.Init(m_RendererID, {
-			.Usage = Internal::ImageUsage::DepthStencil | Internal::ImageUsage::Sampled,
-			.Layout = Internal::ImageLayout::DepthStencil,
+			.Usage = ImageUsage::DepthStencil | ImageUsage::Sampled,
+			.Layout = ImageLayout::DepthStencil,
 			.Format = renderer.GetDepthFormat(),
 			
-			.Width = width, .Height = height,
+			.Width = images[0]->GetWidth(), .Height = images[0]->GetHeight(),
 
 			.MipMaps = false,
 		}, {});
@@ -182,51 +194,51 @@ namespace Lunar
 		// Renderpass
 		Renderer.CommandBuffer.Init(m_RendererID);
 		Renderer.Renderpass.Init(m_RendererID, {
-			.Usage = Internal::RenderpassUsage::Graphics,
+			.Usage = RenderpassUsage::Graphics,
 
-			.ColourAttachment = renderer.GetSwapChainImages(),
-			.ColourLoadOp = Internal::LoadOperation::Clear,		// TODO: Set this to LoadOp::Load when also using 3D rendering and set that renderpass to Clear and run that first and then run this renderpass
-			.ColourStoreOp = Internal::StoreOperation::Store,
+			.ColourAttachment = images,
+			.ColourLoadOp = loadOperation,
+			.ColourStoreOp = StoreOperation::Store,
 			.ColourClearColour { 0.0f, 0.0f, 0.0f, 1.0f },
-			.PreviousColourImageLayout = Internal::ImageLayout::Undefined,
-			.FinalColourImageLayout = Internal::ImageLayout::PresentSrcKHR,
+			.PreviousColourImageLayout = ((loadOperation == LoadOperation::Clear) ? ImageLayout::Undefined : ImageLayout::PresentSrcKHR),
+			.FinalColourImageLayout = ImageLayout::PresentSrcKHR,
 
 			.DepthAttachment = &Renderer.DepthImage,
-			.DepthLoadOp = Internal::LoadOperation::Clear,
-			.DepthStoreOp = Internal::StoreOperation::Store,
-			.PreviousDepthImageLayout = Internal::ImageLayout::Undefined,
-			.FinalDepthImageLayout = Internal::ImageLayout::DepthStencil,
+			.DepthLoadOp = LoadOperation::Clear,
+			.DepthStoreOp = StoreOperation::Store,
+			.PreviousDepthImageLayout = ((loadOperation == LoadOperation::Clear) ? ImageLayout::Undefined : ImageLayout::Undefined),
+			.FinalDepthImageLayout = ImageLayout::DepthStencil,
 		}, &Renderer.CommandBuffer);
 
 		// Shader
-		Internal::Shader shader(m_RendererID, {
+		Shader shader(m_RendererID, {
 			.Shaders = {
-				{ Internal::ShaderStage::Vertex, Internal::ShaderCompiler::CompileGLSL(Internal::ShaderStage::Vertex, s_VertexShader.data()) },
-				{ Internal::ShaderStage::Fragment, Internal::ShaderCompiler::CompileGLSL(Internal::ShaderStage::Fragment, s_FragmentShader.data()) }
+				{ ShaderStage::Vertex, ShaderCompiler::CompileGLSL(ShaderStage::Vertex, s_VertexShader.data()) },
+				{ ShaderStage::Fragment, ShaderCompiler::CompileGLSL(ShaderStage::Fragment, s_FragmentShader.data()) }
 			}
 		});
 
 		// Descriptorsets
 		Renderer.DescriptorSets.Init(m_RendererID, {
 			{ 1, { 0, {
-				{ Internal::DescriptorType::UniformBuffer, 0, "u_Camera", Internal::ShaderStage::Vertex },
-				{ Internal::DescriptorType::CombinedImageSampler, 1, "u_Textures", Internal::ShaderStage::Fragment, BatchRenderer2D::MaxTextures, Internal::DescriptorBindingFlags::Default },
+				{ DescriptorType::UniformBuffer, 0, "u_Camera", ShaderStage::Vertex },
+				{ DescriptorType::CombinedImageSampler, 1, "u_Textures", ShaderStage::Fragment, BatchRenderer2D::MaxTextures, DescriptorBindingFlags::Default },
 			}}}
 		});
 
 		// Pipeline
 		Renderer.Pipeline.Init(m_RendererID, {
-			.Usage = Internal::PipelineUsage::Graphics,
+			.Usage = PipelineUsage::Graphics,
 			.Bufferlayout = GetVertexBufferLayout(),
-			.Polygonmode = Internal::PolygonMode::Fill,
-			.Cullingmode = Internal::CullingMode::None,
+			.Polygonmode = PolygonMode::Fill,
+			.Cullingmode = CullingMode::None,
 			.Blending = true
 		}, Renderer.DescriptorSets, shader, Renderer.Renderpass);
 		shader.Destroy(m_RendererID);
 
 		// Buffers
 		Renderer.VertexBuffer.Init(m_RendererID, { 
-			.Usage = Internal::BufferMemoryUsage::CPUToGPU 
+			.Usage = BufferMemoryUsage::CPUToGPU 
 		}, nullptr, sizeof(BatchResources2D::Vertex) * BatchRenderer2D::MaxQuads * 4);
 		Renderer.IndexBuffer.Init(m_RendererID, {}, indices.data(), static_cast<uint32_t>(indices.size()));
 
@@ -237,12 +249,12 @@ namespace Lunar
 	////////////////////////////////////////////////////////////////////////////////////
 	// Init & Destroy
 	////////////////////////////////////////////////////////////////////////////////////
-	void BatchRenderer2D::Init(const Internal::RendererID renderer, uint32_t width, uint32_t height)
+	void BatchRenderer2D::Init(const RendererID renderer, const std::vector<Image*>& images, LoadOperation loadOperation)
 	{
 		#if defined(LU_PLATFORM_APPLE)
 		LU_LOG_WARN("[BatchRenderer2D] BatchRenderer2D only supports {0} simultaneous textures on apple devices. Should be used with care.", MaxTextures);
 		#endif
-		m_Resources.Init(renderer, width, height);
+		m_Resources.Init(renderer, images, loadOperation);
 	}
 
 	void BatchRenderer2D::Destroy()
@@ -268,7 +280,7 @@ namespace Lunar
 	void BatchRenderer2D::End()
 	{
 		LU_PROFILE("BatchRenderer2D::End()");
-		std::vector<Internal::Uploadable> uploadQueue;
+		std::vector<Uploadable> uploadQueue;
 		uploadQueue.reserve(m_Resources.m_TextureIndices.size() + 1); // + 1 for the Camera Buffer.
 		{
 			LU_PROFILE("BatchRenderer2D::End::FormUploadQueue");
@@ -297,13 +309,13 @@ namespace Lunar
 	{
 		LU_PROFILE("BatchRenderer2D::Flush()");
 
-		Internal::Renderer& renderer = Internal::Renderer::GetRenderer(m_Resources.m_RendererID);
+		Renderer& renderer = Renderer::GetRenderer(m_Resources.m_RendererID);
 
 		// Start rendering
 		renderer.Begin(m_Resources.Renderer.Renderpass);
 
-		Internal::CommandBuffer& cmdBuf = m_Resources.Renderer.Renderpass.GetCommandBuffer();
-		m_Resources.Renderer.Pipeline.Use(m_Resources.m_RendererID, cmdBuf, Internal::PipelineBindPoint::Graphics);
+		CommandBuffer& cmdBuf = m_Resources.Renderer.Renderpass.GetCommandBuffer();
+		m_Resources.Renderer.Pipeline.Use(m_Resources.m_RendererID, cmdBuf, PipelineBindPoint::Graphics);
 
 		m_Resources.Renderer.DescriptorSets.GetSets(0)[0]->Bind(m_Resources.m_RendererID, m_Resources.Renderer.Pipeline, cmdBuf);
 
@@ -315,7 +327,7 @@ namespace Lunar
 
 		// End rendering
 		renderer.End(m_Resources.Renderer.Renderpass);
-		renderer.Submit(m_Resources.Renderer.Renderpass, Internal::ExecutionPolicy::InOrder);
+		renderer.Submit(m_Resources.Renderer.Renderpass, ExecutionPolicy::InOrder);
 	}
 
 	void BatchRenderer2D::SetCamera(const Mat4& view, const Mat4& projection)
@@ -329,7 +341,7 @@ namespace Lunar
 		AddQuad(position, size, nullptr, colour);
 	}
 
-	void BatchRenderer2D::AddQuad(const Vec3<float>& position, const Vec2<float>& size, Internal::Image* texture, const Vec4<float>& colour)
+	void BatchRenderer2D::AddQuad(const Vec3<float>& position, const Vec2<float>& size, Image* texture, const Vec4<float>& colour)
 	{
 		LU_PROFILE("BatchRenderer2D::AddQuad()");
 		constexpr const Vec2<float> uv0(1.0f, 0.0f);
@@ -365,7 +377,7 @@ namespace Lunar
 	////////////////////////////////////////////////////////////////////////////////////
 	// Private methods
 	////////////////////////////////////////////////////////////////////////////////////
-	uint32_t BatchRenderer2D::GetTextureID(Internal::Image* image)
+	uint32_t BatchRenderer2D::GetTextureID(Image* image)
 	{
 		// If nullptr return white texture
 		if (image == nullptr)

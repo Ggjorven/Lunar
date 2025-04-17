@@ -96,7 +96,6 @@ namespace Lunar::Internal
         if (m_Specification.WindowRef->IsMinimized())
             return;
 
-
         #if !defined(LU_CONFIG_DIST)
         std::vector<VkSemaphore> semaphores = m_TaskManager.GetSemaphores();
         
@@ -161,7 +160,7 @@ namespace Lunar::Internal
         colourAttachment.imageLayout = (state.ColourAttachment ? ImageLayoutToVkImageLayout(state.ColourAttachment->GetSpecification().Layout) : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
         colourAttachment.loadOp = LoadOperationToVkAttachmentLoadOp(state.ColourLoadOp);
         colourAttachment.storeOp = StoreOperationToVkAttachmentStoreOp(state.ColourStoreOp);
-        colourAttachment.clearValue.color = { state.ColourClearValue.r, state.ColourClearValue.g, state.ColourClearValue.b, state.ColourClearValue.a };
+        colourAttachment.clearValue.color = { { state.ColourClearValue.r, state.ColourClearValue.g, state.ColourClearValue.b, state.ColourClearValue.a } };
 
         VkRenderingAttachmentInfo depthAttachment = {};
         depthAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
@@ -169,7 +168,7 @@ namespace Lunar::Internal
         depthAttachment.imageLayout = (state.DepthAttachment ? ImageLayoutToVkImageLayout(state.DepthAttachment->GetSpecification().Layout) : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
         depthAttachment.loadOp = LoadOperationToVkAttachmentLoadOp(state.DepthLoadOp);
         depthAttachment.storeOp = StoreOperationToVkAttachmentStoreOp(state.DepthStoreOp);
-        depthAttachment.clearValue.depthStencil = { state.DepthClearValue };
+        depthAttachment.clearValue.depthStencil = { state.DepthClearValue, 0 };
 
         uint32_t width = 0, height = 0;
         if (state.ColourAttachment)

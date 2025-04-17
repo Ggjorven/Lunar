@@ -29,6 +29,9 @@
 #include <stb/stb_image.h>
 
 	#pragma warning(pop)
+#else
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb/stb_image.h>
 #endif
 
 namespace Lunar::Internal

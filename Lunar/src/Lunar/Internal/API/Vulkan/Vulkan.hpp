@@ -29,6 +29,9 @@
 #include <vma/vk_mem_alloc.h>
 
     #pragma warning(pop)
+#else
+#include <vulkan/vulkan.h>
+#include <vma/vk_mem_alloc.h>
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////////

@@ -14,7 +14,7 @@
 
 #include <cstdint>
 
-namespace Lunar
+namespace Lunar::Internal
 {
 
 	class BatchRenderer2D;
@@ -51,7 +51,7 @@ namespace Lunar
 		~BatchResources2D() = default;
 
 		// Init & Destroy
-		void Init(const Internal::RendererID renderer, uint32_t width, uint32_t height);
+		void Init(const Internal::RendererID renderer, const std::vector<Image*>& images, LoadOperation loadOperation);
 		void Destroy();
 
 		// Methods
@@ -59,35 +59,36 @@ namespace Lunar
 
 	private:
 		// Global
-		Lunar::Internal::Image m_WhiteTexture;
-		Lunar::Internal::UniformBuffer m_CameraBuffer;
+		Image m_WhiteTexture;
+		UniformBuffer m_CameraBuffer;
 
 		// Renderer
 		struct
 		{
-			Internal::Image DepthImage = {};
+			std::vector<Image*> Images = { };
+			Image DepthImage = {};
 
-			Internal::Pipeline Pipeline = {};
-			Internal::DescriptorSets DescriptorSets = {};
+			Pipeline Pipeline = {};
+			DescriptorSets DescriptorSets = {};
 
-			Internal::CommandBuffer CommandBuffer = {};
-			Internal::Renderpass Renderpass = {};
+			CommandBuffer CommandBuffer = {};
+			Renderpass Renderpass = {};
 
-			Internal::VertexBuffer VertexBuffer = {};
-			Internal::IndexBuffer IndexBuffer = {};
+			VertexBuffer VertexBuffer = {};
+			IndexBuffer IndexBuffer = {};
 		} Renderer;
 
 		// State
-		Internal::RendererID m_RendererID;
+		RendererID m_RendererID = 0;
 		std::vector<Vertex> m_CPUBuffer = { };
 		
 		uint32_t m_CurrentTextureIndex = 0;
-		std::unordered_map<Internal::Image*, uint32_t> m_TextureIndices = { };
+		std::unordered_map<Image*, uint32_t> m_TextureIndices = { };
 
 	private:
 		// Private methods
 		void InitGlobal();
-		void InitRenderer(uint32_t width, uint32_t height);
+		void InitRenderer(const std::vector<Image*>& images, LoadOperation loadOperation);
 
 		friend class BatchRenderer2D;
 	};
@@ -111,7 +112,7 @@ namespace Lunar
 		~BatchRenderer2D() = default;
 
 		// Init & Destroy
-		void Init(const Internal::RendererID renderer, uint32_t width, uint32_t height);
+		void Init(const Internal::RendererID renderer, const std::vector<Image*>& images, LoadOperation loadOperation = LoadOperation::Clear);
 		void Destroy();
 
 		// Methods
@@ -123,13 +124,13 @@ namespace Lunar
 
 		// Note: We multiply the Z-axis by -1, so the depth is from 0 to 1
 		void AddQuad(const Vec3<float>& position, const Vec2<float>& size, const Vec4<float>& colour);
-		void AddQuad(const Vec3<float>& position, const Vec2<float>& size, Internal::Image* texture, const Vec4<float>& colour);
+		void AddQuad(const Vec3<float>& position, const Vec2<float>& size, Image* texture, const Vec4<float>& colour);
 
 		// Internal
 		void Resize(uint32_t width, uint32_t height);
 
 	private:
-		uint32_t GetTextureID(Internal::Image* image);
+		uint32_t GetTextureID(Image* image);
 
 	private:
 		BatchResources2D m_Resources = {};
